@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Streamflux — AI Real Estate Marketing</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Georgia',serif;background:#080808;color:#fff;min-height:100vh}
+input,textarea,button,select{font-family:inherit}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#111}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const G = {
+bg:"#080808",card:"#111111",card2:"#161616",border:"#222222",
+aqua:"#2AB8D4",aquaDim:"rgba(42,184,212,0.1)",aquaBorder:"rgba(42,184,212,0.25)",
+gold:"#D4A843",white:"#FFFFFF",muted:"rgba(255,255,255,0.5)",
+green:"#3d9e5c",red:"#ef4444",
+};
+
+// ── API HELPERS ──────────────────────────────────────────────────────────────
+const apiAuth = async (body) => {
+const r = await fetch("/api/auth", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) });
+return r.json();
+};
+
+const apiClaude = async (prompt, system, maxTokens=1000) => {
+const r = await fetch("/api/claude", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({prompt,system,maxTokens}) });
+const d = await r.json();
+if(d.error) throw new Error(d.error);
+const text = d.text.trim();
+try { return JSON.parse(text); } catch{}
+const cm = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+if(cm) { try { return JSON.parse(cm[1].trim()); } catch{} }
+const jm = text.match(/\{[\s\S]*\}/);
+if(jm) { try { return JSON.parse(jm[0]); } catch{} }
+throw new Error("Could not parse AI response. Please try again.");
+};
+
+const apiAdmin = async (body) => {
+const r = await fetch("/api/admin", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) });
+return r.json();
+};
+
+const SYSTEM = "You are the world's best real estate copywriter. You ALWAYS respond with ONLY a valid JSON object. No markdown. No backticks. No explanation. Just the raw JSON object starting with { and ending with }.";
+
+// ── SHARED COMPONENTS ────────────────────────────────────────────────────────
+const Btn = ({onClick,children,disabled,style={}}) => (
+<button onClick={onClick} disabled={disabled} style={{
+background:disabled?"#1a1a1a":G.aqua, color:disabled?G.muted:"#080808",
+border:"none", borderRadius:8, padding:"13px 24px", fontSize:14, fontWeight:700,
+cursor:disabled?"not-allowed":"pointer", transition:"opacity 0.2s",
+fontFamily:"inherit", ...style
+}}>{children}</button>
+);
+
+const GhostBtn = ({onClick,children,style={}}) => (
+<button onClick={onClick} style={{
+background:"transparent", color:G.muted, border:`1px solid ${G.border}`,
+borderRadius:8, padding:"11px 20px", fontSize:13, cursor:"pointer",
+fontFamily:"inherit", ...style
+}}>{children}</button>
+);
+
+const Input = ({label,type="text",value,onChange,placeholder,hint}) => (
+<div style={{marginBottom:16}}>
+{label && <label style={{display:"block",fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:G.muted,textTransform:"uppercase",marginBottom:4}}>{label}</label>}
+{hint && <p style={{fontSize:12,color:"#444",margin:"0 0 5px",fontStyle:"italic"}}>{hint}</p>}
+<input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
+style={{width:"100%",background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:8,color:G.white,fontSize:14,padding:"11px 14px",outline:"none"}}/>
+</div>
+);
+
+const Textarea = ({label,value,onChange,placeholder,rows=3,hint}) => (
+<div style={{marginBottom:16}}>
+{label && <label style={{display:"block",fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:G.muted,textTransform:"uppercase",marginBottom:4}}>{label}</label>}
+{hint && <p style={{fontSize:12,color:"#444",margin:"0 0 5px",fontStyle:"italic"}}>{hint}</p>}
+<textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} rows={rows}
+style={{width:"100%",background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:8,color:G.white,fontSize:14,padding:"11px 14px",outline:"none",resize:"vertical"}}/>
+</div>
+);
+
+const Chips = ({label,hint,options,selected,onToggle,single=false}) => (
+<div style={{marginBottom:20}}>
+{label && <label style={{display:"block",fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:G.muted,textTransform:"uppercase",marginBottom:4}}>{label}</label>}
+{hint && <p style={{fontSize:12,color:"#444",margin:"0 0 7px",fontStyle:"italic"}}>{hint}</p>}
+<div style={{display:"flex",flexWrap:"wrap",gap:7}}>
+{options.map(opt=>{
+const val=typeof opt==="string"?opt:opt.value;
+const lbl=typeof opt==="string"?opt:opt.label;
+const sub=typeof opt==="object"?opt.desc:null;
+const active=single?selected===val:selected.includes(val);
+return <button key={val} onClick={()=>onToggle(val)} style={{
+background:active?"#0f2a0f":"#0d0d0d",border:`1px solid ${active?G.green:G.border}`,
+borderRadius:7,color:active?"#6ee7a0":"#888",fontSize:12,
+padding:sub?"9px 13px":"7px 12px",cursor:"pointer",fontFamily:"inherit",textAlign:"left"
+}}>
+<div style={{fontWeight:active?700:400}}>{lbl}</div>
+{sub&&<div style={{fontSize:11,color:active?"#4ade80":G.muted,marginTop:2}}>{sub}</div>}
+</button>;
+})}
+</div>
+</div>
+);
+
+const CopyCard = ({title,content,icon,badge,accentColor=G.aqua}) => {
+const [copied,setCopied]=useState(false);
+return <div style={{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:10,padding:"15px 17px",marginBottom:12}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+<div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+<span style={{fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:accentColor,textTransform:"uppercase"}}>{icon} {title}</span>
+{badge&&<span style={{fontSize:10,background:"#1a2a3a",color:"#60a5fa",border:"1px solid #1e3a5a",borderRadius:4,padding:"2px 6px"}}>{badge}</span>}
+</div>
+<button onClick={()=>{navigator.clipboard.writeText(content);setCopied(true);setTimeout(()=>setCopied(false),1800);}}
+style={{background:copied?"#0f2a0f":"#161616",border:`1px solid ${copied?"#2a5a2a":G.border}`,borderRadius:6,color:copied?"#4caf50":"#666",fontSize:11,padding:"4px 11px",cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>
+{copied?"✓ Copied":"Copy"}
+</button>
+</div>
+<p style={{color:"#ccc",fontSize:14,lineHeight:1.75,margin:0,whiteSpace:"pre-wrap"}}>{content}</p>
+</div>;
+};
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"},{value:"Portuguese",label:"🇧🇷 Português"},{value:"French",label:"🇫🇷 Français"},{value:"Arabic",label:"🇦🇪 العربية"},{value:"Chinese",label:"🇨🇳 中文"},{value:"German",label:"🇩🇪 Deutsch"},{value:"Italian",label:"🇮🇹 Italiano"}];
+const PROP_TYPES=["House","Apartment","Condo","Townhouse","Villa","Penthouse","Studio","Duplex","Triplex","Land / Lot","Commercial","Mixed Use"];
+const CONDITIONS=["Brand New / Off-Plan","Newly Renovated","Move-in Ready","Good Condition","Needs TLC / Fixer-upper"];
+const LOCATION_FEATS=["Beachfront","Beach Access","Oceanfront","Ocean View","Lakefront","Lake View","Riverfront","River View","Mountain View","Golf Course View","Golf Course Community","City View","City Center","Waterfront","Marina / Boat Dock","Gated Community","Cul-de-Sac","Corner Lot","Quiet Street","Shopping & Dining Nearby","Top-Rated Schools","Parks & Green Space","Transport Links","Airport Nearby","Highway Access"];
+const INTERIOR=["Open Plan Living","High Ceilings","Hardwood Floors","Marble Floors","Modern Kitchen","Chef's Kitchen","Granite Countertops","Quartz Countertops","Kitchen Island","Butler's Pantry","Master Suite","Walk-in Wardrobe","En-suite Bathrooms","Double Vanity","Soaking Tub","Rainfall Shower","Home Office","Media Room / Cinema","Smart Home System","Fireplace","Wine Cellar","Wet Bar","Laundry Room","In-unit Washer & Dryer","Elevator","Solar Panels","Generator"];
+const OUTDOOR=["Private Pool","Heated Pool","Infinity Pool","Hot Tub / Jacuzzi","Rooftop Terrace","Covered Patio","Balcony","Private Garden","Landscaped Yard","Outdoor Kitchen","Built-in BBQ","Fire Pit","Boat Dock","Private Beach Access","Tennis Court","Basketball Court","Guest House","Garage (1 Car)","Garage (2 Car)","Garage (3+ Car)","EV Charging","Gated Entry","Security System"];
+const BUILDING=["Concierge Service","24/7 Security","Doorman","Valet Parking","Rooftop Pool","Fitness Center","Yoga Studio","Spa","Co-working Space","Pet-Friendly","Guest Suites","Low HOA Fees","No HOA"];
+const TONES1=[{value:"luxury",label:"Luxury & Prestige",desc:"High-end, aspirational"},{value:"friendly",label:"Warm & Friendly",desc:"Approachable, homey"},{value:"investment",label:"Investment Focus",desc:"ROI, numbers, opportunity"},{value:"lifestyle",label:"Lifestyle & Vibe",desc:"Energetic, aspirational"},{value:"urgent",label:"Urgency & FOMO",desc:"Act now, limited time"}];
+const MODES=[{value:"new_listing",label:"🏠 New Listing",desc:"Full marketing package"},{value:"open_house",label:"🚪 Open House",desc:"Event invite & promotion"},{value:"price_reduction",label:"📉 Price Reduction",desc:"Re-market with new price"},{value:"sold",label:"🏆 Just Sold",desc:"Announce the sale"}];
+const CLIENT_TYPES=[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
+const CONTACT_REASONS=[{value:"new_listing",label:"New Listing Match",desc:"Property matches their criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view a property"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
+const TONES2=[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive, act now"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
+const URGENCY=[{value:"high",label:"🔥 High Urgency",desc:"Must act now"},{value:"medium",label:"⏳ Medium Urgency",desc:"1-3 months"},{value:"low",label:"🌱 Low Urgency",desc:"Building relationship"}];
+const OBJECTIONS=[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
+const BUYER_CRITERIA=["Under $500K","$500K–$1M","$1M–$2M","$2M–$5M","$5M+","1 Bedroom","2 Bedrooms","3 Bedrooms","4+ Bedrooms","House","Apartment","Condo","Villa","Townhouse","Pool Wanted","Garden Wanted","Sea View Wanted","City Center","Quiet Area","Good Schools Nearby","Pet Friendly","Investment Purpose","Primary Residence"];
+const SELLER_SITUATION=["Wants Quick Sale","Flexible on Timeline","Needs Top Dollar","Downsizing","Upsizing","Relocating","Divorce Settlement","Inherited Property","Investment Property Sale","Already Found New Home","Testing the Market"];
+
+// ── LOGIN SCREEN ─────────────────────────────────────────────────────────────
+function LoginScreen({onLogin}) {
+const [email,setEmail]=useState("");
+const [password,setPassword]=useState("");
+const [loading,setLoading]=useState(false);
+const [error,setError]=useState("");
+
+const login = async () => {
+if(!email||!password){setError("Please enter your email and password.");return;}
+setLoading(true); setError("");
+const res = await apiAuth({action:"login",email,password});
+setLoading(false);
+if(res.success) onLogin(res.user);
+else setError(res.error||"Login failed. Please try again.");
+};
+
+return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:24,background:G.bg}}>
+<div style={{width:"100%",maxWidth:420}}>
+<div style={{textAlign:"center",marginBottom:36}}>
+<div style={{fontFamily:"'Georgia',serif",fontSize:28,fontWeight:700,letterSpacing:3,color:G.white,marginBottom:8}}>
+STREAM<span style={{color:G.aqua}}>FLUX</span>
+</div>
+<p style={{color:G.muted,fontSize:14}}>AI-Powered Real Estate Marketing</p>
+</div>
+<div style={{background:G.card,border:`1px solid ${G.border}`,borderRadius:14,padding:28}}>
+<h2 style={{fontSize:18,fontWeight:700,marginBottom:20,color:G.white}}>Sign In to Your Account</h2>
+<Input label="Email Address" type="email" value={email} onChange={setEmail} placeholder="your@email.com"/>
+<Input label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••"/>
+{error && <div style={{background:"#1a0808",border:"1px solid #3a1010",borderRadius:8,padding:"10px 14px",color:"#f87171",fontSize:13,marginBottom:14,fontFamily:"monospace"}}>⚠ {error}</div>}
+<Btn onClick={login} disabled={loading} style={{width:"100%",fontSize:15}}>{loading?"Signing in...":"Sign In →"}</Btn>
+<p style={{textAlign:"center",color:G.muted,fontSize:12,marginTop:16}}>Don't have an account? Contact <span style={{color:G.aqua}}>francisco@streamflux.app</span></p>
+</div>
+</div>
+</div>;
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function Dashboard({user,onSelectApp,onLogout,onAdmin}) {
+const hasApp1 = user.plan==="marketing"||user.plan==="bundle";
+const hasApp2 = user.plan==="outreach"||user.plan==="bundle";
+
+return <div style={{minHeight:"100vh",background:G.bg}}>
+{/* Nav */}
+<div style={{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"16px 28px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+<div style={{fontFamily:"'Georgia',serif",fontSize:20,fontWeight:700,letterSpacing:3,color:G.white}}>
+STREAM<span style={{color:G.aqua}}>FLUX</span>
+</div>
+<div style={{display:"flex",alignItems:"center",gap:12}}>
+{user.trialActive && <span style={{fontSize:12,background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:100,padding:"4px 12px",color:G.aqua,fontWeight:600}}>🎯 {user.daysLeft} day{user.daysLeft!==1?"s":""} left in trial</span>}
+{user.subscribed && <span style={{fontSize:12,background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:100,padding:"4px 12px",color:"#4ade80",fontWeight:600}}>✓ Active</span>}
+{user.email==="francisco@streamflux.app" && <GhostBtn onClick={onAdmin} style={{fontSize:12,padding:"6px 14px"}}>⚙️ Admin</GhostBtn>}
+<GhostBtn onClick={onLogout} style={{fontSize:12,padding:"6px 14px"}}>Sign Out</GhostBtn>
+</div>
+</div>
+
+{/* Content */}
+<div style={{maxWidth:900,margin:"0 auto",padding:"48px 24px"}}>
+<div style={{marginBottom:36}}>
+<h1 style={{fontSize:28,fontWeight:700,color:G.white,marginBottom:6}}>Welcome back, {user.name.split(" ")[0]} 👋</h1>
+<p style={{color:G.muted,fontSize:15}}>Your AI marketing tools are ready. What do you want to generate today?</p>
+</div>
+
+<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:20,marginBottom:40}}>
+{/* App 1 */}
+<div style={{background:G.card,border:`1px solid ${hasApp1?G.aquaBorder:G.border}`,borderRadius:16,overflow:"hidden",opacity:hasApp1?1:0.5}}>
+<div style={{background:"#111",padding:"28px 28px 20px",borderBottom:`1px solid ${G.border}`,position:"relative"}}>
+<div style={{position:"absolute",top:16,right:20,fontSize:52,fontWeight:800,color:"rgba(42,184,212,0.08)",fontFamily:"sans-serif"}}>01</div>
+<div style={{fontSize:10,fontWeight:700,letterSpacing:3,textTransform:"uppercase",color:G.aqua,marginBottom:8}}>App One</div>
+<div style={{fontSize:20,fontWeight:700,color:G.white,marginBottom:4}}>Property Marketing Machine</div>
+<div style={{fontSize:13,color:G.muted}}>MLS listing, social media, ads, TikTok script, neighbour letter — all in 30 seconds</div>
+</div>
+<div style={{padding:"20px 28px"}}>
+<div style={{fontSize:12,color:G.muted,marginBottom:14}}>Generates: MLS description · Instagram · Facebook · Twitter · LinkedIn · Email · SMS · WhatsApp · Google Ad · Facebook Ad · TikTok Script · Neighbour Letter · Posting Schedule</div>
+{hasApp1
+? <Btn onClick={()=>onSelectApp("app1")} style={{width:"100%"}}>Launch App 1 →</Btn>
+: <div style={{textAlign:"center",color:G.muted,fontSize:13,padding:"12px",border:`1px solid ${G.border}`,borderRadius:8}}>Not included in your plan</div>}
+</div>
+</div>
+
+{/* App 2 */}
+<div style={{background:G.card,border:`1px solid ${hasApp2?G.aquaBorder:G.border}`,borderRadius:16,overflow:"hidden",opacity:hasApp2?1:0.5}}>
+<div style={{background:"#111",padding:"28px 28px 20px",borderBottom:`1px solid ${G.border}`,position:"relative"}}>
+<div style={{position:"absolute",top:16,right:20,fontSize:52,fontWeight:800,color:"rgba(42,184,212,0.08)",fontFamily:"sans-serif"}}>02</div>
+<div style={{fontSize:10,fontWeight:700,letterSpacing:3,textTransform:"uppercase",color:G.aqua,marginBottom:8}}>App Two</div>
+<div style={{fontSize:20,fontWeight:700,color:G.white,marginBottom:4}}>Client Outreach Machine</div>
+<div style={{fontSize:13,color:G.muted}}>Personalised WhatsApp, SMS, phone script, email, letter, 4 follow-ups — for any buyer or seller</div>
+</div>
+<div style={{padding:"20px 28px"}}>
+<div style={{fontSize:12,color:G.muted,marginBottom:14}}>Generates: WhatsApp · SMS · Phone Script · Email · Formal Letter · 4 Follow-Ups · Property Matcher · Objection Handler · Anniversary · Referral Request · Schedule</div>
+{hasApp2
+? <Btn onClick={()=>onSelectApp("app2")} style={{width:"100%"}}>Launch App 2 →</Btn>
+: <div style={{textAlign:"center",color:G.muted,fontSize:13,padding:"12px",border:`1px solid ${G.border}`,borderRadius:8}}>Not included in your plan</div>}
+</div>
+</div>
+</div>
+
+{/* Plan info */}
+<div style={{background:G.card,border:`1px solid ${G.border}`,borderRadius:12,padding:"20px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+<div>
+<div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:G.muted,marginBottom:4}}>Your Plan</div>
+<div style={{fontSize:16,fontWeight:700,color:G.white}}>{user.plan==="bundle"?"Complete Bundle":user.plan==="marketing"?"Marketing Tool":"Outreach Tool"}</div>
+</div>
+{user.trialActive && <div style={{textAlign:"right"}}>
+<div style={{fontSize:11,color:G.muted,marginBottom:4}}>Trial ends in</div>
+<div style={{fontSize:16,fontWeight:700,color:G.aqua}}>{user.daysLeft} day{user.daysLeft!==1?"s":""}</div>
+</div>}
+{!user.subscribed && <a href="https://streamflux.app/#pricing" target="_blank" style={{background:G.aqua,color:"#080808",borderRadius:8,padding:"10px 20px",fontSize:13,fontWeight:700,textDecoration:"none"}}>Upgrade to Full Access →</a>}
+</div>
+</div>
+</div>;
+}
+
+// ── APP 1 — PROPERTY MARKETING MACHINE ──────────────────────────────────────
+function App1({onBack}) {
+const [step,setStep]=useState(1);
+const [loading,setLoading]=useState(false);
+const [loadingMsg,setLoadingMsg]=useState("");
+const [loadingPct,setLoadingPct]=useState(0);
+const [result,setResult]=useState(null);
+const [error,setError]=useState("");
+const [activeTab,setActiveTab]=useState("listing");
+const [language,setLanguage]=useState("English");
+const [mode,setMode]=useState("");
+const [propType,setPropType]=useState("");
+const [address,setAddress]=useState("");
+const [price,setPrice]=useState("");
+const [oldPrice,setOldPrice]=useState("");
+const [beds,setBeds]=useState("");
+const [baths,setBaths]=useState("");
+const [sqft,setSqft]=useState("");
+const [yearBuilt,setYearBuilt]=useState("");
+const [condition,setCondition]=useState("");
+const [soldPrice,setSoldPrice]=useState("");
+const [daysOnMarket,setDaysOnMarket]=useState("");
+const [openHouseDate,setOpenHouseDate]=useState("");
+const [openHouseTime,setOpenHouseTime]=useState("");
+const [city,setCity]=useState("");
+const [neighbourhood,setNeighbourhood]=useState("");
+const [locationFeatures,setLocationFeatures]=useState([]);
+const [commute,setCommute]=useState("");
+const [interior,setInterior]=useState([]);
+const [outdoor,setOutdoor]=useState([]);
+const [building,setBuilding]=useState([]);
+const [uniqueFeature,setUniqueFeature]=useState("");
+const [agentNote,setAgentNote]=useState("");
+const [tone,setTone]=useState("");
+const [targetBuyer,setTargetBuyer]=useState("");
+const [agentName,setAgentName]=useState("");
+const [agentPhone,setAgentPhone]=useState("");
+
+const tog=(arr,setArr,val)=>setArr(arr.includes(val)?arr.filter(x=>x!==val):[...arr,val]);
+const totalSteps=mode==="sold"?4:mode==="open_house"?5:6;
+const langInstr=language!=="English"?`\n\nIMPORTANT: Write ALL content in ${language}.`:"";
+
+const propSummary=[
+`Mode: ${MODES.find(m=>m.value===mode)?.label||mode}`,
+`${propType} at ${address}`,
+`Price: $${price}${oldPrice?` (was $${oldPrice})`:""}`,
+(beds||baths)&&`Beds:${beds}|Baths:${baths}${sqft?`|${sqft}sqft`:""}${yearBuilt?`|Built ${yearBuilt}`:""}`,
+condition&&`Condition:${condition}`,
+mode==="sold"&&soldPrice&&`Sold:$${soldPrice}${daysOnMarket?` in ${daysOnMarket} days`:""}`,
+mode==="open_house"&&openHouseDate&&`Open House:${openHouseDate} at ${openHouseTime}`,
+`City:${city}${neighbourhood?`,${neighbourhood}`:""}`,
+locationFeatures.length&&`Location:${locationFeatures.slice(0,8).join(",")}`,
+commute&&`Transport:${commute}`,
+interior.length&&`Interior:${interior.slice(0,10).join(",")}`,
+outdoor.length&&`Outdoor:${outdoor.slice(0,8).join(",")}`,
+building.length&&`Amenities:${building.slice(0,5).join(",")}`,
+uniqueFeature&&`Unique:${uniqueFeature}`,
+agentNote&&`Notes:${agentNote}`,
+`Tone:${tone}|Buyer:${targetBuyer||"general"}`,
+`Agent:${agentName||"Agent"}${agentPhone?`|${agentPhone}`:""}`,
+].filter(Boolean).join("\n");
+
+const canProceed=()=>{
+if(step===1)return!!mode;
+if(step===2)return propType&&address&&price&&(mode==="sold"?true:beds&&baths);
+if(step===3)return!!city;
+if(step===4)return mode==="sold"?!!tone:interior.length>0||outdoor.length>0;
+if(step===5)return!!tone;
+if(step===6)return!!tone;
+return true;
+};
+
+const generate=async()=>{
+setError("");setLoading(true);setResult(null);setLoadingPct(0);
+try{
+let listingPrompt="";
+if(mode==="new_listing") listingPrompt=`{"listing":"130-150 word MLS description","email_subject":"email subject under 9 words","email_body":"120-140 word email signed by ${agentName||"Your Agent"}"}`;
+else if(mode==="open_house") listingPrompt=`{"listing":"120-140 word open house announcement for ${openHouseDate} at ${openHouseTime}","email_subject":"open house invite subject","email_body":"110-130 word invite email signed by ${agentName||"Your Agent"}"}`;
+else if(mode==="price_reduction") listingPrompt=`{"listing":"120-140 word price reduction announcement","email_subject":"price drop subject","email_body":"110-130 word price drop email signed by ${agentName||"Your Agent"}"}`;
+else listingPrompt=`{"listing":"100-120 word just sold announcement building credibility","email_subject":"just sold subject","email_body":"100-120 word sold email signed by ${agentName||"Your Agent"}"}`;
+
+setLoadingMsg("Writing listing & email...");setLoadingPct(15);
+const r1=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n${listingPrompt}`,SYSTEM,800);
+setLoadingPct(35);
+
+setLoadingMsg("Writing social media posts...");
+const r2=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"instagram":"65-80 word Instagram caption with 6-8 emojis and CTA","facebook":"70-90 word Facebook caption with price and DM CTA","twitter":"max 220 char Twitter post with price","linkedin":"80-100 word professional LinkedIn post"}`,SYSTEM,700);
+setLoadingPct(55);
+
+setLoadingMsg("Writing ads & SMS...");
+const r3=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"sms_blast":"max 155 char SMS","whatsapp_broadcast":"60-70 word WhatsApp broadcast ending with Reply YES","google_ad":"Headline (30 chars): and Description (90 chars):","facebook_ad":"Primary Text (60 words): and Headline (25 chars): and Description (25 chars):"}`,SYSTEM,700);
+setLoadingPct(75);
+
+setLoadingMsg("Writing TikTok & neighbour letter...");
+const r4=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"tiktok_script":"TikTok script: HOOK (3 sec), BODY (top features), CTA. 45-55 seconds.","neighbour_letter":"200-220 word neighbour letter signed by ${agentName||"Your Agent"}${agentPhone?` | ${agentPhone}`:""}"}`,SYSTEM,900);
+setLoadingPct(90);
+
+setLoadingMsg("Building posting schedule...");
+const r5=await apiClaude(`Property:\n${propSummary}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Day 1 — Launch","icon":"🚀","tasks":["Post MLS on all portals","Send WhatsApp broadcast","Post Instagram with best photo","Send SMS blast to hot leads","Email your buyer list","Deliver neighbour letters"]},{"day":"Day 2","icon":"📱","tasks":["Post Facebook caption","Share LinkedIn post","Call back anyone who replied to WhatsApp"]},{"day":"Day 3","icon":"🎯","tasks":["Launch Facebook and Instagram ads","Post Twitter update","Call leads who opened email but did not reply"]},{"day":"Day 5","icon":"🎬","tasks":["Post TikTok video using your script","Share Instagram story with behind-the-scenes"]},{"day":"Day 7 — Review","icon":"📊","tasks":["Check ad performance — pause what is not working","Re-send WhatsApp to anyone who did not open","Book viewing requests received so far"]},{"day":"Day 14 — Push","icon":"💥","tasks":["Post fresh Instagram update with different angle","Send second email with new subject line","Consider price review if no serious interest"]},{"day":"Day 21 — Final Push","icon":"📣","tasks":["Send final WhatsApp with urgency message","Run last targeted ad push","Post sold update if under offer"]}]}`,SYSTEM,900);
+setLoadingPct(100);
+
+setResult({...r1,...r2,...r3,...r4,...r5});
+setActiveTab("listing");
+}catch(err){setError(err.message);}
+setLoading(false);setLoadingMsg("");setLoadingPct(0);
+};
+
+const TABS=[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"}];
+const card={background:G.card,border:`1px solid ${G.border}`,borderRadius:14,padding:24,marginBottom:18};
+
+if(result) return <div style={{background:G.bg,minHeight:"100vh"}}>
+<div style={{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<span style={{fontSize:15,fontWeight:700}}>🏡 Marketing Package Ready</span>
+<GhostBtn onClick={()=>{setResult(null);setStep(1);setMode("");}} style={{fontSize:12,padding:"6px 14px"}}>← New Listing</GhostBtn>
+</div>
+<div style={{maxWidth:720,margin:"0 auto",padding:"22px 16px 60px"}}>
+<p style={{color:G.muted,fontSize:13,margin:"0 0 18px"}}>Everything ready in {language}. Tap Copy on any piece to use it instantly.</p>
+<div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
+{TABS.map(tab=><button key={tab.id} onClick={()=>setActiveTab(tab.id)} style={{
+background:activeTab===tab.id?G.gold:"#0d0d0d",color:activeTab===tab.id?"#080808":G.muted,
+border:`1px solid ${activeTab===tab.id?G.gold:G.border}`,borderRadius:8,padding:"7px 12px",
+fontSize:12,fontWeight:activeTab===tab.id?700:400,fontFamily:"inherit",cursor:"pointer"
+}}>{tab.label}</button>)}
+</div>
+{activeTab==="listing"&&<><CopyCard title="MLS Listing" icon="🏠" content={result.listing}/><CopyCard title="Email Subject" icon="📧" content={result.email_subject}/><CopyCard title="Email Body" icon="📨" content={result.email_body}/></>}
+{activeTab==="social"&&<><CopyCard title="Instagram" icon="📸" content={result.instagram}/><CopyCard title="Facebook" icon="👥" content={result.facebook}/><CopyCard title="Twitter / X" icon="⚡" content={result.twitter}/><CopyCard title="LinkedIn" icon="💼" content={result.linkedin}/></>}
+{activeTab==="ads"&&<><CopyCard title="SMS Blast" icon="📱" badge="155 chars" content={result.sms_blast}/><CopyCard title="WhatsApp Broadcast" icon="💬" content={result.whatsapp_broadcast}/><CopyCard title="Google Ad" icon="🔍" content={result.google_ad}/><CopyCard title="Facebook/Instagram Ad" icon="🎯" content={result.facebook_ad}/></>}
+{activeTab==="tiktok"&&<CopyCard title="TikTok Script" icon="🎬" content={result.tiktok_script}/>}
+{activeTab==="neighbours"&&<><p style={{color:G.muted,fontSize:13,margin:"0 0 12px"}}>Print and hand-deliver to nearby neighbours.</p><CopyCard title="Neighbour Letter" icon="✉️" content={result.neighbour_letter}/></>}
+{activeTab==="schedule"&&<>
+<p style={{color:G.muted,fontSize:13,margin:"0 0 18px"}}>Your day-by-day action plan. Follow this to maximise every listing.</p>
+{result.schedule&&result.schedule.map((day,i)=><div key={i} style={{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:10,padding:"15px 17px",marginBottom:12}}>
+<div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+<span style={{fontSize:20}}>{day.icon}</span>
+<span style={{fontSize:14,fontWeight:700,color:G.gold}}>{day.day}</span>
+</div>
+{day.tasks&&day.tasks.map((t,j)=><div key={j} style={{display:"flex",gap:8,marginBottom:6}}>
+<span style={{color:G.gold,fontWeight:700,flexShrink:0}}>→</span>
+<span style={{fontSize:14,color:"#ccc",lineHeight:1.6}}>{t}</span>
+</div>)}
+</div>)}
+</>}
+</div>
+</div>;
+
+return <div style={{background:G.bg,minHeight:"100vh"}}>
+<div style={{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+<span style={{fontSize:15,fontWeight:700}}>🏡 Property Marketing Machine</span>
+<div style={{display:"flex",alignItems:"center",gap:10}}>
+<span style={{fontSize:11,color:G.muted}}>Step {step}/{totalSteps}</span>
+<GhostBtn onClick={onBack} style={{fontSize:12,padding:"6px 14px"}}>← Dashboard</GhostBtn>
+</div>
+</div>
+<div style={{maxWidth:660,margin:"0 auto",padding:"28px 18px 60px"}}>
+{/* Progress */}
+<div style={{display:"flex",gap:5,marginBottom:28}}>
+{Array.from({length:totalSteps},(_,i)=><div key={i} style={{flex:1,height:3,background:step>i+1?G.gold:step===i+1?G.aqua:G.border,borderRadius:2,transition:"background 0.3s"}}/>}
+</div>
+
+{/* Language selector on step 1 */}
+{step===1&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:16,color:G.white}}>🌐 Output Language</h2>
+<select value={language} onChange={e=>setLanguage(e.target.value)} style={{width:"100%",background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:8,color:G.white,fontSize:14,padding:"11px 14px",marginBottom:20,cursor:"pointer"}}>
+{LANGUAGES.map(l=><option key={l.value} value={l.value}>{l.label}</option>)}
+</select>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🎯 What Are You Marketing?</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>Select the type of content you need.</p>
+<Chips options={MODES} selected={mode} onToggle={setMode} single/>
+</div>}
+
+{step===2&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🏠 Property Basics</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>The core facts.</p>
+<Chips options={PROP_TYPES} selected={propType} onToggle={setPropType} single label="Property Type"/>
+<Input label="Full Address" value={address} onChange={setAddress} placeholder="123 Ocean Drive, Miami Beach, FL 33139"/>
+{mode==="price_reduction"?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}><Input label="New Price ($)" value={price} onChange={setPrice} placeholder="895,000"/><Input label="Original Price ($)" value={oldPrice} onChange={setOldPrice} placeholder="995,000"/></div>
+:mode==="sold"?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}><Input label="List Price ($)" value={price} onChange={setPrice} placeholder="995,000"/><Input label="Sold Price ($)" value={soldPrice} onChange={setSoldPrice} placeholder="980,000"/><Input label="Days on Market" value={daysOnMarket} onChange={setDaysOnMarket} placeholder="12"/></div>
+:<Input label="Asking Price ($)" value={price} onChange={setPrice} placeholder="1,250,000"/>}
+{mode!=="sold"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+<Input label="Bedrooms" type="number" value={beds} onChange={setBeds} placeholder="4"/>
+<Input label="Bathrooms" type="number" value={baths} onChange={setBaths} placeholder="3"/>
+<Input label="Size (sq ft)" value={sqft} onChange={setSqft} placeholder="2,400"/>
+<Input label="Year Built" value={yearBuilt} onChange={setYearBuilt} placeholder="2019"/>
+</div>}
+{mode==="open_house"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+<Input label="Open House Date" value={openHouseDate} onChange={setOpenHouseDate} placeholder="Saturday, June 14"/>
+<Input label="Open House Time" value={openHouseTime} onChange={setOpenHouseTime} placeholder="1:00 PM – 4:00 PM"/>
+</div>}
+<Chips options={CONDITIONS} selected={condition} onToggle={setCondition} single label="Condition"/>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+<Input label="Agent Name" value={agentName} onChange={setAgentName} placeholder="James Rivera"/>
+<Input label="Agent Phone" value={agentPhone} onChange={setAgentPhone} placeholder="+1 305 555 0199"/>
+</div>
+</div>}
+
+{step===3&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>📍 Location & Views</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>Tick every feature that applies.</p>
+<Input label="City" value={city} onChange={setCity} placeholder="Miami, Dubai, London..."/>
+<Input label="Neighbourhood / Area" value={neighbourhood} onChange={setNeighbourhood} placeholder="South Beach, Beverly Hills..."/>
+<Chips label="Location & View Features" options={LOCATION_FEATS} selected={locationFeatures} onToggle={v=>tog(locationFeatures,setLocationFeatures,v)}/>
+<Input label="Commute & Transport" value={commute} onChange={setCommute} placeholder="2 blocks to metro, 20 min to downtown"/>
+</div>}
+
+{step===4&&mode!=="sold"&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🛋️ Property Features</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>Tick everything. More detail = better output.</p>
+<Chips label="Interior Features" options={INTERIOR} selected={interior} onToggle={v=>tog(interior,setInterior,v)}/>
+<Chips label="Outdoor Features" options={OUTDOOR} selected={outdoor} onToggle={v=>tog(outdoor,setOutdoor,v)}/>
+<Chips label="Building Amenities" options={BUILDING} selected={building} onToggle={v=>tog(building,setBuilding,v)}/>
+</div>}
+
+{step===4&&mode==="sold"&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🎯 Tone & Style</h2>
+<Chips label="Writing Tone" options={TONES1} selected={tone} onToggle={setTone} single/>
+<Input label="Target Audience" value={targetBuyer} onChange={setTargetBuyer} placeholder="Sphere of influence, past clients..."/>
+{error&&<div style={{background:"#1a0808",border:"1px solid #3a1010",borderRadius:8,padding:"10px 14px",color:"#f87171",fontSize:13,fontFamily:"monospace"}}>⚠ {error}</div>}
+</div>}
+
+{step===5&&mode!=="sold"&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>⭐ Standout Details</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>What makes this property impossible to ignore?</p>
+<Textarea label="The #1 Unique Feature" hint="Be vivid and specific" value={uniqueFeature} onChange={setUniqueFeature} placeholder="e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views from every room"/>
+<Textarea label="Additional Notes" value={agentNote} onChange={setAgentNote} placeholder="e.g. Fully renovated 2024. Motivated seller." rows={2}/>
+</div>}
+
+{((step===6)||(step===5&&mode==="open_house"))&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🎯 Tone & Target Buyer</h2>
+<Chips label="Writing Tone" options={TONES1} selected={tone} onToggle={setTone} single/>
+<Input label="Ideal Buyer" hint="More specific = better content" value={targetBuyer} onChange={setTargetBuyer} placeholder="High-net-worth families, crypto investors, relocating executives..."/>
+{error&&<div style={{background:"#1a0808",border:"1px solid #3a1010",borderRadius:8,padding:"10px 14px",color:"#f87171",fontSize:13,fontFamily:"monospace"}}>⚠ {error}</div>}
+</div>}
+
+{loading&&<div style={{background:G.card,border:`1px solid ${G.border}`,borderRadius:10,padding:"16px 20px",marginBottom:16}}>
+<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+<p style={{color:G.gold,fontSize:13,margin:0,fontWeight:600}}>{loadingMsg}</p>
+<span style={{color:G.muted,fontSize:12}}>{loadingPct}%</span>
+</div>
+<div style={{width:"100%",height:4,background:G.border,borderRadius:2}}>
+<div style={{width:`${loadingPct}%`,height:"100%",background:G.gold,borderRadius:2,transition:"width 0.5s ease"}}/>
+</div>
+<p style={{color:G.muted,fontSize:12,margin:"8px 0 0"}}>Generating in {language}. Please wait...</p>
+</div>}
+
+<div style={{display:"flex",justifyContent:"space-between"}}>
+<GhostBtn onClick={()=>{setError("");step>1?setStep(s=>s-1):onBack()}} disabled={loading}>← Back</GhostBtn>
+{step<totalSteps
+?<Btn onClick={()=>canProceed()?(setError(""),setStep(s=>s+1)):setError("Fill in required fields to continue.")}>Continue →</Btn>
+:<Btn onClick={()=>canProceed()&&!loading&&generate()} disabled={loading||!canProceed()} style={{minWidth:200}}>{loading?"Generating...":"✦ Generate Full Package"}</Btn>}
+</div>
+{error&&step<totalSteps&&<p style={{color:"#f87171",fontSize:12,marginTop:8,fontFamily:"monospace",textAlign:"right"}}>⚠ {error}</p>}
+</div>
+</div>;
+}
+
+// ── APP 2 — CLIENT OUTREACH MACHINE ─────────────────────────────────────────
+function App2({onBack}) {
+const [loading,setLoading]=useState(false);
+const [loadingMsg,setLoadingMsg]=useState("");
+const [result,setResult]=useState(null);
+const [error,setError]=useState("");
+const [activeTab,setActiveTab]=useState("messages");
+const [language,setLanguage]=useState("English");
+const [clientName,setClientName]=useState("");
+const [clientType,setClientType]=useState("");
+const [contactReason,setContactReason]=useState("");
+const [urgency,setUrgency]=useState("");
+const [tone,setTone]=useState("");
+const [objection,setObjection]=useState("");
+const [propAddress,setPropAddress]=useState("");
+const [propPrice,setPropPrice]=useState("");
+const [propType,setPropType]=useState("");
+const [propHighlights,setPropHighlights]=useState("");
+const [matcherProps,setMatcherProps]=useState([{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}]);
+const [buyerNeeds,setBuyerNeeds]=useState("");
+const [buyerCriteria,setBuyerCriteria]=useState([]);
+const [sellerSituation,setSellerSituation]=useState([]);
+const [priorContact,setPriorContact]=useState("");
+const [personalNote,setPersonalNote]=useState("");
+const [anniversaryYears,setAnniversaryYears]=useState("");
+const [agentName,setAgentName]=useState("");
+const [agentPhone,setAgentPhone]=useState("");
+const [agencyName,setAgencyName]=useState("");
+
+const isBuyer=clientType.includes("buyer")||clientType==="investor";
+const isSeller=clientType.includes("seller");
+const isObjection=contactReason==="objection_handle";
+const isReferral=contactReason==="referral_request";
+const isAnniversary=contactReason==="anniversary";
+const isMatcher=contactReason==="new_listing"&&isBuyer;
+const canGenerate=clientName&&clientType&&contactReason&&agentName&&tone;
+const langInstr=language!=="English"?`\n\nIMPORTANT: Write ALL content in ${language}.`:"";
+
+const updMP=(idx,field,val)=>setMatcherProps(prev=>prev.map((p,i)=>i===idx?{...p,[field]:val}:p));
+
+const ctx=`CLIENT: ${clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===clientType)?.label||clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===contactReason)?.label||contactReason} | URGENCY: ${URGENCY.find(u=>u.value===urgency)?.label||"not specified"} | TONE: ${TONES2.find(t=>t.value===tone)?.label||tone}
+PRIOR CONTACT: ${priorContact||"none"} | PERSONAL NOTE: ${personalNote||"none"}
+PROPERTY: ${propAddress||"not specified"} | $${propPrice||"N/A"} | ${propType||""} | ${propHighlights||""}
+${isBuyer?`BUYER CRITERIA: ${buyerCriteria.join(",")||"not specified"}`:""}
+${isSeller?`SELLER SITUATION: ${sellerSituation.join(",")||"not specified"}`:""}
+${isMatcher?`PROPERTY OPTIONS:\n${matcherProps.map((p,i)=>`Option ${i+1}: ${p.address} | $${p.price} | ${p.type} | ${p.highlights}`).join("\n")}\nBUYER NEEDS: ${buyerNeeds}`:""}
+AGENT: ${agentName}${agentPhone?` | ${agentPhone}`:""}${agencyName?` | ${agencyName}`:""}`;
+
+const generate=async()=>{
+setError("");setLoading(true);setResult(null);
+try{
+setLoadingMsg("✦ Writing messages & voice script...");
+let p1="";
+if(isObjection) p1=`You are an elite real estate sales coach.${ctx}${langInstr}\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp objection response. Acknowledge concern, reframe, keep door open. End with soft question.","sms":"SMS objection response max 160 chars.","voice_script":"Phone script: OPENING, REFRAME, QUESTION, CLOSE. Labelled. Handle the objection gracefully.","email_subject":"Non-salesy email subject under 9 words.","email_body":"130-150 word email handling the objection gracefully. Signed by ${agentName}."}`;
+else if(isReferral) p1=`You are an elite real estate sales coach.${ctx}${langInstr}\nReturn ONLY JSON:\n{"whatsapp":"60-80 word referral request WhatsApp. Warm, celebrate success, ask naturally.","sms":"Referral SMS max 160 chars.","voice_script":"Referral call script: OPENING, CELEBRATION, ASK, CLOSE. Labelled.","email_subject":"Referral request subject under 9 words.","email_body":"120-140 word referral email. Celebrate, ask naturally. Signed by ${agentName}."}`;
+else if(isAnniversary) p1=`You are an elite real estate sales coach.${ctx}${langInstr}\nReturn ONLY JSON:\n{"whatsapp":"60-80 word anniversary WhatsApp. Warm, celebratory, mention the home, market update, no hard sell.","sms":"Anniversary SMS max 160 chars.","voice_script":"Anniversary call: OPENING, UPDATE, CHECK-IN, SOFT CTA. Labelled.","email_subject":"Anniversary email subject under 9 words.","email_body":"120-140 word anniversary email. Signed by ${agentName}."}`;
+else p1=`You are an elite real estate sales coach.${ctx}${langInstr}\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp. Warm, personal, use client's first name, end with easy question.","sms":"SMS max 160 chars. Punchy and personal.","voice_script":"Call script: OPENING, REASON FOR CALL, VALUE PITCH, CLOSE. Labelled. Natural spoken language.","email_subject":"Personal email subject under 10 words.","email_body":"130-160 word email. Personal opener, opportunity, CTA. Signed by ${agentName}${agencyName?` from ${agencyName}`:""}."}`;
+const part1=await apiClaude(p1,null,1300);
+
+setLoadingMsg("✦ Writing letter & follow-ups...");
+let p2=`You are an elite real estate sales coach.${ctx}${langInstr}\nReturn ONLY JSON:\n{"formal_letter":"Full formal letter 260-300 words. Start: [Date]\\n\\n${clientName}\\n[Client Address]\\n\\nDear ${clientName},\\n\\n4 paragraphs: personal opening, opportunity, why now, warm close. Sign off: Warm regards,\\n${agentName}${agencyName?`\\n${agencyName}`:""}${agentPhone?`\\n${agentPhone}`:""}","followup_1":"Follow-up Day 3. 50-60 words. Friendly nudge, different angle.","followup_2":"Follow-up Week 1. 50-60 words. New info or urgency.","followup_3":"Follow-up Week 2. 40-50 words. Casual check-in.","followup_4":"Follow-up Month 1. 40-50 words. Final warm touch."}`;
+if(isMatcher&&matcherProps.some(p=>p.address)) p2=`You are an elite real estate sales coach and property matching expert.${ctx}${langInstr}\n\nAnalyse the 3 property options and determine the best match for this buyer. Return ONLY JSON:\n{"best_match_analysis":"2-3 sentence analysis of which property best matches and exactly why.","formal_letter":"Full formal letter 260-300 words recommending the best-match property. Format with date, Dear ${clientName}, 4 paragraphs, sign off by ${agentName}.","followup_1":"Follow-up Day 3 about the property recommendation.","followup_2":"Follow-up Week 1 with urgency.","followup_3":"Follow-up Week 2 casual.","followup_4":"Follow-up Month 1 final."}`;
+const part2=await apiClaude(p2,null,1400);
+
+setLoadingMsg("✦ Building follow-up schedule...");
+const p3=`CLIENT: ${clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===clientType)?.label||clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===contactReason)?.label||contactReason}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Today — First Contact","icon":"🚀","tasks":["Send the WhatsApp message","If no reply after 2 hours, send SMS as well","Save client in CRM with today's date"]},{"day":"Day 3 — First Follow-Up","icon":"💬","tasks":["Send Follow-Up #1 if no reply","Check if they opened your email — call if they did","Note their response in CRM"]},{"day":"Day 7 — Week 1","icon":"📞","tasks":["Send Follow-Up #2 with new angle","Make a phone call using your voice script","Listen first — ask questions before pitching"]},{"day":"Day 14 — Two Week Touch","icon":"🔄","tasks":["Send Follow-Up #3 — casual, no pressure","Share relevant market update if available","Update CRM with current status"]},{"day":"Day 30 — Monthly Touch","icon":"🌱","tasks":["Send Follow-Up #4 — final warm message","Move to monthly newsletter if still no reply","Do not give up — timing is everything"]},{"day":"Ongoing","icon":"📅","tasks":["Add to monthly market update list","Reach out on home anniversary if past client","Check in every 90 days for long-term leads"]}]}`;
+const part3=await apiClaude(p3,null,900);
+
+setResult({...part1,...part2,...part3});
+setActiveTab("messages");
+}catch(err){setError("Error: "+err.message);}
+setLoading(false);setLoadingMsg("");
+};
+
+const TABS=[{id:"messages",label:"💬 Messages"},{id:"voice",label:"🎙️ Voice"},{id:"email",label:"📧 Email"},{id:"letter",label:"✉️ Letter"},{id:"followups",label:"🔄 Follow-Ups"},{id:"schedule",label:"📅 Schedule"}];
+const card={background:G.card,border:`1px solid ${G.border}`,borderRadius:14,padding:24,marginBottom:18};
+
+if(result) return <div style={{background:G.bg,minHeight:"100vh"}}>
+<div style={{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 22px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<span style={{fontSize:15,fontWeight:700}}>🤝 Outreach Package for {clientName}</span>
+<GhostBtn onClick={()=>{setResult(null);setError("");}} style={{fontSize:12,padding:"6px 14px"}}>← New Client</GhostBtn>
+</div>
+<div style={{maxWidth:720,margin:"0 auto",padding:"22px 16px 60px"}}>
+{result.best_match_analysis&&<div style={{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:10,padding:"15px 17px",marginBottom:18}}>
+<p style={{fontSize:11,fontWeight:700,color:"#4ade80",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8}}>🏆 AI Property Match Analysis</p>
+<p style={{color:"#d1fae5",fontSize:14,lineHeight:1.7}}>{result.best_match_analysis}</p>
+</div>}
+<p style={{color:G.muted,fontSize:13,margin:"0 0 18px"}}>Every message personalised for {clientName} in {language}. Tap Copy and send.</p>
+<div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
+{TABS.map(tab=><button key={tab.id} onClick={()=>setActiveTab(tab.id)} style={{
+background:activeTab===tab.id?G.aqua:"#0d0d0d",color:activeTab===tab.id?"#080808":G.muted,
+border:`1px solid ${activeTab===tab.id?G.aqua:G.border}`,borderRadius:8,padding:"7px 12px",
+fontSize:12,fontWeight:activeTab===tab.id?700:400,fontFamily:"inherit",cursor:"pointer"
+}}>{tab.label}</button>)}
+</div>
+{activeTab==="messages"&&<><CopyCard title="WhatsApp" icon="💬" badge="WhatsApp" content={result.whatsapp} accentColor={G.aqua}/><CopyCard title="SMS" icon="📱" badge="160 chars" content={result.sms} accentColor={G.aqua}/></>}
+{activeTab==="voice"&&<><p style={{color:G.muted,fontSize:13,margin:"0 0 12px"}}>Read naturally — don't sound like you're reading a script.</p><CopyCard title="Phone Call Script" icon="🎙️" content={result.voice_script} accentColor={G.aqua}/></>}
+{activeTab==="email"&&<><CopyCard title="Email Subject" icon="📧" content={result.email_subject} accentColor={G.aqua}/><CopyCard title="Email Body" icon="📨" content={result.email_body} accentColor={G.aqua}/></>}
+{activeTab==="letter"&&<><p style={{color:G.muted,fontSize:13,margin:"0 0 12px"}}>Replace anything in brackets before printing.</p><CopyCard title="Formal Letter" icon="✉️" content={result.formal_letter} accentColor={G.aqua}/></>}
+{activeTab==="followups"&&<>
+<p style={{color:G.muted,fontSize:13,margin:"0 0 12px"}}>Send in order if no reply. Works on WhatsApp and SMS.</p>
+<CopyCard title="Follow-Up #1" icon="💬" badge="Day 3" content={result.followup_1} accentColor={G.aqua}/>
+<CopyCard title="Follow-Up #2" icon="💬" badge="Week 1" content={result.followup_2} accentColor={G.aqua}/>
+<CopyCard title="Follow-Up #3" icon="💬" badge="Week 2" content={result.followup_3} accentColor={G.aqua}/>
+<CopyCard title="Follow-Up #4" icon="💬" badge="Month 1" content={result.followup_4} accentColor={G.aqua}/>
+</>}
+{activeTab==="schedule"&&<>
+<p style={{color:G.muted,fontSize:13,margin:"0 0 18px"}}>Your exact follow-up plan for {clientName}. Never miss a touch point again.</p>
+{result.schedule&&result.schedule.map((day,i)=><div key={i} style={{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:10,padding:"15px 17px",marginBottom:12}}>
+<div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+<span style={{fontSize:20}}>{day.icon}</span>
+<span style={{fontSize:14,fontWeight:700,color:G.aqua}}>{day.day}</span>
+</div>
+{day.tasks&&day.tasks.map((t,j)=><div key={j} style={{display:"flex",gap:8,marginBottom:6}}>
+<span style={{color:G.aqua,fontWeight:700,flexShrink:0}}>→</span>
+<span style={{fontSize:14,color:"#ccc",lineHeight:1.6}}>{t}</span>
+</div>)}
+</div>)}
+</>}
+</div>
+</div>;
+
+return <div style={{background:G.bg,minHeight:"100vh"}}>
+<div style={{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+<span style={{fontSize:15,fontWeight:700}}>🤝 Client Outreach Machine</span>
+<div style={{display:"flex",alignItems:"center",gap:10}}>
+<span style={{fontSize:11,color:G.muted}}>{language}</span>
+<GhostBtn onClick={onBack} style={{fontSize:12,padding:"6px 14px"}}>← Dashboard</GhostBtn>
+</div>
+</div>
+<div style={{maxWidth:660,margin:"0 auto",padding:"30px 18px 60px"}}>
+
+<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🌐 Output Language</h2>
+<select value={language} onChange={e=>setLanguage(e.target.value)} style={{width:"100%",background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:8,color:G.white,fontSize:14,padding:"11px 14px",cursor:"pointer",marginBottom:4}}>
+{LANGUAGES.map(l=><option key={l.value} value={l.value}>{l.label}</option>)}
+</select>
+</div>
+
+<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>👤 Who Are You Contacting?</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>The more detail, the more personalised the messages.</p>
+<Input label="Client First Name" value={clientName} onChange={setClientName} placeholder="Sarah"/>
+<Chips label="Client Type" options={CLIENT_TYPES} selected={clientType} onToggle={setClientType} single/>
+<Chips label="Reason for Contacting" options={CONTACT_REASONS} selected={contactReason} onToggle={setContactReason} single/>
+<Chips label="Urgency Level" options={URGENCY} selected={urgency} onToggle={setUrgency} single/>
+<Chips label="Communication Tone" options={TONES2} selected={tone} onToggle={setTone} single/>
+</div>
+
+{isObjection&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🛡️ What Objection Did They Raise?</h2>
+<Chips label="Their Objection" options={OBJECTIONS} selected={objection} onToggle={setObjection} single/>
+</div>}
+
+{isAnniversary&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🎉 Anniversary Details</h2>
+<Input label="Years Since Purchase" type="number" value={anniversaryYears} onChange={setAnniversaryYears} placeholder="1"/>
+</div>}
+
+<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🏠 Property You're Offering</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>Leave blank for general outreach.</p>
+<Input label="Property Address" value={propAddress} onChange={setPropAddress} placeholder="42 Palm Drive, Miami Beach, FL 33139"/>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+<Input label="Asking Price ($)" value={propPrice} onChange={setPropPrice} placeholder="1,100,000"/>
+<Input label="Property Type" value={propType} onChange={setPropType} placeholder="4-bed villa with pool"/>
+</div>
+<Textarea label="Key Highlights" hint="Top 2-3 things perfect for this client" value={propHighlights} onChange={setPropHighlights} placeholder="Ocean views, private pool, just reduced by $50K" rows={2}/>
+</div>
+
+{isMatcher&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🏆 Property Preference Matcher</h2>
+<p style={{color:G.muted,fontSize:13,marginBottom:16}}>Enter up to 3 properties. AI picks the best match and writes all messages around it.</p>
+<Textarea label="Buyer's Needs & Preferences" value={buyerNeeds} onChange={setBuyerNeeds} placeholder="4 beds, pool, good schools, under $1.5M, prefers South Beach" rows={2}/>
+{matcherProps.map((p,i)=><div key={i} style={{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:10,padding:16,marginBottom:12}}>
+<p style={{fontSize:11,fontWeight:700,color:G.gold,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12}}>Option {i+1}</p>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+<Input label="Address" value={p.address} onChange={v=>updMP(i,"address",v)} placeholder="123 Main St, Miami"/>
+<Input label="Price ($)" value={p.price} onChange={v=>updMP(i,"price",v)} placeholder="1,200,000"/>
+</div>
+<Input label="Property Type" value={p.type} onChange={v=>updMP(i,"type",v)} placeholder="4-bed house with pool"/>
+<Input label="Key Highlights" value={p.highlights} onChange={v=>updMP(i,"highlights",v)} placeholder="Ocean view, renovated kitchen, top school district"/>
+</div>)}
+</div>}
+
+{isBuyer&&!isMatcher&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🔍 Buyer Criteria</h2>
+<Chips options={BUYER_CRITERIA} selected={buyerCriteria} onToggle={v=>setBuyerCriteria(prev=>prev.includes(v)?prev.filter(x=>x!==v):[...prev,v])}/>
+</div>}
+
+{isSeller&&<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🏷️ Seller Situation</h2>
+<Chips options={SELLER_SITUATION} selected={sellerSituation} onToggle={v=>setSellerSituation(prev=>prev.includes(v)?prev.filter(x=>x!==v):[...prev,v])}/>
+</div>}
+
+<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>💡 Personal Context</h2>
+<Textarea label="Prior Contact History" hint="Have you spoken before? What did they say?" value={priorContact} onChange={setPriorContact} placeholder="Met at open house 2 weeks ago. Said they loved the area but wanted more bedrooms." rows={2}/>
+<Textarea label="Personal Note" hint="Kids, job, lifestyle — makes messages feel real" value={personalNote} onChange={setPersonalNote} placeholder="Has 2 young kids, works from home, loves outdoor entertaining" rows={2}/>
+</div>
+
+<div style={card}>
+<h2 style={{fontSize:17,fontWeight:700,marginBottom:4,color:G.white}}>🏷️ Your Details</h2>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+<Input label="Your Name" value={agentName} onChange={setAgentName} placeholder="James Rivera"/>
+<Input label="Your Phone" value={agentPhone} onChange={setAgentPhone} placeholder="+1 305 555 0199"/>
+</div>
+<Input label="Agency / Company Name" value={agencyName} onChange={setAgencyName} placeholder="Rivera Real Estate Group"/>
+</div>
+
+{error&&<div style={{background:"#1a0808",border:"1px solid #3a1010",borderRadius:8,padding:"12px 16px",color:"#f87171",fontSize:13,marginBottom:16,fontFamily:"monospace"}}>⚠ {error}</div>}
+
+{loading&&<div style={{background:G.card,border:`1px solid ${G.border}`,borderRadius:10,padding:"18px 22px",marginBottom:16,textAlign:"center"}}>
+<p style={{color:G.aqua,fontSize:14,margin:0,fontWeight:600}}>{loadingMsg}</p>
+<p style={{color:G.muted,fontSize:12,margin:"6px 0 0"}}>Generating in {language}. Please wait...</p>
+</div>}
+
+<Btn onClick={()=>canGenerate&&!loading&&generate()} disabled={loading||!canGenerate} style={{width:"100%",fontSize:15}}>
+{loading?"Generating...":"✦ Generate Full Outreach Package"}
+</Btn>
+{!canGenerate&&<p style={{color:G.muted,fontSize:12,marginTop:8,textAlign:"center"}}>Fill in client name, type, contact reason, tone and your name to continue.</p>}
+</div>
+</div>;
+}
+
+// ── ADMIN PANEL ──────────────────────────────────────────────────────────────
+function AdminPanel({onBack}) {
+const [adminKey,setAdminKey]=useState("");
+const [authed,setAuthed]=useState(false);
+const [users,setUsers]=useState([]);
+const [loading,setLoading]=useState(false);
+const [msg,setMsg]=useState("");
+const [name,setName]=useState("");
+const [email,setEmail]=useState("");
+const [password,setPassword]=useState("");
+const [plan,setPlan]=useState("bundle");
+const [trialDays,setTrialDays]=useState("7");
+
+const loadUsers=async(key)=>{
+setLoading(true);
+const res=await apiAdmin({adminKey:key,action:"list_users"});
+setLoading(false);
+if(res.success) setUsers(res.users);
+else setMsg("❌ "+res.error);
+};
+
+const auth=async()=>{
+setLoading(true);
+const res=await apiAdmin({adminKey,action:"list_users"});
+setLoading(false);
+if(res.success){setAuthed(true);setUsers(res.users);}
+else setMsg("❌ Wrong admin key");
+};
+
+const addUser=async()=>{
+if(!name||!email||!password){setMsg("Fill in all fields.");return;}
+setLoading(true);
+const res=await apiAdmin({adminKey,action:"add_user",name,email,password,plan,trialDays:parseInt(trialDays)});
+setLoading(false);
+if(res.success){setMsg("✅ User added: "+res.user.email);setName("");setEmail("");setPassword("");loadUsers(adminKey);}
+else setMsg("❌ "+res.error);
+};
+
+const deactivate=async(userId,userName)=>{
+if(!confirm(`Deactivate ${userName}?`)) return;
+await apiAdmin({adminKey,action:"deactivate_user",userId});
+setMsg("✅ Deactivated.");
+loadUsers(adminKey);
+};
+
+const activate=async(userId)=>{
+await apiAdmin({adminKey,action:"activate_user",userId});
+setMsg("✅ Activated.");
+loadUsers(adminKey);
+};
+
+const markSubscribed=async(userId)=>{
+await apiAdmin({adminKey,action:"subscribe_user",userId});
+setMsg("✅ Marked as subscribed.");
+loadUsers(adminKey);
+};
+
+const card={background:G.card,border:`1px solid ${G.border}`,borderRadius:14,padding:24,marginBottom:18};
+
+if(!authed) return <div style={{background:G.bg,minHeight:"100vh",padding:24}}>
+<div style={{maxWidth:420,margin:"60px auto"}}>
+<GhostBtn onClick={onBack} style={{marginBottom:24,fontSize:12}}>← Back</GhostBtn>
+<div style={card}>
+<h2 style={{fontSize:18,fontWeight:700,marginBottom:16,color:G.white}}>⚙️ Admin Panel</h2>
+<Input label="Admin Secret Key" type="password" value={adminKey} onChange={setAdminKey} placeholder="Your admin secret key"/>
+{msg&&<p style={{color:"#f87171",fontSize:13,marginBottom:12,fontFamily:"monospace"}}>{msg}</p>}
+<Btn onClick={auth} disabled={loading} style={{width:"100%"}}>{loading?"Checking...":"Access Admin Panel →"}</Btn>
+</div>
+</div>
+</div>;
+
+return <div style={{background:G.bg,minHeight:"100vh"}}>
+<div style={{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<span style={{fontSize:15,fontWeight:700}}>⚙️ Streamflux Admin Panel</span>
+<GhostBtn onClick={onBack} style={{fontSize:12,padding:"6px 14px"}}>← Dashboard</GhostBtn>
+</div>
+<div style={{maxWidth:900,margin:"0 auto",padding:"32px 20px 60px"}}>
+{msg&&<div style={{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:8,padding:"10px 14px",color:"#4ade80",fontSize:13,marginBottom:16,fontFamily:"monospace"}}>{msg}</div>}
+
+{/* Add user */}
+<div style={card}>
+<h3 style={{fontSize:16,fontWeight:700,color:G.white,marginBottom:16}}>➕ Add New Client</h3>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+<Input label="Full Name" value={name} onChange={setName} placeholder="Sarah Johnson"/>
+<Input label="Email" type="email" value={email} onChange={setEmail} placeholder="sarah@email.com"/>
+<Input label="Password" value={password} onChange={setPassword} placeholder="Welcome2024!"/>
+<Input label="Trial Days" type="number" value={trialDays} onChange={setTrialDays} placeholder="7"/>
+</div>
+<div style={{marginBottom:16}}>
+<label style={{display:"block",fontSize:11,fontWeight:700,letterSpacing:"0.1em",color:G.muted,textTransform:"uppercase",marginBottom:6}}>Plan</label>
+<select value={plan} onChange={e=>setPlan(e.target.value)} style={{width:"100%",background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:8,color:G.white,fontSize:14,padding:"11px 14px",cursor:"pointer"}}>
+<option value="marketing">Marketing Tool — $125/mo (App 1 only)</option>
+<option value="outreach">Outreach Tool — $125/mo (App 2 only)</option>
+<option value="bundle">Complete Bundle — $157/mo (Both Apps)</option>
+</select>
+</div>
+<Btn onClick={addUser} disabled={loading}>{loading?"Adding...":"Add Client →"}</Btn>
+</div>
+
+{/* Users list */}
+<div style={card}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+<h3 style={{fontSize:16,fontWeight:700,color:G.white}}>👥 All Clients ({users.length})</h3>
+<GhostBtn onClick={()=>loadUsers(adminKey)} style={{fontSize:12,padding:"6px 12px"}}>Refresh</GhostBtn>
+</div>
+{users.length===0?<p style={{color:G.muted,fontSize:14}}>No clients yet.</p>:users.map(u=>{
+const trial=new Date(u.trial_ends_at);
+const now=new Date();
+const trialActive=now<trial;
+const daysLeft=trialActive?Math.ceil((trial-now)/(1000*60*60*24)):0;
+return <div key={u.id} style={{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:10,padding:"14px 16px",marginBottom:10}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:10}}>
+<div>
+<div style={{fontWeight:700,color:G.white,fontSize:14}}>{u.name}</div>
+<div style={{color:G.muted,fontSize:12,marginTop:2}}>{u.email}</div>
+<div style={{display:"flex",gap:8,marginTop:6,flexWrap:"wrap"}}>
+<span style={{fontSize:11,background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:100,padding:"2px 10px",color:G.aqua,fontWeight:600}}>{u.plan==="bundle"?"Bundle":u.plan==="marketing"?"Marketing":"Outreach"}</span>
+{u.subscribed&&<span style={{fontSize:11,background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:100,padding:"2px 10px",color:"#4ade80",fontWeight:600}}>✓ Subscribed</span>}
+{trialActive&&!u.subscribed&&<span style={{fontSize:11,background:"rgba(212,168,67,0.1)",border:"1px solid rgba(212,168,67,0.3)",borderRadius:100,padding:"2px 10px",color:G.gold,fontWeight:600}}>Trial: {daysLeft}d left</span>}
+{!trialActive&&!u.subscribed&&<span style={{fontSize:11,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:100,padding:"2px 10px",color:G.red,fontWeight:600}}>Trial Expired</span>}
+{!u.active&&<span style={{fontSize:11,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:100,padding:"2px 10px",color:G.red,fontWeight:600}}>Deactivated</span>}
+</div>
+</div>
+<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+{!u.subscribed&&<GhostBtn onClick={()=>markSubscribed(u.id)} style={{fontSize:11,padding:"5px 12px",color:G.green,borderColor:G.green}}>Mark Paid</GhostBtn>}
+{u.active?<GhostBtn onClick={()=>deactivate(u.id,u.name)} style={{fontSize:11,padding:"5px 12px",color:G.red,borderColor:G.red}}>Deactivate</GhostBtn>:<GhostBtn onClick={()=>activate(u.id)} style={{fontSize:11,padding:"5px 12px",color:G.green,borderColor:G.green}}>Activate</GhostBtn>}
+</div>
+</div>
+</div>;
+})}
+</div>
+</div>
+</div>;
+}
+
+// ── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+const [user,setUser]=useState(null);
+const [screen,setScreen]=useState("login");
+
+useEffect(()=>{
+const saved=localStorage.getItem("sf_user");
+if(saved){
+const u=JSON.parse(saved);
+apiAuth({action:"check",userId:u.id}).then(res=>{
+if(res.success){setUser(res.user);setScreen("dashboard");}
+else localStorage.removeItem("sf_user");
+});
+}
+},[]);
+
+const handleLogin=(u)=>{localStorage.setItem("sf_user",JSON.stringify(u));setUser(u);setScreen("dashboard");};
+const handleLogout=()=>{localStorage.removeItem("sf_user");setUser(null);setScreen("login");};
+
+if(screen==="login") return <LoginScreen onLogin={handleLogin}/>;
+if(screen==="dashboard") return <Dashboard user={user} onSelectApp={app=>setScreen(app)} onLogout={handleLogout} onAdmin={()=>setScreen("admin")}/>;
+if(screen==="app1") return <App1 onBack={()=>setScreen("dashboard")}/>;
+if(screen==="app2") return <App2 onBack={()=>setScreen("dashboard")}/>;
+if(screen==="admin") return <AdminPanel onBack={()=>setScreen("dashboard")}/>;
+return null;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
