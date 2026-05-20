@@ -6,28 +6,822 @@
 <title>Streamflux — AI Real Estate Marketing</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Georgia',serif;background:#080808;color:#fff;min-height:100vh}
+body{font-family:Georgia,serif;background:#080808;color:#fff;min-height:100vh}
 input,textarea,button,select{font-family:inherit}
-.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#080808}
-.logo{font-size:28px;font-weight:700;letter-spacing:3px;color:#fff;margin-bottom:12px}
-.logo span{color:#2AB8D4}
-.loading-text{color:rgba(255,255,255,0.4);font-size:13px}
-.dot{display:inline-block;animation:blink 1.4s infinite both}
-.dot:nth-child(2){animation-delay:.2s}
-.dot:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#111}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
 </style>
 </head>
 <body>
-<div id="root">
-<div class="loading-screen">
-<div class="logo">STREAM<span>FLUX</span></div>
-<div class="loading-text">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
-</div>
-</div>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="app.js"></script>
+<div id="root"><div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080808"><div style="font-size:28px;font-weight:700;letter-spacing:3px;color:#fff;margin-bottom:12px">STREAM<span style="color:#2AB8D4">FLUX</span></div><div style="color:rgba(255,255,255,0.4);font-size:13px">Loading...</div></div></div>
+<script>
+const G={bg:"#080808",card:"#111",border:"#222",aqua:"#2AB8D4",aquaDim:"rgba(42,184,212,0.1)",aquaBorder:"rgba(42,184,212,0.25)",gold:"#D4A843",white:"#fff",muted:"rgba(255,255,255,0.5)",green:"#3d9e5c",red:"#ef4444"};
+
+const apiAuth=async(body)=>{try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
+const apiAdmin=async(body)=>{try{const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
+const apiClaude=async(prompt,system,maxTokens=1000)=>{
+const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,system,maxTokens})});
+const d=await r.json();
+if(d.error)throw new Error(d.error);
+const t=d.text.trim();
+try{return JSON.parse(t);}catch{}
+const cm=t.match(/```(?:json)?\s*([\s\S]*?)```/);
+if(cm){try{return JSON.parse(cm[1].trim());}catch{}}
+const jm=t.match(/\{[\s\S]*\}/);
+if(jm){try{return JSON.parse(jm[0]);}catch{}}
+throw new Error("Could not parse AI response.");
+};
+
+// STATE
+let state={screen:"login",user:null};
+const setState=(updates)=>{state={...state,...updates};render();};
+
+// STYLES
+const btnStyle=(disabled,color)=>({background:disabled?"#1a1a1a":color||G.aqua,color:disabled?G.muted:"#080808",border:"none",borderRadius:"8px",padding:"13px 24px",fontSize:"14px",fontWeight:"700",cursor:disabled?"not-allowed":"pointer",fontFamily:"inherit",width:"auto",display:"inline-block"});
+const inputStyle={width:"100%",background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"8px",color:G.white,fontSize:"14px",padding:"11px 14px",outline:"none",fontFamily:"inherit",boxSizing:"border-box"};
+const cardStyle={background:G.card,border:`1px solid ${G.border}`,borderRadius:"14px",padding:"24px",marginBottom:"18px"};
+const labelStyle={display:"block",fontSize:"11px",fontWeight:"700",letterSpacing:"0.1em",color:G.muted,textTransform:"uppercase",marginBottom:"4px"};
+
+// HELPERS
+function el(tag,attrs,...children){
+const e=document.createElement(tag);
+if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+if(k==="style"&&typeof v==="object")Object.assign(e.style,v);
+else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
+else if(k==="class")e.className=v;
+else e.setAttribute(k,v);
+});
+children.flat().forEach(c=>{
+if(c==null||c===false)return;
+e.appendChild(typeof c==="string"?document.createTextNode(c):c);
+});
+return e;
+}
+
+function field(label,type,value,onChange,placeholder,hint){
+const wrap=el("div",{style:{marginBottom:"16px"}});
+if(label)wrap.appendChild(el("label",{style:labelStyle},label));
+if(hint)wrap.appendChild(el("p",{style:{fontSize:"12px",color:"#444",margin:"0 0 5px",fontStyle:"italic"}},hint));
+const inp=el("input",{type,placeholder,style:inputStyle});
+inp.value=value||"";
+inp.addEventListener("input",e=>onChange(e.target.value));
+wrap.appendChild(inp);
+return wrap;
+}
+
+function textarea(label,value,onChange,placeholder,rows,hint){
+const wrap=el("div",{style:{marginBottom:"16px"}});
+if(label)wrap.appendChild(el("label",{style:labelStyle},label));
+if(hint)wrap.appendChild(el("p",{style:{fontSize:"12px",color:"#444",margin:"0 0 5px",fontStyle:"italic"}},hint));
+const ta=el("textarea",{placeholder,rows:rows||3,style:{...inputStyle,resize:"vertical"}});
+ta.value=value||"";
+ta.addEventListener("input",e=>onChange(e.target.value));
+wrap.appendChild(ta);
+return wrap;
+}
+
+function chips(label,hint,options,selected,onToggle,single){
+const wrap=el("div",{style:{marginBottom:"20px"}});
+if(label)wrap.appendChild(el("label",{style:labelStyle},label));
+if(hint)wrap.appendChild(el("p",{style:{fontSize:"12px",color:"#444",margin:"0 0 7px",fontStyle:"italic"}},hint));
+const grid=el("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}});
+options.forEach(opt=>{
+const val=typeof opt==="string"?opt:opt.value;
+const lbl=typeof opt==="string"?opt:opt.label;
+const sub=typeof opt==="object"?opt.desc:null;
+const active=single?selected===val:(selected||[]).includes(val);
+const btn=el("button",{style:{background:active?"#0f2a0f":"#0d0d0d",border:`1px solid ${active?G.green:G.border}`,borderRadius:"7px",color:active?"#6ee7a0":"#888",fontSize:"12px",padding:sub?"9px 13px":"7px 12px",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}},
+el("div",{style:{fontWeight:active?"700":"400"}},lbl),
+...(sub?[el("div",{style:{fontSize:"11px",color:active?"#4ade80":G.muted,marginTop:"2px"}},sub)]:[])
+);
+btn.addEventListener("click",()=>onToggle(val));
+grid.appendChild(btn);
+});
+wrap.appendChild(grid);
+return wrap;
+}
+
+function copyCard(title,content,icon,accentColor){
+accentColor=accentColor||G.aqua;
+const card=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"12px"}});
+let copied=false;
+const copyBtn=el("button",{style:{background:"#161616",border:`1px solid ${G.border}`,borderRadius:"6px",color:"#666",fontSize:"11px",padding:"4px 11px",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},"Copy");
+copyBtn.addEventListener("click",()=>{
+navigator.clipboard.writeText(content||"");
+copyBtn.textContent="✓ Copied";
+copyBtn.style.color="#4caf50";
+copyBtn.style.borderColor="#2a5a2a";
+setTimeout(()=>{copyBtn.textContent="Copy";copyBtn.style.color="#666";copyBtn.style.borderColor=G.border;},1800);
+});
+card.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},
+el("span",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"0.1em",color:accentColor,textTransform:"uppercase"}},`${icon} ${title}`),
+copyBtn
+));
+card.appendChild(el("p",{style:{color:"#ccc",fontSize:"14px",lineHeight:"1.75",margin:"0",whiteSpace:"pre-wrap"}},content||""));
+return card;
+}
+
+// LOGIN SCREEN
+function renderLogin(){
+let email="",password="",loading=false,error="";
+
+const wrap=el("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px",background:G.bg}});
+const inner=el("div",{style:{width:"100%",maxWidth:"420px"}});
+
+inner.appendChild(el("div",{style:{textAlign:"center",marginBottom:"36px"}},
+el("div",{style:{fontSize:"28px",fontWeight:"700",letterSpacing:"3px",color:G.white,marginBottom:"8px"}},
+"STREAM",el("span",{style:{color:G.aqua}},"FLUX")
+),
+el("p",{style:{color:G.muted,fontSize:"14px"}},"AI-Powered Real Estate Marketing")
+));
+
+const card=el("div",{style:cardStyle});
+card.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"700",marginBottom:"20px",color:G.white}},"Sign In to Your Account"));
+
+const emailField=field("Email Address","email",email,v=>email=v,"your@email.com");
+const passField=field("Password","password",password,v=>password=v,"••••••••");
+card.appendChild(emailField);
+card.appendChild(passField);
+
+const errDiv=el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginBottom:"14px",display:"none"}});
+card.appendChild(errDiv);
+
+const loginBtn=el("button",{style:{...btnStyle(false),width:"100%",fontSize:"15px"}},"Sign In →");
+loginBtn.addEventListener("click",async()=>{
+if(!email||!password){errDiv.textContent="Please enter your email and password.";errDiv.style.display="block";return;}
+loginBtn.textContent="Signing in...";loginBtn.disabled=true;loginBtn.style.background="#1a1a1a";loginBtn.style.color=G.muted;
+errDiv.style.display="none";
+const res=await apiAuth({action:"login",email,password});
+if(res.success){localStorage.setItem("sf_user",JSON.stringify(res.user));setState({screen:"dashboard",user:res.user});}
+else{errDiv.textContent="⚠ "+(res.error||"Login failed.");errDiv.style.display="block";loginBtn.textContent="Sign In →";loginBtn.disabled=false;loginBtn.style.background=G.aqua;loginBtn.style.color="#080808";}
+});
+card.appendChild(loginBtn);
+card.appendChild(el("p",{style:{textAlign:"center",color:G.muted,fontSize:"12px",marginTop:"16px"}},"Don't have an account? Contact ",el("span",{style:{color:G.aqua}},"francisco@streamflux.app")));
+inner.appendChild(card);
+wrap.appendChild(inner);
+return wrap;
+}
+
+// DASHBOARD
+function renderDashboard(){
+const user=state.user;
+const hasApp1=user.plan==="marketing"||user.plan==="bundle";
+const hasApp2=user.plan==="outreach"||user.plan==="bundle";
+
+const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
+
+// Nav
+const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"16px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"10px"}});
+nav.appendChild(el("div",{style:{fontSize:"20px",fontWeight:"700",letterSpacing:"3px",color:G.white}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
+const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}});
+if(user.trialActive)navRight.appendChild(el("span",{style:{fontSize:"12px",background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 12px",color:G.aqua,fontWeight:"600"}},`🎯 ${user.daysLeft} days left in trial`));
+if(user.subscribed)navRight.appendChild(el("span",{style:{fontSize:"12px",background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:"100px",padding:"4px 12px",color:"#4ade80",fontWeight:"600"}},"✓ Active"));
+
+const adminBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"⚙️ Admin");
+adminBtn.addEventListener("click",()=>setState({screen:"admin"}));
+navRight.appendChild(adminBtn);
+
+const logoutBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"Sign Out");
+logoutBtn.addEventListener("click",()=>{localStorage.removeItem("sf_user");setState({screen:"login",user:null});});
+navRight.appendChild(logoutBtn);
+nav.appendChild(navRight);
+wrap.appendChild(nav);
+
+// Content
+const content=el("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"48px 24px"}});
+content.appendChild(el("div",{style:{marginBottom:"36px"}},
+el("h1",{style:{fontSize:"28px",fontWeight:"700",color:G.white,marginBottom:"6px"}},`Welcome back, ${user.name.split(" ")[0]} 👋`),
+el("p",{style:{color:G.muted,fontSize:"15px"}},"Your AI marketing tools are ready.")
+));
+
+const grid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"20px",marginBottom:"40px"}});
+
+// App 1 card
+const app1Card=el("div",{style:{background:G.card,border:`1px solid ${hasApp1?G.aquaBorder:G.border}`,borderRadius:"16px",overflow:"hidden",opacity:hasApp1?"1":"0.5"}});
+app1Card.appendChild(el("div",{style:{background:"#111",padding:"28px 28px 20px",borderBottom:`1px solid ${G.border}`}},
+el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"8px"}},"App One"),
+el("div",{style:{fontSize:"20px",fontWeight:"700",color:G.white,marginBottom:"4px"}},"Property Marketing Machine"),
+el("div",{style:{fontSize:"13px",color:G.muted}},"MLS listing, social media, ads, TikTok, neighbour letter — all in 30 seconds")
+));
+const app1Body=el("div",{style:{padding:"20px 28px"}});
+app1Body.appendChild(el("div",{style:{fontSize:"12px",color:G.muted,marginBottom:"14px"}},"Generates: MLS · Instagram · Facebook · Twitter · LinkedIn · Email · SMS · WhatsApp · Google Ad · Facebook Ad · TikTok · Letter · Schedule"));
+if(hasApp1){
+const btn=el("button",{style:{...btnStyle(false),width:"100%"}},"Launch App 1 →");
+btn.addEventListener("click",()=>setState({screen:"app1"}));
+app1Body.appendChild(btn);
+}else{
+app1Body.appendChild(el("div",{style:{textAlign:"center",color:G.muted,fontSize:"13px",padding:"12px",border:`1px solid ${G.border}`,borderRadius:"8px"}},"Not included in your plan"));
+}
+app1Card.appendChild(app1Body);
+grid.appendChild(app1Card);
+
+// App 2 card
+const app2Card=el("div",{style:{background:G.card,border:`1px solid ${hasApp2?G.aquaBorder:G.border}`,borderRadius:"16px",overflow:"hidden",opacity:hasApp2?"1":"0.5"}});
+app2Card.appendChild(el("div",{style:{background:"#111",padding:"28px 28px 20px",borderBottom:`1px solid ${G.border}`}},
+el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"8px"}},"App Two"),
+el("div",{style:{fontSize:"20px",fontWeight:"700",color:G.white,marginBottom:"4px"}},"Client Outreach Machine"),
+el("div",{style:{fontSize:"13px",color:G.muted}},"WhatsApp, SMS, phone script, email, letter, 4 follow-ups — for any buyer or seller")
+));
+const app2Body=el("div",{style:{padding:"20px 28px"}});
+app2Body.appendChild(el("div",{style:{fontSize:"12px",color:G.muted,marginBottom:"14px"}},"Generates: WhatsApp · SMS · Phone Script · Email · Letter · 4 Follow-Ups · Property Matcher · Objection Handler · Anniversary · Referral · Schedule"));
+if(hasApp2){
+const btn=el("button",{style:{...btnStyle(false),width:"100%"}},"Launch App 2 →");
+btn.addEventListener("click",()=>setState({screen:"app2"}));
+app2Body.appendChild(btn);
+}else{
+app2Body.appendChild(el("div",{style:{textAlign:"center",color:G.muted,fontSize:"13px",padding:"12px",border:`1px solid ${G.border}`,borderRadius:"8px"}},"Not included in your plan"));
+}
+app2Card.appendChild(app2Body);
+grid.appendChild(app2Card);
+
+content.appendChild(grid);
+
+// Plan info
+content.appendChild(el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"12px",padding:"20px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"12px"}},
+el("div",{},
+el("div",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:G.muted,marginBottom:"4px"}},"Your Plan"),
+el("div",{style:{fontSize:"16px",fontWeight:"700",color:G.white}},user.plan==="bundle"?"Complete Bundle":user.plan==="marketing"?"Marketing Tool":"Outreach Tool")
+)
+));
+
+wrap.appendChild(content);
+return wrap;
+}
+
+// ADMIN PANEL
+function renderAdmin(){
+let adminKey="",authed=false,users=[],loading=false,msg="";
+let name="",email="",password="",plan="bundle",trialDays="7";
+
+const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
+const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+nav.appendChild(el("span",{style:{fontSize:"15px",fontWeight:"700"}},"⚙️ Admin Panel"));
+const backBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"← Dashboard");
+backBtn.addEventListener("click",()=>setState({screen:"dashboard"}));
+nav.appendChild(backBtn);
+wrap.appendChild(nav);
+
+const content=el("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"32px 20px 60px"}});
+
+function renderAdminContent(){
+content.innerHTML="";
+
+const msgDiv=el("div",{style:{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:"8px",padding:"10px 14px",color:"#4ade80",fontSize:"13px",marginBottom:"16px",display:msg?"block":"none"}},msg);
+content.appendChild(msgDiv);
+
+if(!authed){
+const authCard=el("div",{style:cardStyle});
+authCard.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"700",marginBottom:"16px",color:G.white}},"⚙️ Admin Panel"));
+const keyField=field("Admin Secret Key","password",adminKey,v=>adminKey=v,"Your admin secret key");
+authCard.appendChild(keyField);
+const authBtn=el("button",{style:{...btnStyle(false),width:"100%"}},"Access Admin →");
+authBtn.addEventListener("click",async()=>{
+const res=await apiAdmin({adminKey,action:"list_users"});
+if(res.success){authed=true;users=res.users;msg="";renderAdminContent();}
+else{msg="❌ Wrong admin key";renderAdminContent();}
+});
+authCard.appendChild(authBtn);
+content.appendChild(authCard);
+return;
+}
+
+// Add user form
+const addCard=el("div",{style:cardStyle});
+addCard.appendChild(el("h3",{style:{fontSize:"16px",fontWeight:"700",color:G.white,marginBottom:"16px"}},"➕ Add New Client"));
+const grid=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+grid.appendChild(field("Full Name","text",name,v=>name=v,"Sarah Johnson"));
+grid.appendChild(field("Email","email",email,v=>email=v,"sarah@email.com"));
+grid.appendChild(field("Password","text",password,v=>password=v,"Welcome2024!"));
+grid.appendChild(field("Trial Days","number",trialDays,v=>trialDays=v,"7"));
+addCard.appendChild(grid);
+
+const planWrap=el("div",{style:{marginBottom:"16px"}});
+planWrap.appendChild(el("label",{style:labelStyle},"Plan"));
+const sel=el("select",{style:{...inputStyle,cursor:"pointer"}},
+el("option",{value:"marketing"},"Marketing Tool — $125/mo (App 1 only)"),
+el("option",{value:"outreach"},"Outreach Tool — $125/mo (App 2 only)"),
+el("option",{value:"bundle"},"Complete Bundle — $157/mo (Both Apps)")
+);
+sel.value=plan;
+sel.addEventListener("change",e=>plan=e.target.value);
+planWrap.appendChild(sel);
+addCard.appendChild(planWrap);
+
+const addBtn=el("button",{style:btnStyle(false)},"Add Client →");
+addBtn.addEventListener("click",async()=>{
+if(!name||!email||!password){msg="❌ Fill in all fields.";renderAdminContent();return;}
+const res=await apiAdmin({adminKey,action:"add_user",name,email,password,plan,trialDays:parseInt(trialDays)});
+if(res.success){msg="✅ Client added: "+res.user.email;name="";email="";password="";}
+else msg="❌ "+res.error;
+const r2=await apiAdmin({adminKey,action:"list_users"});
+if(r2.success)users=r2.users;
+renderAdminContent();
+});
+addCard.appendChild(addBtn);
+content.appendChild(addCard);
+
+// Users list
+const usersCard=el("div",{style:cardStyle});
+usersCard.appendChild(el("h3",{style:{fontSize:"16px",fontWeight:"700",color:G.white,marginBottom:"16px"}},`👥 All Clients (${users.length})`));
+
+if(users.length===0){
+usersCard.appendChild(el("p",{style:{color:G.muted,fontSize:"14px"}},"No clients yet."));
+}else{
+users.forEach(u=>{
+const trial=new Date(u.trial_ends_at);
+const now=new Date();
+const trialActive=now<trial;
+const daysLeft=trialActive?Math.ceil((trial-now)/(1000*60*60*24)):0;
+
+const row=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"10px"}});
+const rowTop=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:"10px"}});
+
+const info=el("div",{});
+info.appendChild(el("div",{style:{fontWeight:"700",color:G.white,fontSize:"14px"}},u.name));
+info.appendChild(el("div",{style:{color:G.muted,fontSize:"12px",marginTop:"2px"}},u.email));
+const tags=el("div",{style:{display:"flex",gap:"8px",marginTop:"6px",flexWrap:"wrap"}});
+tags.appendChild(el("span",{style:{fontSize:"11px",background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"2px 10px",color:G.aqua,fontWeight:"600"}},u.plan==="bundle"?"Bundle":u.plan==="marketing"?"Marketing":"Outreach"));
+if(u.subscribed)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:"100px",padding:"2px 10px",color:"#4ade80",fontWeight:"600"}},"✓ Paid"));
+if(trialActive&&!u.subscribed)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(212,168,67,0.1)",border:"1px solid rgba(212,168,67,0.3)",borderRadius:"100px",padding:"2px 10px",color:G.gold,fontWeight:"600"}},`Trial: ${daysLeft}d left`));
+if(!trialActive&&!u.subscribed)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:"100px",padding:"2px 10px",color:G.red,fontWeight:"600"}},"Trial Expired"));
+if(!u.active)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:"100px",padding:"2px 10px",color:G.red,fontWeight:"600"}},"Deactivated"));
+info.appendChild(tags);
+rowTop.appendChild(info);
+
+const btns=el("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}});
+if(!u.subscribed){
+const paidBtn=el("button",{style:{background:"transparent",color:G.green,border:`1px solid ${G.green}`,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Mark Paid");
+paidBtn.addEventListener("click",async()=>{await apiAdmin({adminKey,action:"subscribe_user",userId:u.id});msg="✅ Marked as paid.";const r=await apiAdmin({adminKey,action:"list_users"});if(r.success)users=r.users;renderAdminContent();});
+btns.appendChild(paidBtn);
+}
+if(u.active){
+const deactBtn=el("button",{style:{background:"transparent",color:G.red,border:`1px solid ${G.red}`,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Deactivate");
+deactBtn.addEventListener("click",async()=>{if(!confirm(`Deactivate ${u.name}?`))return;await apiAdmin({adminKey,action:"deactivate_user",userId:u.id});msg="✅ Deactivated.";const r=await apiAdmin({adminKey,action:"list_users"});if(r.success)users=r.users;renderAdminContent();});
+btns.appendChild(deactBtn);
+}else{
+const actBtn=el("button",{style:{background:"transparent",color:G.green,border:`1px solid ${G.green}`,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Activate");
+actBtn.addEventListener("click",async()=>{await apiAdmin({adminKey,action:"activate_user",userId:u.id});msg="✅ Activated.";const r=await apiAdmin({adminKey,action:"list_users"});if(r.success)users=r.users;renderAdminContent();});
+btns.appendChild(actBtn);
+}
+rowTop.appendChild(btns);
+row.appendChild(rowTop);
+usersCard.appendChild(row);
+});
+}
+content.appendChild(usersCard);
+}
+
+renderAdminContent();
+wrap.appendChild(content);
+return wrap;
+}
+
+// APP 1 - Property Marketing Machine
+function renderApp1(){
+const SYSTEM="You are the world's best real estate copywriter. You ALWAYS respond with ONLY a valid JSON object. No markdown. No backticks. No explanation.";
+const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"},{value:"Portuguese",label:"🇧🇷 Português"},{value:"French",label:"🇫🇷 Français"},{value:"Arabic",label:"🇦🇪 العربية"},{value:"Chinese",label:"🇨🇳 中文"},{value:"German",label:"🇩🇪 Deutsch"},{value:"Italian",label:"🇮🇹 Italiano"}];
+const MODES=[{value:"new_listing",label:"🏠 New Listing",desc:"Full marketing package"},{value:"open_house",label:"🚪 Open House",desc:"Event invite & promotion"},{value:"price_reduction",label:"📉 Price Reduction",desc:"Re-market with new price"},{value:"sold",label:"🏆 Just Sold",desc:"Announce the sale"}];
+const PROP_TYPES=["House","Apartment","Condo","Townhouse","Villa","Penthouse","Studio","Duplex","Triplex","Land / Lot","Commercial","Mixed Use"];
+const CONDITIONS=["Brand New / Off-Plan","Newly Renovated","Move-in Ready","Good Condition","Needs TLC / Fixer-upper"];
+const LOCATION_FEATS=["Beachfront","Beach Access","Oceanfront","Ocean View","Lakefront","Lake View","Riverfront","River View","Mountain View","Golf Course View","Golf Course Community","City View","City Center","Waterfront","Marina / Boat Dock","Gated Community","Cul-de-Sac","Corner Lot","Quiet Street","Shopping & Dining Nearby","Top-Rated Schools","Parks & Green Space","Transport Links","Airport Nearby","Highway Access"];
+const INTERIOR=["Open Plan Living","High Ceilings","Hardwood Floors","Marble Floors","Modern Kitchen","Chef's Kitchen","Granite Countertops","Quartz Countertops","Kitchen Island","Butler's Pantry","Master Suite","Walk-in Wardrobe","En-suite Bathrooms","Double Vanity","Soaking Tub","Rainfall Shower","Home Office","Media Room / Cinema","Smart Home System","Fireplace","Wine Cellar","Wet Bar","Laundry Room","Solar Panels","Generator"];
+const OUTDOOR=["Private Pool","Heated Pool","Infinity Pool","Hot Tub / Jacuzzi","Rooftop Terrace","Covered Patio","Balcony","Private Garden","Landscaped Yard","Outdoor Kitchen","Built-in BBQ","Fire Pit","Boat Dock","Private Beach Access","Tennis Court","Basketball Court","Guest House","Garage (1 Car)","Garage (2 Car)","Garage (3+ Car)","EV Charging","Gated Entry","Security System"];
+const BUILDING=["Concierge Service","24/7 Security","Doorman","Valet Parking","Rooftop Pool","Fitness Center","Yoga Studio","Spa","Co-working Space","Pet-Friendly","Guest Suites","Low HOA Fees","No HOA"];
+const TONES=[{value:"luxury",label:"Luxury & Prestige",desc:"High-end, aspirational"},{value:"friendly",label:"Warm & Friendly",desc:"Approachable, homey"},{value:"investment",label:"Investment Focus",desc:"ROI, numbers, opportunity"},{value:"lifestyle",label:"Lifestyle & Vibe",desc:"Energetic, aspirational"},{value:"urgent",label:"Urgency & FOMO",desc:"Act now, limited time"}];
+const TABS=[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"}];
+
+let s={step:1,mode:"",language:"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
+
+const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
+
+function tog(arr,val){return arr.includes(val)?arr.filter(x=>x!==val):[...arr,val];}
+function totalSteps(){return s.mode==="sold"?4:s.mode==="open_house"?5:6;}
+function canProceed(){
+if(s.step===1)return!!s.mode;
+if(s.step===2)return s.propType&&s.address&&s.price&&(s.mode==="sold"?true:s.beds&&s.baths);
+if(s.step===3)return!!s.city;
+if(s.step===4)return s.mode==="sold"?!!s.tone:s.interior.length>0||s.outdoor.length>0;
+return!!s.tone;
+}
+
+async function generate(){
+s.loading=true;s.error="";s.result=null;s.loadingPct=0;renderApp1Content();
+const langInstr=s.language!=="English"?`\n\nIMPORTANT: Write ALL content in ${s.language}.`:"";
+const propSummary=[`Mode:${s.mode}`,`${s.propType} at ${s.address}`,`Price:$${s.price}${s.oldPrice?` (was $${s.oldPrice})`:""}`,`Beds:${s.beds}|Baths:${s.baths}${s.sqft?`|${s.sqft}sqft`:""}`,s.condition&&`Condition:${s.condition}`,`City:${s.city}${s.neighbourhood?`,${s.neighbourhood}`:""}`,s.locationFeatures.length&&`Location:${s.locationFeatures.slice(0,8).join(",")}`,s.interior.length&&`Interior:${s.interior.slice(0,10).join(",")}`,s.outdoor.length&&`Outdoor:${s.outdoor.slice(0,8).join(",")}`,s.uniqueFeature&&`Unique:${s.uniqueFeature}`,`Tone:${s.tone}|Buyer:${s.targetBuyer||"general"}`,`Agent:${s.agentName||"Agent"}${s.agentPhone?`|${s.agentPhone}`:""}`].filter(Boolean).join("\n");
+try{
+s.loadingMsg="Writing listing & email...";s.loadingPct=15;renderApp1Content();
+let lp=s.mode==="new_listing"?`{"listing":"130-150 word MLS description","email_subject":"email subject under 9 words","email_body":"120-140 word email signed by ${s.agentName||"Your Agent"}"}`:s.mode==="open_house"?`{"listing":"120-140 word open house announcement for ${s.openHouseDate} at ${s.openHouseTime}","email_subject":"open house subject","email_body":"110-130 word invite email signed by ${s.agentName||"Your Agent"}"}`:s.mode==="price_reduction"?`{"listing":"120-140 word price reduction announcement","email_subject":"price drop subject","email_body":"110-130 word email signed by ${s.agentName||"Your Agent"}"}`:s.mode==="sold"?`{"listing":"100-120 word just sold announcement","email_subject":"just sold subject","email_body":"100-120 word sold email signed by ${s.agentName||"Your Agent"}"}`:null;
+const r1=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n${lp}`,SYSTEM,800);
+s.loadingPct=35;s.loadingMsg="Writing social media...";renderApp1Content();
+const r2=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"instagram":"65-80 word Instagram caption with 6-8 emojis and CTA","facebook":"70-90 word Facebook caption","twitter":"max 220 char Twitter post","linkedin":"80-100 word LinkedIn post"}`,SYSTEM,700);
+s.loadingPct=55;s.loadingMsg="Writing ads & SMS...";renderApp1Content();
+const r3=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"sms_blast":"max 155 char SMS","whatsapp_broadcast":"60-70 word WhatsApp ending Reply YES","google_ad":"Headline (30 chars): and Description (90 chars):","facebook_ad":"Primary Text (60 words): and Headline (25 chars): and Description (25 chars):"}`,SYSTEM,700);
+s.loadingPct=75;s.loadingMsg="Writing TikTok & letter...";renderApp1Content();
+const r4=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"tiktok_script":"TikTok: HOOK (3 sec), BODY (features), CTA. 45-55 seconds.","neighbour_letter":"200-220 word neighbour letter signed by ${s.agentName||"Your Agent"}${s.agentPhone?` | ${s.agentPhone}`:""}"}`,SYSTEM,900);
+s.loadingPct=90;s.loadingMsg="Building schedule...";renderApp1Content();
+const r5=await apiClaude(`Property:\n${propSummary}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Day 1 — Launch","icon":"🚀","tasks":["Post MLS on all portals","Send WhatsApp broadcast","Post Instagram","Send SMS blast","Email your buyer list","Deliver neighbour letters"]},{"day":"Day 2","icon":"📱","tasks":["Post Facebook caption","Share LinkedIn post","Call back anyone who replied"]},{"day":"Day 3","icon":"🎯","tasks":["Launch Facebook and Instagram ads","Post Twitter update","Call email leads"]},{"day":"Day 5","icon":"🎬","tasks":["Post TikTok video","Share Instagram story"]},{"day":"Day 7","icon":"📊","tasks":["Check ad performance","Re-send WhatsApp to non-openers","Book viewing requests"]},{"day":"Day 14","icon":"💥","tasks":["Post fresh Instagram update","Send second email","Consider price review"]},{"day":"Day 21","icon":"📣","tasks":["Send final WhatsApp urgency message","Run last ad push","Post sold update if under offer"]}]}`,SYSTEM,900);
+s.loadingPct=100;s.result={...r1,...r2,...r3,...r4,...r5};s.activeTab="listing";
+}catch(err){s.error=err.message;}
+s.loading=false;renderApp1Content();
+}
+
+function renderApp1Content(){
+wrap.innerHTML="";
+// Nav
+const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}});
+nav.appendChild(el("span",{style:{fontSize:"15px",fontWeight:"700"}},"🏡 Property Marketing Machine"));
+const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+navRight.appendChild(el("span",{style:{fontSize:"11px",color:G.muted}},s.result?"":`Step ${s.step}/${totalSteps()}`));
+const backBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"← Dashboard");
+backBtn.addEventListener("click",()=>setState({screen:"dashboard"}));
+navRight.appendChild(backBtn);
+nav.appendChild(navRight);
+wrap.appendChild(nav);
+
+if(s.result){
+// Results
+const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"22px 16px 60px"}});
+content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},`Everything ready in ${s.language}. Tap Copy on any piece to use it instantly.`));
+const tabs=el("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}});
+TABS.forEach(tab=>{
+const btn=el("button",{style:{background:s.activeTab===tab.id?G.gold:"#0d0d0d",color:s.activeTab===tab.id?"#080808":G.muted,border:`1px solid ${s.activeTab===tab.id?G.gold:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:s.activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
+btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
+tabs.appendChild(btn);
+});
+content.appendChild(tabs);
+if(s.activeTab==="listing"){content.appendChild(copyCard("MLS Listing","🏠",s.result.listing));content.appendChild(copyCard("Email Subject","📧",s.result.email_subject));content.appendChild(copyCard("Email Body","📨",s.result.email_body));}
+if(s.activeTab==="social"){content.appendChild(copyCard("Instagram","📸",s.result.instagram));content.appendChild(copyCard("Facebook","👥",s.result.facebook));content.appendChild(copyCard("Twitter / X","⚡",s.result.twitter));content.appendChild(copyCard("LinkedIn","💼",s.result.linkedin));}
+if(s.activeTab==="ads"){content.appendChild(copyCard("SMS Blast","📱",s.result.sms_blast));content.appendChild(copyCard("WhatsApp Broadcast","💬",s.result.whatsapp_broadcast));content.appendChild(copyCard("Google Ad","🔍",s.result.google_ad));content.appendChild(copyCard("Facebook/Instagram Ad","🎯",s.result.facebook_ad));}
+if(s.activeTab==="tiktok")content.appendChild(copyCard("TikTok Script","🎬",s.result.tiktok_script));
+if(s.activeTab==="neighbours")content.appendChild(copyCard("Neighbour Letter","✉️",s.result.neighbour_letter));
+if(s.activeTab==="schedule"&&s.result.schedule){
+content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},"Your day-by-day action plan. Follow this to maximise every listing."));
+s.result.schedule.forEach(day=>{
+const dayCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"12px"}});
+dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.gold}},day.day)));
+if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.gold,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
+content.appendChild(dayCard);
+});
+}
+const newBtn=el("button",{style:{...btnStyle(false),marginTop:"16px"}},"← New Listing");
+newBtn.addEventListener("click",()=>{s.result=null;s.step=1;s.mode="";renderApp1Content();});
+content.appendChild(newBtn);
+wrap.appendChild(content);
+return;
+}
+
+// Form
+const content=el("div",{style:{maxWidth:"660px",margin:"0 auto",padding:"28px 18px 60px"}});
+// Progress bar
+const prog=el("div",{style:{display:"flex",gap:"5px",marginBottom:"28px"}});
+for(let i=0;i<totalSteps();i++){prog.appendChild(el("div",{style:{flex:"1",height:"3px",background:s.step>i+1?G.gold:s.step===i+1?G.aqua:G.border,borderRadius:"2px",transition:"background 0.3s"}}));}
+content.appendChild(prog);
+
+const card=el("div",{style:cardStyle});
+
+if(s.step===1){
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},"🌐 Output Language"));
+const langSel=el("select",{style:{...inputStyle,cursor:"pointer",marginBottom:"20px"}});
+LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
+langSel.addEventListener("change",e=>s.language=e.target.value);
+card.appendChild(langSel);
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},"🎯 What Are You Marketing?"));
+card.appendChild(chips(null,null,MODES,s.mode,v=>{s.mode=v;renderApp1Content();},true));
+}
+
+if(s.step===2){
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏠 Property Basics"));
+card.appendChild(chips("Property Type",null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
+card.appendChild(field("Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
+if(s.mode==="price_reduction"){
+const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+g.appendChild(field("New Price ($)","text",s.price,v=>s.price=v,"895,000"));
+g.appendChild(field("Original Price ($)","text",s.oldPrice,v=>s.oldPrice=v,"995,000"));
+card.appendChild(g);
+}else if(s.mode==="sold"){
+const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+g.appendChild(field("List Price ($)","text",s.price,v=>s.price=v,"995,000"));
+g.appendChild(field("Sold Price ($)","text",s.soldPrice,v=>s.soldPrice=v,"980,000"));
+g.appendChild(field("Days on Market","number",s.daysOnMarket,v=>s.daysOnMarket=v,"12"));
+card.appendChild(g);
+}else{
+card.appendChild(field("Asking Price ($)","text",s.price,v=>s.price=v,"1,250,000"));
+}
+if(s.mode!=="sold"){
+const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+g.appendChild(field("Bedrooms","number",s.beds,v=>s.beds=v,"4"));
+g.appendChild(field("Bathrooms","number",s.baths,v=>s.baths=v,"3"));
+g.appendChild(field("Size (sq ft)","text",s.sqft,v=>s.sqft=v,"2,400"));
+g.appendChild(field("Year Built","text",s.yearBuilt,v=>s.yearBuilt=v,"2019"));
+card.appendChild(g);
+}
+if(s.mode==="open_house"){
+const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+g.appendChild(field("Open House Date","text",s.openHouseDate,v=>s.openHouseDate=v,"Saturday, June 14"));
+g.appendChild(field("Open House Time","text",s.openHouseTime,v=>s.openHouseTime=v,"1:00 PM – 4:00 PM"));
+card.appendChild(g);
+}
+card.appendChild(chips("Condition",null,CONDITIONS,s.condition,v=>{s.condition=v;renderApp1Content();},true));
+const g2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+g2.appendChild(field("Agent Name","text",s.agentName,v=>s.agentName=v,"James Rivera"));
+g2.appendChild(field("Agent Phone","text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
+card.appendChild(g2);
+}
+
+if(s.step===3){
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"📍 Location & Views"));
+card.appendChild(field("City","text",s.city,v=>s.city=v,"Miami, Dubai, London..."));
+card.appendChild(field("Neighbourhood","text",s.neighbourhood,v=>s.neighbourhood=v,"South Beach, Beverly Hills..."));
+card.appendChild(chips("Location Features",null,LOCATION_FEATS,s.locationFeatures,v=>{s.locationFeatures=tog(s.locationFeatures,v);renderApp1Content();}));
+card.appendChild(field("Commute & Transport","text",s.commute,v=>s.commute=v,"2 blocks to metro, 20 min to downtown"));
+}
+
+if(s.step===4&&s.mode!=="sold"){
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🛋️ Property Features"));
+card.appendChild(chips("Interior Features",null,INTERIOR,s.interior,v=>{s.interior=tog(s.interior,v);renderApp1Content();}));
+card.appendChild(chips("Outdoor Features",null,OUTDOOR,s.outdoor,v=>{s.outdoor=tog(s.outdoor,v);renderApp1Content();}));
+card.appendChild(chips("Building Amenities",null,BUILDING,s.building,v=>{s.building=tog(s.building,v);renderApp1Content();}));
+}
+
+if(s.step===5&&s.mode!=="sold"&&s.mode!=="open_house"){
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"⭐ Standout Details"));
+card.appendChild(textarea("The #1 Unique Feature",s.uniqueFeature,v=>s.uniqueFeature=v,"e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views",3,"Be vivid and specific"));
+card.appendChild(textarea("Additional Notes",s.agentNote,v=>s.agentNote=v,"e.g. Fully renovated 2024. Motivated seller.",2));
+}
+
+if((s.step===totalSteps())||(s.step===4&&s.mode==="sold")||(s.step===5&&s.mode==="open_house")){
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🎯 Tone & Target Buyer"));
+card.appendChild(chips("Writing Tone",null,TONES,s.tone,v=>{s.tone=v;renderApp1Content();},true));
+card.appendChild(field("Ideal Buyer","text",s.targetBuyer,v=>s.targetBuyer=v,"High-net-worth families, crypto investors...","More specific = better content"));
+}
+
+if(s.error){card.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginTop:"14px"}},`⚠ ${s.error}`));}
+
+content.appendChild(card);
+
+if(s.loading){
+const loadCard=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 20px",marginBottom:"16px"}});
+loadCard.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"8px"}},el("p",{style:{color:G.gold,fontSize:"13px",margin:"0",fontWeight:"600"}},s.loadingMsg),el("span",{style:{color:G.muted,fontSize:"12px"}},`${s.loadingPct}%`)));
+const bar=el("div",{style:{width:"100%",height:"4px",background:G.border,borderRadius:"2px"}});
+bar.appendChild(el("div",{style:{width:`${s.loadingPct}%`,height:"100%",background:G.gold,borderRadius:"2px",transition:"width 0.5s ease"}}));
+loadCard.appendChild(bar);
+content.appendChild(loadCard);
+}
+
+const btnRow=el("div",{style:{display:"flex",justifyContent:"space-between"}});
+const backB=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 22px",fontSize:"14px",fontFamily:"inherit",cursor:"pointer"}},"← Back");
+backB.addEventListener("click",()=>{s.error="";if(s.step>1)s.step--;else setState({screen:"dashboard"});renderApp1Content();});
+btnRow.appendChild(backB);
+if(s.step<totalSteps()){
+const nextB=el("button",{style:btnStyle(!canProceed())},"Continue →");
+nextB.addEventListener("click",()=>{if(canProceed()){s.error="";s.step++;renderApp1Content();}else{s.error="Fill in required fields to continue.";renderApp1Content();}});
+btnRow.appendChild(nextB);
+}else{
+const genB=el("button",{style:{...btnStyle(!canProceed()||s.loading),minWidth:"200px"}},s.loading?"Generating...":"✦ Generate Full Package");
+genB.addEventListener("click",()=>{if(canProceed()&&!s.loading)generate();});
+btnRow.appendChild(genB);
+}
+content.appendChild(btnRow);
+wrap.appendChild(content);
+}
+
+renderApp1Content();
+return wrap;
+}
+
+// APP 2 - Client Outreach Machine
+function renderApp2(){
+const SYSTEM="You are an elite real estate sales coach. Return ONLY raw JSON — no markdown, no explanation.";
+const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"},{value:"Portuguese",label:"🇧🇷 Português"},{value:"French",label:"🇫🇷 Français"},{value:"Arabic",label:"🇦🇪 العربية"},{value:"Chinese",label:"🇨🇳 中文"},{value:"German",label:"🇩🇪 Deutsch"},{value:"Italian",label:"🇮🇹 Italiano"}];
+const CLIENT_TYPES=[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
+const CONTACT_REASONS=[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
+const TONES=[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
+const URGENCY=[{value:"high",label:"🔥 High Urgency",desc:"Must act now"},{value:"medium",label:"⏳ Medium Urgency",desc:"1-3 months"},{value:"low",label:"🌱 Low Urgency",desc:"Building relationship"}];
+const OBJECTIONS=[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
+const BUYER_CRITERIA=["Under $500K","$500K–$1M","$1M–$2M","$2M–$5M","$5M+","1 Bedroom","2 Bedrooms","3 Bedrooms","4+ Bedrooms","House","Apartment","Condo","Villa","Townhouse","Pool Wanted","Garden Wanted","Sea View Wanted","City Center","Quiet Area","Good Schools Nearby","Pet Friendly","Investment Purpose","Primary Residence"];
+const SELLER_SITUATION=["Wants Quick Sale","Flexible on Timeline","Needs Top Dollar","Downsizing","Upsizing","Relocating","Divorce Settlement","Inherited Property","Investment Property Sale","Already Found New Home","Testing the Market"];
+const TABS=[{id:"messages",label:"💬 Messages"},{id:"voice",label:"🎙️ Voice"},{id:"email",label:"📧 Email"},{id:"letter",label:"✉️ Letter"},{id:"followups",label:"🔄 Follow-Ups"},{id:"schedule",label:"📅 Schedule"}];
+
+let s={language:"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+
+const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
+
+function tog(arr,val){return arr.includes(val)?arr.filter(x=>x!==val):[...arr,val];}
+const isBuyer=()=>s.clientType.includes("buyer")||s.clientType==="investor";
+const isSeller=()=>s.clientType.includes("seller");
+const isMatcher=()=>s.contactReason==="new_listing"&&isBuyer();
+const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName&&s.tone;
+
+async function generate(){
+s.loading=true;s.error="";s.result=null;renderApp2Content();
+const langInstr=s.language!=="English"?`\n\nIMPORTANT: Write ALL content in ${s.language}.`:"";
+const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\nAGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
+try{
+s.loadingMsg="✦ Writing messages...";renderApp2Content();
+let p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp. Warm, personal, use ${s.clientName}'s first name. End with easy question.","sms":"SMS max 160 chars. Punchy and personal.","voice_script":"Call script: OPENING, REASON FOR CALL, VALUE PITCH, CLOSE. Labelled. Natural spoken language.","email_subject":"Personal email subject under 10 words.","email_body":"130-160 word email. Personal opener, opportunity, CTA. Signed by ${s.agentName}${s.agencyName?` from ${s.agencyName}`:""}."}`;
+if(s.contactReason==="objection_handle")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp objection response. Acknowledge, reframe, keep door open.","sms":"SMS objection response max 160 chars.","voice_script":"Objection handling script: OPENING, REFRAME, QUESTION, CLOSE. Labelled.","email_subject":"Non-salesy subject under 9 words.","email_body":"130-150 word email handling objection. Signed by ${s.agentName}."}`;
+if(s.contactReason==="referral_request")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word referral request WhatsApp. Warm, celebrate success, ask naturally.","sms":"Referral SMS max 160 chars.","voice_script":"Referral call: OPENING, CELEBRATION, ASK, CLOSE. Labelled.","email_subject":"Referral subject under 9 words.","email_body":"120-140 word referral email. Signed by ${s.agentName}."}`;
+if(s.contactReason==="anniversary")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word anniversary WhatsApp. Warm, celebratory, no hard sell.","sms":"Anniversary SMS max 160 chars.","voice_script":"Anniversary call: OPENING, UPDATE, CHECK-IN, SOFT CTA. Labelled.","email_subject":"Anniversary subject under 9 words.","email_body":"120-140 word anniversary email. Signed by ${s.agentName}."}`;
+const part1=await apiClaude(p1,SYSTEM,1300);
+
+s.loadingMsg="✦ Writing letter & follow-ups...";renderApp2Content();
+let p2=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"formal_letter":"Full formal letter 260-300 words. Start: [Date]\\n\\n${s.clientName}\\n[Address]\\n\\nDear ${s.clientName},\\n\\n4 paragraphs. Sign: Warm regards,\\n${s.agentName}${s.agencyName?`\\n${s.agencyName}`:""}${s.agentPhone?`\\n${s.agentPhone}`:""}","followup_1":"Follow-up Day 3. 50-60 words. Different angle.","followup_2":"Follow-up Week 1. 50-60 words. New info or urgency.","followup_3":"Follow-up Week 2. 40-50 words. Casual check-in.","followup_4":"Follow-up Month 1. 40-50 words. Final warm touch."}`;
+if(isMatcher()&&s.matcherProps.some(p=>p.address))p2=`${ctx}\nPROPERTY OPTIONS:\n${s.matcherProps.map((p,i)=>`Option ${i+1}: ${p.address} | $${p.price} | ${p.type} | ${p.highlights}`).join("\n")}\nBUYER NEEDS: ${s.buyerNeeds}${langInstr}\n\nReturn ONLY JSON:\n{"best_match_analysis":"2-3 sentence analysis of which property best matches and why.","formal_letter":"Full formal letter 260-300 words recommending best-match property. Sign: Warm regards,\\n${s.agentName}.","followup_1":"Follow-up Day 3 about the recommendation.","followup_2":"Follow-up Week 1 with urgency.","followup_3":"Follow-up Week 2 casual.","followup_4":"Follow-up Month 1 final."}`;
+const part2=await apiClaude(p2,SYSTEM,1400);
+
+s.loadingMsg="✦ Building schedule...";renderApp2Content();
+const p3=`CLIENT: ${s.clientName} | TYPE: ${s.clientType} | REASON: ${s.contactReason}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Today — First Contact","icon":"🚀","tasks":["Send the WhatsApp message","If no reply after 2 hours, send SMS","Save client in CRM with today's date"]},{"day":"Day 3 — First Follow-Up","icon":"💬","tasks":["Send Follow-Up #1 if no reply","Check if they opened your email — call if they did","Note response in CRM"]},{"day":"Day 7 — Week 1","icon":"📞","tasks":["Send Follow-Up #2 with new angle","Make a phone call using your voice script","Listen first — ask questions before pitching"]},{"day":"Day 14 — Two Week Touch","icon":"🔄","tasks":["Send Follow-Up #3 — casual, no pressure","Share relevant market update if available","Update CRM with current status"]},{"day":"Day 30 — Monthly Touch","icon":"🌱","tasks":["Send Follow-Up #4 — final warm message","Move to monthly newsletter if still no reply","Do not give up — timing is everything"]},{"day":"Ongoing","icon":"📅","tasks":["Add to monthly market update list","Reach out on home anniversary if past client","Check in every 90 days for long-term leads"]}]}`;
+const part3=await apiClaude(p3,SYSTEM,900);
+s.result={...part1,...part2,...part3};s.activeTab="messages";
+}catch(err){s.error="Error: "+err.message;}
+s.loading=false;renderApp2Content();
+}
+
+function renderApp2Content(){
+wrap.innerHTML="";
+const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}});
+nav.appendChild(el("span",{style:{fontSize:"15px",fontWeight:"700"}},"🤝 Client Outreach Machine"));
+const backBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"← Dashboard");
+backBtn.addEventListener("click",()=>setState({screen:"dashboard"}));
+nav.appendChild(backBtn);
+wrap.appendChild(nav);
+
+if(s.result){
+const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"22px 16px 60px"}});
+if(s.result.best_match_analysis){
+const matchBox=el("div",{style:{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"18px"}});
+matchBox.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"8px"}},"🏆 AI Property Match Analysis"));
+matchBox.appendChild(el("p",{style:{color:"#d1fae5",fontSize:"14px",lineHeight:"1.7"}},s.result.best_match_analysis));
+content.appendChild(matchBox);
+}
+content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},`Every message personalised for ${s.clientName} in ${s.language}.`));
+const tabs=el("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}});
+TABS.forEach(tab=>{
+const btn=el("button",{style:{background:s.activeTab===tab.id?G.aqua:"#0d0d0d",color:s.activeTab===tab.id?"#080808":G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:s.activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
+btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp2Content();});
+tabs.appendChild(btn);
+});
+content.appendChild(tabs);
+if(s.activeTab==="messages"){content.appendChild(copyCard("WhatsApp","💬",s.result.whatsapp,G.aqua));content.appendChild(copyCard("SMS","📱",s.result.sms,G.aqua));}
+if(s.activeTab==="voice"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},"Read naturally — don't sound like you're reading a script."));content.appendChild(copyCard("Phone Call Script","🎙️",s.result.voice_script,G.aqua));}
+if(s.activeTab==="email"){content.appendChild(copyCard("Email Subject","📧",s.result.email_subject,G.aqua));content.appendChild(copyCard("Email Body","📨",s.result.email_body,G.aqua));}
+if(s.activeTab==="letter"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},"Replace anything in brackets before printing."));content.appendChild(copyCard("Formal Letter","✉️",s.result.formal_letter,G.aqua));}
+if(s.activeTab==="followups"){
+content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},"Send in order if no reply."));
+content.appendChild(copyCard("Follow-Up #1","💬",s.result.followup_1,G.aqua));
+content.appendChild(copyCard("Follow-Up #2","💬",s.result.followup_2,G.aqua));
+content.appendChild(copyCard("Follow-Up #3","💬",s.result.followup_3,G.aqua));
+content.appendChild(copyCard("Follow-Up #4","💬",s.result.followup_4,G.aqua));
+}
+if(s.activeTab==="schedule"&&s.result.schedule){
+content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},`Your exact follow-up plan for ${s.clientName}.`));
+s.result.schedule.forEach(day=>{
+const dayCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"12px"}});
+dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.aqua}},day.day)));
+if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.aqua,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
+content.appendChild(dayCard);
+});
+}
+const newBtn=el("button",{style:{...btnStyle(false),marginTop:"16px"}},"← New Client");
+newBtn.addEventListener("click",()=>{s.result=null;renderApp2Content();});
+content.appendChild(newBtn);
+wrap.appendChild(content);
+return;
+}
+
+const content=el("div",{style:{maxWidth:"660px",margin:"0 auto",padding:"30px 18px 60px"}});
+
+// Language
+const langCard=el("div",{style:cardStyle});
+langCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},"🌐 Output Language"));
+const langSel=el("select",{style:{...inputStyle,cursor:"pointer"}});
+LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
+langSel.addEventListener("change",e=>s.language=e.target.value);
+langCard.appendChild(langSel);
+content.appendChild(langCard);
+
+// Client info
+const clientCard=el("div",{style:cardStyle});
+clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"👤 Who Are You Contacting?"));
+clientCard.appendChild(field("Client First Name","text",s.clientName,v=>s.clientName=v,"Sarah"));
+clientCard.appendChild(chips("Client Type",null,CLIENT_TYPES,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
+clientCard.appendChild(chips("Reason for Contacting",null,CONTACT_REASONS,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
+clientCard.appendChild(chips("Urgency Level",null,URGENCY,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
+clientCard.appendChild(chips("Communication Tone",null,TONES,s.tone,v=>{s.tone=v;renderApp2Content();},true));
+content.appendChild(clientCard);
+
+if(s.contactReason==="objection_handle"){
+const objCard=el("div",{style:cardStyle});
+objCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🛡️ What Objection Did They Raise?"));
+objCard.appendChild(chips(null,null,OBJECTIONS,s.objection,v=>{s.objection=v;renderApp2Content();},true));
+content.appendChild(objCard);
+}
+
+if(s.contactReason==="anniversary"){
+const annCard=el("div",{style:cardStyle});
+annCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},"🎉 Anniversary Details"));
+annCard.appendChild(field("Years Since Purchase","number",s.anniversaryYears,v=>s.anniversaryYears=v,"1"));
+content.appendChild(annCard);
+}
+
+const propCard=el("div",{style:cardStyle});
+propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏠 Property You're Offering"));
+propCard.appendChild(field("Property Address","text",s.propAddress,v=>s.propAddress=v,"42 Palm Drive, Miami Beach, FL 33139"));
+const pg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+pg.appendChild(field("Asking Price ($)","text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
+pg.appendChild(field("Property Type","text",s.propType,v=>s.propType=v,"4-bed villa with pool"));
+propCard.appendChild(pg);
+propCard.appendChild(textarea("Key Highlights",s.propHighlights,v=>s.propHighlights=v,"Ocean views, private pool, just reduced by $50K",2,"Top 2-3 things perfect for this client"));
+content.appendChild(propCard);
+
+if(isMatcher()){
+const matchCard=el("div",{style:cardStyle});
+matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏆 Property Preference Matcher"));
+matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},"Enter up to 3 properties. AI picks the best match and writes all messages around it."));
+matchCard.appendChild(textarea("Buyer's Needs & Preferences",s.buyerNeeds,v=>s.buyerNeeds=v,"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
+s.matcherProps.forEach((p,i)=>{
+const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
+pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.gold,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`Option ${i+1}`));
+const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
+pg2.appendChild(field("Address","text",p.address,v=>{s.matcherProps[i].address=v;},"123 Main St, Miami"));
+pg2.appendChild(field("Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
+pCard.appendChild(pg2);
+pCard.appendChild(field("Property Type","text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
+pCard.appendChild(field("Key Highlights","text",p.highlights,v=>{s.matcherProps[i].highlights=v;},"Ocean view, renovated kitchen, top school district"));
+matchCard.appendChild(pCard);
+});
+content.appendChild(matchCard);
+}
+
+if(isBuyer()&&!isMatcher()){
+const buyCard=el("div",{style:cardStyle});
+buyCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🔍 Buyer Criteria"));
+buyCard.appendChild(chips(null,null,BUYER_CRITERIA,s.buyerCriteria,v=>{s.buyerCriteria=tog(s.buyerCriteria,v);renderApp2Content();}));
+content.appendChild(buyCard);
+}
+
+if(isSeller()){
+const sellCard=el("div",{style:cardStyle});
+sellCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏷️ Seller Situation"));
+sellCard.appendChild(chips(null,null,SELLER_SITUATION,s.sellerSituation,v=>{s.sellerSituation=tog(s.sellerSituation,v);renderApp2Content();}));
+content.appendChild(sellCard);
+}
+
+const ctxCard=el("div",{style:cardStyle});
+ctxCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"💡 Personal Context"));
+ctxCard.appendChild(textarea("Prior Contact History",s.priorContact,v=>s.priorContact=v,"Met at open house 2 weeks ago...",2,"Have you spoken before? What did they say?"));
+ctxCard.appendChild(textarea("Personal Note",s.personalNote,v=>s.personalNote=v,"Has 2 young kids, works from home...",2,"Kids, job, lifestyle — makes messages feel real"));
+content.appendChild(ctxCard);
+
+const agentCard=el("div",{style:cardStyle});
+agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏷️ Your Details"));
+const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+ag.appendChild(field("Your Name","text",s.agentName,v=>s.agentName=v,"James Rivera"));
+ag.appendChild(field("Your Phone","text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
+agentCard.appendChild(ag);
+agentCard.appendChild(field("Agency / Company Name","text",s.agencyName,v=>s.agencyName=v,"Rivera Real Estate Group"));
+content.appendChild(agentCard);
+
+if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"12px 16px",color:"#f87171",fontSize:"13px",marginBottom:"16px",fontFamily:"monospace"}},`⚠ ${s.error}`));
+
+if(s.loading){
+const lc=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"18px 22px",marginBottom:"16px",textAlign:"center"}});
+lc.appendChild(el("p",{style:{color:G.aqua,fontSize:"14px",margin:"0",fontWeight:"600"}},s.loadingMsg));
+lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},`Generating in ${s.language}. Please wait...`));
+content.appendChild(lc);
+}
+
+const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px"}},s.loading?"Generating...":"✦ Generate Full Outreach Package");
+genBtn.addEventListener("click",()=>{if(canGenerate()&&!s.loading)generate();});
+content.appendChild(genBtn);
+if(!canGenerate())content.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",marginTop:"8px",textAlign:"center"}},"Fill in client name, type, contact reason, tone and your name to continue."));
+
+wrap.appendChild(content);
+}
+
+renderApp2Content();
+return wrap;
+}
+
+// MAIN RENDER
+function render(){
+const root=document.getElementById("root");
+root.innerHTML="";
+if(state.screen==="login")root.appendChild(renderLogin());
+else if(state.screen==="dashboard")root.appendChild(renderDashboard());
+else if(state.screen==="admin")root.appendChild(renderAdmin());
+else if(state.screen==="app1")root.appendChild(renderApp1());
+else if(state.screen==="app2")root.appendChild(renderApp2());
+}
+
+// CHECK SESSION ON LOAD
+const saved=localStorage.getItem("sf_user");
+if(saved){
+const u=JSON.parse(saved);
+apiAuth({action:"check",userId:u.id}).then(res=>{
+if(res.success){state={screen:"dashboard",user:res.user};render();}
+else{localStorage.removeItem("sf_user");render();}
+}).catch(()=>render());
+}else{render();}
+</script>
 </body>
 </html>
