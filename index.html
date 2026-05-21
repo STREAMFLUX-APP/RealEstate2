@@ -19,17 +19,45 @@ const G={bg:"#080808",card:"#111",border:"#222",aqua:"#2AB8D4",aquaDim:"rgba(42,
 const apiAuth=async(body)=>{try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
 const apiAdmin=async(body)=>{try{const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
 const apiClaude=async(prompt,system,maxTokens=1000)=>{
+try{
 const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,system,maxTokens})});
 const d=await r.json();
 if(d.error)throw new Error(d.error);
-const t=d.text.trim();
+let t=(d.text||"").trim();
+// Remove common prefixes the AI sometimes adds
+t=t.replace(/^(Here is|Here's|The JSON|JSON:|Result:|Output:)[^\{]*/i,"").trim();
+// Try direct parse
 try{return JSON.parse(t);}catch{}
+// Try stripping markdown code fences
 const cm=t.match(/```(?:json)?\s*([\s\S]*?)```/);
 if(cm){try{return JSON.parse(cm[1].trim());}catch{}}
-const jm=t.match(/\{[\s\S]*\}/);
-if(jm){try{return JSON.parse(jm[0]);}catch{}}
-throw new Error("Could not parse AI response.");
+// Try extracting the largest JSON object
+const matches=t.match(/\{[\s\S]*\}/g);
+if(matches){
+for(const m of matches.sort((a,b)=>b.length-a.length)){
+try{return JSON.parse(m);}catch{}
+}
+}
+// Try fixing truncated JSON by closing open braces
+try{
+let fixed=t;
+const opens=(fixed.match(/\{/g)||[]).length;
+const closes=(fixed.match(/\}/g)||[]).length;
+if(opens>closes)fixed+="}".repeat(opens-closes);
+// Remove trailing comma before closing brace
+fixed=fixed.replace(/,\s*\}/g,"}").replace(/,\s*\]/g,"]");
+return JSON.parse(fixed);
+}catch{}
+console.warn("Could not parse JSON, raw:",t.slice(0,200));
+throw new Error("Could not parse AI response. Please try again.");
+}catch(e){
+console.error("apiClaude error:",e.message);
+throw e;
+}
 };
+
+// SAFE MERGE - never fail on missing keys
+function safeGet(obj,key,fallback){return(obj&&obj[key]!==undefined&&obj[key]!==null)?obj[key]:fallback;}
 
 // STATE
 let state={screen:"login",user:null,lang:"English"};
@@ -494,7 +522,7 @@ return wrap;
 
 // APP 1 - Property Marketing Machine
 function renderApp1(){
-const SYSTEM="You are the world's best real estate copywriter. You ALWAYS respond with ONLY a valid JSON object. No markdown. No backticks. No explanation.";
+const SYSTEM="You are an elite real estate copywriter. You MUST respond with ONLY a raw valid JSON object. No markdown. No backticks. No explanation. No preamble. Start your response with { and end with }. Nothing else.";
 const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}];
 
 const T={
@@ -561,19 +589,22 @@ return!!s.tone;
 async function generate(){
 s.loading=true;s.error="";s.result=null;s.loadingPct=0;renderApp1Content();
 const langInstr=(GL[s.language]||GL.English).langInstr?("\n\n"+(GL[s.language]||GL.English).langInstr):"";
+const safeClaude=async(prompt,sys,tokens)=>{try{const r=await apiClaude(prompt,sys,tokens);return r||{};}catch(e){console.warn("Claude call failed:",e.message);return{};}};
 const propSummary=[`Mode:${s.mode}`,`${s.propType} at ${s.address}`,`Price:$${s.price}${s.oldPrice?` (was $${s.oldPrice})`:""}`,`Beds:${s.beds}|Baths:${s.baths}${s.sqft?`|${s.sqft}sqft`:""}`,s.condition&&`Condition:${s.condition}`,`City:${s.city}${s.neighbourhood?`,${s.neighbourhood}`:""}`,s.locationFeatures.length&&`Location:${s.locationFeatures.slice(0,8).join(",")}`,s.interior.length&&`Interior:${s.interior.slice(0,10).join(",")}`,s.outdoor.length&&`Outdoor:${s.outdoor.slice(0,8).join(",")}`,s.uniqueFeature&&`Unique:${s.uniqueFeature}`,s.customContext&&`AGENT'S OWN WORDS (use this above all else): ${s.customContext}`,`Tone:${s.tone}|Buyer:${s.targetBuyer||"general"}`,`Agent:${s.agentName||"Agent"}${s.agentPhone?`|${s.agentPhone}`:""}`].filter(Boolean).join("\n");
 try{
 s.loadingMsg=(T[s.language]||T.English).loading1;s.loadingPct=15;renderApp1Content();
 let lp=s.mode==="new_listing"?`{"listing":"130-150 word MLS description","email_subject":"email subject under 9 words","email_body":"120-140 word email signed by ${s.agentName||"Your Agent"}"}`:s.mode==="open_house"?`{"listing":"120-140 word open house announcement for ${s.openHouseDate} at ${s.openHouseTime}","email_subject":"open house subject","email_body":"110-130 word invite email signed by ${s.agentName||"Your Agent"}"}`:s.mode==="price_reduction"?`{"listing":"120-140 word price reduction announcement","email_subject":"price drop subject","email_body":"110-130 word email signed by ${s.agentName||"Your Agent"}"}`:s.mode==="sold"?`{"listing":"100-120 word just sold announcement","email_subject":"just sold subject","email_body":"100-120 word sold email signed by ${s.agentName||"Your Agent"}"}`:null;
-const r1=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n${lp}`,SYSTEM,800);
+const r1=await safeClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n${lp}`,SYSTEM,1200);
 s.loadingPct=35;s.loadingMsg=(T[s.language]||T.English).loading2;renderApp1Content();
-const r2=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"instagram":"65-80 word Instagram caption with 6-8 emojis and CTA","facebook":"70-90 word Facebook caption","twitter":"max 220 char Twitter post","linkedin":"80-100 word LinkedIn post"}`,SYSTEM,700);
+const r2=await safeClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"instagram":"65-80 word Instagram caption with 6-8 emojis and CTA","facebook":"70-90 word Facebook caption","twitter":"max 220 char Twitter post","linkedin":"80-100 word LinkedIn post"}`,SYSTEM,1200);
 s.loadingPct=55;s.loadingMsg=(T[s.language]||T.English).loading3;renderApp1Content();
-const r3=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"sms_blast":"max 155 char SMS","whatsapp_broadcast":"60-70 word WhatsApp ending Reply YES","google_ad":"Headline (30 chars): and Description (90 chars):","facebook_ad":"Primary Text (60 words): and Headline (25 chars): and Description (25 chars):"}`,SYSTEM,700);
+const r3=await safeClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"sms_blast":"max 155 char SMS","whatsapp_broadcast":"60-70 word WhatsApp ending Reply YES","google_ad":"Headline (30 chars): and Description (90 chars):","facebook_ad":"Primary Text (60 words): and Headline (25 chars): and Description (25 chars):"}`,SYSTEM,1200);
 s.loadingPct=75;s.loadingMsg=(T[s.language]||T.English).loading4;renderApp1Content();
-const r4=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"tiktok_script":"TikTok: HOOK (3 sec), BODY (features), CTA. 45-55 seconds.","neighbour_letter":"200-220 word neighbour letter signed by ${s.agentName||"Your Agent"}${s.agentPhone?` | ${s.agentPhone}`:""}"}`,SYSTEM,900);
+const r4=await safeClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"tiktok_script":"TikTok: HOOK (3 sec), BODY (features), CTA. 45-55 seconds.","neighbour_letter":"200-220 word neighbour letter signed by ${s.agentName||"Your Agent"}${s.agentPhone?` | ${s.agentPhone}`:""}"}`,SYSTEM,1200);
 s.loadingPct=90;s.loadingMsg=(T[s.language]||T.English).loading5;renderApp1Content();
-const r5=await apiClaude(`Property:\n${propSummary}\n\nReturn ONLY JSON:\n{"schedule":[{"day":s.language==="Spanish"?"Día 1 — Lanzamiento":"Day 1 — Launch","icon":"🚀","tasks":["Post MLS on all portals","Send WhatsApp broadcast","Post Instagram","Send SMS blast","Email your buyer list","Deliver neighbour letters"]},{"day":s.language==="Spanish"?"Día 2":"Day 2","icon":"📱","tasks":["Post Facebook caption","Share LinkedIn post","Call back anyone who replied"]},{"day":s.language==="Spanish"?"Día 3":"Day 3","icon":"🎯","tasks":["Launch Facebook and Instagram ads","Post Twitter update","Call email leads"]},{"day":s.language==="Spanish"?"Día 5":"Day 5","icon":"🎬","tasks":["Post TikTok video","Share Instagram story"]},{"day":s.language==="Spanish"?"Día 7":"Day 7","icon":"📊","tasks":["Check ad performance","Re-send WhatsApp to non-openers","Book viewing requests"]},{"day":s.language==="Spanish"?"Día 14":"Day 14","icon":"💥","tasks":["Post fresh Instagram update","Send second email","Consider price review"]},{"day":s.language==="Spanish"?"Día 21":"Day 21","icon":"📣","tasks":["Send final WhatsApp urgency message","Run last ad push","Post sold update if under offer"]}]}`,SYSTEM,900);
+const isSpaSchedule=s.language==="Spanish";
+const schedulePrompt=isSpaSchedule?`Propiedad:\n${propSummary}\n\nDevuelve SOLO JSON:\n{"schedule":[{"day":"Día 1 — Lanzamiento","icon":"🚀","tasks":["Publicar en MLS y todos los portales","Enviar difusión de WhatsApp","Publicar en Instagram","Enviar SMS masivo","Email a tu lista de compradores","Entregar cartas a vecinos"]},{"day":"Día 2","icon":"📱","tasks":["Publicar en Facebook","Compartir en LinkedIn","Llamar a quienes respondieron"]},{"day":"Día 3","icon":"🎯","tasks":["Lanzar anuncios de Facebook e Instagram","Actualizar Twitter","Llamar a leads del email"]},{"day":"Día 5","icon":"🎬","tasks":["Publicar vídeo de TikTok","Compartir en Instagram Stories"]},{"day":"Día 7","icon":"📊","tasks":["Revisar rendimiento de anuncios","Reenviar WhatsApp a quien no abrió","Confirmar visitas solicitadas"]},{"day":"Día 14","icon":"💥","tasks":["Nueva publicación en Instagram con nuevo enfoque","Enviar segundo email","Considerar revisión de precio"]},{"day":"Día 21","icon":"📣","tasks":["Enviar mensaje de urgencia final por WhatsApp","Último push de anuncios","Publicar actualización de vendido si hay oferta"]}]}`:`Property:\n${propSummary}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Day 1 — Launch","icon":"🚀","tasks":["Post MLS on all portals","Send WhatsApp broadcast","Post Instagram","Send SMS blast","Email your buyer list","Deliver neighbour letters"]},{"day":"Day 2","icon":"📱","tasks":["Post Facebook caption","Share LinkedIn post","Call back anyone who replied"]},{"day":"Day 3","icon":"🎯","tasks":["Launch Facebook and Instagram ads","Post Twitter update","Call email leads"]},{"day":"Day 5","icon":"🎬","tasks":["Post TikTok video","Share Instagram story"]},{"day":"Day 7","icon":"📊","tasks":["Check ad performance","Re-send WhatsApp to non-openers","Book viewing requests"]},{"day":"Day 14","icon":"💥","tasks":["Post fresh Instagram update","Send second email","Consider price review"]},{"day":"Day 21","icon":"📣","tasks":["Send final WhatsApp urgency message","Run last ad push","Post sold update if under offer"]}]}`;
+const r5=await safeClaude(schedulePrompt,SYSTEM,1200);
 s.loadingPct=100;s.result={...r1,...r2,...r3,...r4,...r5};s.activeTab="listing";
 // Save to history
 SF.addListing({address:s.address,city:s.city,mode:s.mode,price:s.price,beds:s.beds,baths:s.baths,tone:s.tone,language:s.language});
@@ -768,7 +799,7 @@ return wrap;
 
 // APP 2 - Client Outreach Machine
 function renderApp2(){
-const SYSTEM="You are an elite real estate sales coach. Return ONLY raw JSON — no markdown, no explanation.";
+const SYSTEM="You are an elite real estate sales coach. You MUST respond with ONLY a raw valid JSON object. Start your response with { and end with }. No markdown. No backticks. No explanation. Nothing else.";
 const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}];
 
 const T2={
@@ -899,6 +930,8 @@ async function generate(){
 s.loading=true;s.error="";s.result=null;renderApp2Content();
 const langInstr=(GL[s.language]||GL.English).langInstr?("\n\n"+(GL[s.language]||GL.English).langInstr):"";
 const isSpa2=s.language==="Spanish";
+// Helper to safely call Claude and return empty object on failure
+const safeClaude=async(prompt,sys,tokens)=>{try{const r=await apiClaude(prompt,sys,tokens);return r||{};}catch(e){console.warn("Claude call failed:",e.message);return{};}};
 const CLIENT_TYPES=isSpa2?[{value:"buyer_active",label:"Comprador Activo"},{value:"buyer_passive",label:"Comprador Pasivo"},{value:"seller_motivated",label:"Vendedor Motivado"},{value:"seller_exploring",label:"Vendedor Explorando"},{value:"investor",label:"Inversor"},{value:"cold_lead",label:"Lead Frío"},{value:"past_client",label:"Cliente Anterior"}]:[{value:"buyer_active",label:"Active Buyer"},{value:"buyer_passive",label:"Passive Buyer"},{value:"seller_motivated",label:"Motivated Seller"},{value:"seller_exploring",label:"Exploring Seller"},{value:"investor",label:"Investor"},{value:"cold_lead",label:"Cold Lead"},{value:"past_client",label:"Past Client"}];
 const CONTACT_REASONS=isSpa2?[{value:"new_listing",label:"Nueva Propiedad"},{value:"price_drop",label:"Reducción de Precio"},{value:"first_contact",label:"Primer Contacto"},{value:"reconnect",label:"Retomar Contacto"},{value:"open_house",label:"Invitación a Visita"},{value:"market_update",label:"Actualización del Mercado"},{value:"off_market",label:"Propiedad Exclusiva"},{value:"just_sold",label:"Recién Vendido"},{value:"referral_request",label:"Pedir Referidos"},{value:"anniversary",label:"Aniversario"},{value:"objection_handle",label:"Manejar Objeción"}]:[{value:"new_listing",label:"New Listing"},{value:"price_drop",label:"Price Reduction"},{value:"first_contact",label:"First Outreach"},{value:"reconnect",label:"Reconnecting"},{value:"open_house",label:"Open House"},{value:"market_update",label:"Market Update"},{value:"off_market",label:"Off-Market Deal"},{value:"just_sold",label:"Just Sold"},{value:"referral_request",label:"Referral Request"},{value:"anniversary",label:"Anniversary"},{value:"objection_handle",label:"Handle Objection"}];
 const URGENCY=isSpa2?[{value:"high",label:"Alta Urgencia"},{value:"medium",label:"Urgencia Media"},{value:"low",label:"Baja Urgencia"}]:[{value:"high",label:"High Urgency"},{value:"medium",label:"Medium Urgency"},{value:"low",label:"Low Urgency"}];
@@ -910,16 +943,16 @@ let p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsAp
 if(s.contactReason==="objection_handle")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp objection response. Acknowledge, reframe, keep door open.","sms":"SMS objection response max 160 chars.","voice_script":"Objection handling script: OPENING, REFRAME, QUESTION, CLOSE. Labelled.","email_subject":"Non-salesy subject under 9 words.","email_body":"130-150 word email handling objection. Signed by ${s.agentName}."}`;
 if(s.contactReason==="referral_request")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word referral request WhatsApp. Warm, celebrate success, ask naturally.","sms":"Referral SMS max 160 chars.","voice_script":"Referral call: OPENING, CELEBRATION, ASK, CLOSE. Labelled.","email_subject":"Referral subject under 9 words.","email_body":"120-140 word referral email. Signed by ${s.agentName}."}`;
 if(s.contactReason==="anniversary")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word anniversary WhatsApp. Warm, celebratory, no hard sell.","sms":"Anniversary SMS max 160 chars.","voice_script":"Anniversary call: OPENING, UPDATE, CHECK-IN, SOFT CTA. Labelled.","email_subject":"Anniversary subject under 9 words.","email_body":"120-140 word anniversary email. Signed by ${s.agentName}."}`;
-const part1=await apiClaude(p1,SYSTEM,1300);
+const part1=await safeClaude(p1,SYSTEM,1500);
 
 s.loadingMsg=(T2[s.language]||T2.English).loading2;renderApp2Content();
 let p2=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"formal_letter":"Full formal letter 260-300 words. Start: [Date]\\n\\n${s.clientName}\\n[Address]\\n\\nDear ${s.clientName},\\n\\n4 paragraphs. Sign: Warm regards,\\n${s.agentName}${s.agencyName?`\\n${s.agencyName}`:""}${s.agentPhone?`\\n${s.agentPhone}`:""}","followup_1":"Follow-up Day 3. 50-60 words. Different angle.","followup_2":"Follow-up Week 1. 50-60 words. New info or urgency.","followup_3":"Follow-up Week 2. 40-50 words. Casual check-in.","followup_4":"Follow-up Month 1. 40-50 words. Final warm touch."}`;
 if(isMatcher()&&s.matcherProps.some(p=>p.address))p2=`${ctx}\nPROPERTY OPTIONS:\n${s.matcherProps.map((p,i)=>`Option ${i+1}: ${p.address} | $${p.price} | ${p.type} | ${p.highlights}`).join("\n")}\nBUYER NEEDS: ${s.buyerNeeds}${langInstr}\n\nReturn ONLY JSON:\n{"best_match_analysis":"2-3 sentence analysis of which property best matches and why.","formal_letter":"Full formal letter 260-300 words recommending best-match property. Sign: Warm regards,\\n${s.agentName}.","followup_1":"Follow-up Day 3 about the recommendation.","followup_2":"Follow-up Week 1 with urgency.","followup_3":"Follow-up Week 2 casual.","followup_4":"Follow-up Month 1 final."}`;
-const part2=await apiClaude(p2,SYSTEM,1400);
+const part2=await safeClaude(p2,SYSTEM,1600);
 
 s.loadingMsg=(T2[s.language]||T2.English).loading3;renderApp2Content();
 const p3=`CLIENT: ${s.clientName} | TYPE: ${s.clientType} | REASON: ${s.contactReason}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Today — First Contact","icon":"🚀","tasks":["Send the WhatsApp message","If no reply after 2 hours, send SMS","Save client in CRM with today's date"]},{"day":"Day 3 — First Follow-Up","icon":"💬","tasks":["Send Follow-Up #1 if no reply","Check if they opened your email — call if they did","Note response in CRM"]},{"day":"Day 7 — Week 1","icon":"📞","tasks":["Send Follow-Up #2 with new angle","Make a phone call using your voice script","Listen first — ask questions before pitching"]},{"day":"Day 14 — Two Week Touch","icon":"🔄","tasks":["Send Follow-Up #3 — casual, no pressure","Share relevant market update if available","Update CRM with current status"]},{"day":"Day 30 — Monthly Touch","icon":"🌱","tasks":["Send Follow-Up #4 — final warm message","Move to monthly newsletter if still no reply","Do not give up — timing is everything"]},{"day":"Ongoing","icon":"📅","tasks":["Add to monthly market update list","Reach out on home anniversary if past client","Check in every 90 days for long-term leads"]}]}`;
-const part3=await apiClaude(p3,SYSTEM,900);
+const part3=await safeClaude(p3,SYSTEM,1200);
 s.result={...part1,...part2,...part3};s.activeTab="messages";
 // Save to history
 SF.addClient({clientName:s.clientName,clientType:s.clientType,contactReason:s.contactReason,language:s.language,agentName:s.agentName});
