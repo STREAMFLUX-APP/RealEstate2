@@ -892,7 +892,7 @@ function tog(arr,val){return arr.includes(val)?arr.filter(x=>x!==val):[...arr,va
 const isBuyer=()=>s.clientType.includes("buyer")||s.clientType==="investor";
 const isSeller=()=>s.clientType.includes("seller");
 const isMatcher=()=>s.contactReason==="new_listing"&&isBuyer();
-const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName&&s.tone;
+const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName;
 
 async function generate(){
 s.loading=true;s.error="";s.result=null;renderApp2Content();
@@ -1125,7 +1125,7 @@ lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},s
 content.appendChild(lc);
 }
 
-const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px",background:canGenerate()&&!s.loading?G.aqua:undefined,color:canGenerate()&&!s.loading?"#080808":undefined}},s.loading?t2form.generating:t2form.generate);
+const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px",background:canGenerate()&&!s.loading?G.aqua:"#1a1a1a",color:canGenerate()&&!s.loading?"#080808":G.muted}},s.loading?t2form.generating:t2form.generate);
 genBtn.addEventListener("click",()=>{if(canGenerate()&&!s.loading)generate();});
 content.appendChild(genBtn);
 if(!canGenerate())content.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",marginTop:"8px",textAlign:"center"}},(T2[s.language]||T2.English).fillRequired));
