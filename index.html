@@ -32,7 +32,7 @@ throw new Error("Could not parse AI response.");
 };
 
 // STATE
-let state={screen:"login",user:null};
+let state={screen:"login",user:null,lang:"English"};
 const setState=(updates)=>{state={...state,...updates};render();};
 
 // STYLES
@@ -121,44 +121,111 @@ return card;
 }
 
 // LOGIN SCREEN
+// GLOBAL LANGUAGE
+const LANGS=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}];
+const GL={
+English:{
+tagline:"AI-Powered Real Estate Marketing",
+signIn:"Sign In to Your Account",
+emailLabel:"Email Address",passLabel:"Password",
+signingIn:"Signing in...",signInBtn:"Sign In →",
+noAccount:"Don't have an account? Contact",
+chooseLanguage:"Choose your language",
+welcomeBack:"Welcome back",
+marketingSystem:g.marketingSystem,
+yourPlan:g.yourPlan,bundle:"Complete Bundle — Both Apps",marketing:"Marketing Tool — App 1 Only",outreach:"Outreach Tool — App 2 Only",
+upgrade:g.upgrade,signOut:g.signOut,admin:g.admin,
+daysLeft:"days left",active:g.active,
+newListing:g.newListing,newClient:g.newClient,
+recentListings:g.recentListings,recentClients:g.recentClients,
+activeListings:g.activeListings,clientsPipeline:g.clientsPipeline,followUpsDue:g.followUpsDue,totalGenerated:g.totalGenerated,
+rerun:g.rerun,followUpDue:g.followUpDue,
+app1title:g.app1title,app1sub:g.app1sub,
+app2title:g.app2title,app2sub:g.app2sub,
+langInstr:"",
+},
+Spanish:{
+tagline:"Marketing Inmobiliario con Inteligencia Artificial",
+signIn:"Iniciar Sesión en Tu Cuenta",
+emailLabel:"Correo Electrónico",passLabel:"Contraseña",
+signingIn:"Iniciando sesión...","signInBtn":"Iniciar Sesión →",
+noAccount:"¿No tienes cuenta? Contacta a",
+chooseLanguage:"Elige tu idioma",
+welcomeBack:"Bienvenido de vuelta",
+marketingSystem:"Tu sistema de marketing está listo. Ahorra tiempo, ahorra dinero, cierra más ventas.",
+yourPlan:"Tu Plan",bundle:"Paquete Completo — Ambas Apps",marketing:"Herramienta de Marketing — App 1",outreach:"Herramienta de Captación — App 2",
+upgrade:"Mejorar Plan →",signOut:"Cerrar Sesión",admin:g.admin,
+daysLeft:"días restantes",active:"✓ Activo",
+newListing:"🚀 Nueva Propiedad →",newClient:"🤝 Nuevo Cliente →",
+recentListings:"Propiedades Recientes",recentClients:"Clientes Recientes",
+activeListings:"Propiedades Activas",clientsPipeline:"Clientes en Pipeline",followUpsDue:"Seguimientos Pendientes",totalGenerated:"Total Generado",
+rerun:"Re-generar →",followUpDue:"⚠ Seguimiento pendiente",
+app1title:"Máquina de Marketing Inmobiliario",app1sub:"Paquete completo de marketing en 30 segundos — todas las plataformas",
+app2title:"Máquina de Captación de Clientes",app2sub:"Mensajes personalizados para cualquier cliente en segundos",
+langInstr:"CRÍTICO: Escribe TODO el contenido completamente en español. Ni una sola palabra en inglés.",
+}
+};
+
 function renderLogin(){
 let email="",password="",loading=false,error="";
 
+function buildLogin(){
+const g=GL[state.lang]||GL.English;
 const wrap=el("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px",background:G.bg}});
 const inner=el("div",{style:{width:"100%",maxWidth:"420px"}});
 
-inner.appendChild(el("div",{style:{textAlign:"center",marginBottom:"36px"}},
-el("div",{style:{fontSize:"28px",fontWeight:"700",letterSpacing:"3px",color:G.white,marginBottom:"8px"}},
-"STREAM",el("span",{style:{color:G.aqua}},"FLUX")
-),
-el("p",{style:{color:G.muted,fontSize:"14px"}},"AI-Powered Real Estate Marketing")
+// Language selector at top
+const langRow=el("div",{style:{display:"flex",justifyContent:"center",gap:"8px",marginBottom:"28px"}});
+LANGS.forEach(l=>{
+const btn=el("button",{style:{background:state.lang===l.value?G.aqua:"transparent",color:state.lang===l.value?"#080808":G.muted,border:`1px solid ${state.lang===l.value?G.aqua:G.border}`,borderRadius:"100px",padding:"6px 16px",fontSize:"13px",fontWeight:"600",cursor:"pointer",fontFamily:"inherit"}},l.label);
+btn.addEventListener("click",()=>{state.lang=l.value;document.getElementById("root").innerHTML="";document.getElementById("root").appendChild(buildLogin());});
+langRow.appendChild(btn);
+});
+inner.appendChild(langRow);
+
+inner.appendChild(el("div",{style:{textAlign:"center",marginBottom:"32px"}},
+el("div",{style:{fontSize:"28px",fontWeight:"700",letterSpacing:"3px",color:G.white,marginBottom:"8px"}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")),
+el("p",{style:{color:G.muted,fontSize:"14px"}},g.tagline)
 ));
 
 const card=el("div",{style:cardStyle});
-card.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"700",marginBottom:"20px",color:G.white}},"Sign In to Your Account"));
+card.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"700",marginBottom:"20px",color:G.white}},g.signIn));
 
-const emailField=field("Email Address","email",email,v=>email=v,"your@email.com");
-const passField=field("Password","password",password,v=>password=v,"••••••••");
-card.appendChild(emailField);
-card.appendChild(passField);
+const emailWrap=el("div",{style:{marginBottom:"16px"}});
+emailWrap.appendChild(el("label",{style:labelStyle},g.emailLabel));
+const emailInp=el("input",{type:"email",placeholder:"your@email.com",style:inputStyle});
+emailInp.value=email;
+emailInp.addEventListener("input",e=>email=e.target.value);
+emailWrap.appendChild(emailInp);
+card.appendChild(emailWrap);
 
-const errDiv=el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginBottom:"14px",display:"none"}});
+const passWrap=el("div",{style:{marginBottom:"16px"}});
+passWrap.appendChild(el("label",{style:labelStyle},g.passLabel));
+const passInp=el("input",{type:"password",placeholder:"••••••••",style:inputStyle});
+passInp.value=password;
+passInp.addEventListener("input",e=>password=e.target.value);
+passWrap.appendChild(passInp);
+card.appendChild(passWrap);
+
+const errDiv=el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginBottom:"14px",display:error?"block":"none"}},error?`⚠ ${error}`:"");
 card.appendChild(errDiv);
 
-const loginBtn=el("button",{style:{...btnStyle(false),width:"100%",fontSize:"15px"}},"Sign In →");
+const loginBtn=el("button",{style:{...btnStyle(loading),width:"100%",fontSize:"15px"}},loading?g.signingIn:g.signInBtn);
 loginBtn.addEventListener("click",async()=>{
-if(!email||!password){errDiv.textContent="Please enter your email and password.";errDiv.style.display="block";return;}
-loginBtn.textContent="Signing in...";loginBtn.disabled=true;loginBtn.style.background="#1a1a1a";loginBtn.style.color=G.muted;
-errDiv.style.display="none";
+if(!email||!password){error=g.emailLabel+" and "+g.passLabel+" required";document.getElementById("root").innerHTML="";document.getElementById("root").appendChild(buildLogin());return;}
+loading=true;error="";document.getElementById("root").innerHTML="";document.getElementById("root").appendChild(buildLogin());
 const res=await apiAuth({action:"login",email,password});
+loading=false;
 if(res.success){localStorage.setItem("sf_user",JSON.stringify(res.user));setState({screen:"dashboard",user:res.user});}
-else{errDiv.textContent="⚠ "+(res.error||"Login failed.");errDiv.style.display="block";loginBtn.textContent="Sign In →";loginBtn.disabled=false;loginBtn.style.background=G.aqua;loginBtn.style.color="#080808";}
+else{error=res.error||"Login failed.";document.getElementById("root").innerHTML="";document.getElementById("root").appendChild(buildLogin());}
 });
 card.appendChild(loginBtn);
-card.appendChild(el("p",{style:{textAlign:"center",color:G.muted,fontSize:"12px",marginTop:"16px"}},"Don't have an account? Contact ",el("span",{style:{color:G.aqua}},"francisco@streamflux.app")));
+card.appendChild(el("p",{style:{textAlign:"center",color:G.muted,fontSize:"12px",marginTop:"16px"}},g.noAccount," ",el("span",{style:{color:G.aqua}},"francisco@streamflux.app")));
 inner.appendChild(card);
 wrap.appendChild(inner);
 return wrap;
+}
+return buildLogin();
 }
 
 // STORAGE HELPERS
@@ -174,6 +241,7 @@ addClient:(client)=>{const arr=SF.getClients();arr.unshift({...client,id:Date.no
 // DASHBOARD
 function renderDashboard(){
 const user=state.user;
+const g=GL[state.lang]||GL.English;
 const hasApp1=user.plan==="marketing"||user.plan==="bundle";
 const hasApp2=user.plan==="outreach"||user.plan==="bundle";
 const listings=SF.getListings();
@@ -191,12 +259,12 @@ const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"16px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"10px"}});
 nav.appendChild(el("div",{style:{fontSize:"20px",fontWeight:"700",letterSpacing:"3px",color:G.white}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
 const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}});
-if(user.trialActive)navRight.appendChild(el("span",{style:{fontSize:"12px",background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 12px",color:G.aqua,fontWeight:"600"}},`🎯 ${user.daysLeft} day${user.daysLeft!==1?"s":""} left`));
-if(user.subscribed)navRight.appendChild(el("span",{style:{fontSize:"12px",background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:"100px",padding:"4px 12px",color:"#4ade80",fontWeight:"600"}},"✓ Active"));
-const adminBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"⚙️ Admin");
+if(user.trialActive)navRight.appendChild(el("span",{style:{fontSize:"12px",background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 12px",color:G.aqua,fontWeight:"600"}},`🎯 ${user.daysLeft} ${g.daysLeft}`));
+if(user.subscribed)navRight.appendChild(el("span",{style:{fontSize:"12px",background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:"100px",padding:"4px 12px",color:"#4ade80",fontWeight:"600"}},g.active));
+const adminBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},g.admin);
 adminBtn.addEventListener("click",()=>setState({screen:"admin"}));
 navRight.appendChild(adminBtn);
-const logoutBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"Sign Out");
+const logoutBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},g.signOut);
 logoutBtn.addEventListener("click",()=>{localStorage.removeItem("sf_user");setState({screen:"login",user:null});});
 navRight.appendChild(logoutBtn);
 nav.appendChild(navRight);
@@ -206,13 +274,13 @@ const content=el("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"36px 24
 
 // Welcome
 content.appendChild(el("div",{style:{marginBottom:"24px"}},
-el("h1",{style:{fontSize:"26px",fontWeight:"700",color:G.white,marginBottom:"4px"}},`Welcome back, ${user.name.split(" ")[0]} 👋`),
-el("p",{style:{color:G.muted,fontSize:"14px"}},"Your marketing system is ready. Saves you time, saves you money, helps you close more.")
+el("h1",{style:{fontSize:"26px",fontWeight:"700",color:G.white,marginBottom:"4px"}},`${g.welcomeBack}, ${user.name.split(" ")[0]} 👋`),
+el("p",{style:{color:G.muted,fontSize:"14px"}},g.marketingSystem)
 ));
 
 // Pipeline stats
 const statsRow=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:"12px",marginBottom:"24px"}});
-[[`🏠`,listings.length,"Active Listings",G.aqua],[`🤝`,clients.length,"Clients in Pipeline",G.gold],[`🔔`,followUpsDue,"Follow-Ups Due","#f87171"],[`⚡`,listings.length+clients.length,"Total Generated","#2AB8D4"]].forEach(([icon,num,label,color])=>{
+[[`🏠`,listings.length,g.activeListings,G.aqua],[`🤝`,clients.length,g.clientsPipeline,G.gold],[`🔔`,followUpsDue,g.followUpsDue,"#f87171"],[`⚡`,listings.length+clients.length,g.totalGenerated,"#2AB8D4"]].forEach(([icon,num,label,color])=>{
 const c=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 18px"}});
 c.appendChild(el("div",{style:{fontSize:"20px",marginBottom:"6px"}},icon));
 c.appendChild(el("div",{style:{fontSize:"22px",fontWeight:"800",color,marginBottom:"2px"}},String(num)));
@@ -228,22 +296,22 @@ if(hasApp1){
 const c=el("div",{style:{background:G.card,border:`1px solid ${G.aquaBorder}`,borderRadius:"14px",overflow:"hidden"}});
 c.appendChild(el("div",{style:{background:"#111",padding:"20px 22px 16px",borderBottom:`1px solid ${G.border}`}},
 el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"App 01"),
-el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},"Property Marketing Machine"),
+el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},g.app1title),
 el("div",{style:{fontSize:"12px",color:G.muted}},"Complete listing package in 30 seconds")
 ));
 const body=el("div",{style:{padding:"16px 22px"}});
-const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},"🚀 New Listing →");
+const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},g.newListing);
 btn.addEventListener("click",()=>setState({screen:"app1",prefill:null}));
 body.appendChild(btn);
 if(listings.length>0){
-body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},"Recent Listings"));
+body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},g.recentListings));
 listings.slice(0,3).forEach(l=>{
 const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 10px",background:"#0d0d0d",borderRadius:"6px",marginBottom:"6px",cursor:"pointer",border:`1px solid ${G.border}`}});
 row.appendChild(el("div",{},
 el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},l.address||(l.city?"Property in "+l.city:"Listing")),
 el("div",{style:{fontSize:"11px",color:G.muted}},`${l.mode||""} · ${l.savedAt||""}`)
 ));
-row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},"Re-run →"));
+row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},g.rerun));
 row.addEventListener("click",()=>setState({screen:"app1",prefill:l}));
 body.appendChild(row);
 });
@@ -256,24 +324,24 @@ if(hasApp2){
 const c=el("div",{style:{background:G.card,border:`1px solid ${G.aquaBorder}`,borderRadius:"14px",overflow:"hidden"}});
 c.appendChild(el("div",{style:{background:"#111",padding:"20px 22px 16px",borderBottom:`1px solid ${G.border}`}},
 el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"App 02"),
-el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},"Client Outreach Machine"),
-el("div",{style:{fontSize:"12px",color:G.muted}},"Personalised outreach for any client in seconds")
+el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},g.app2title),
+el("div",{style:{fontSize:"12px",color:G.muted}},g.app2sub)
 ));
 const body=el("div",{style:{padding:"16px 22px"}});
-const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},"🤝 New Client →");
+const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},g.newClient);
 btn.addEventListener("click",()=>setState({screen:"app2",prefill:null}));
 body.appendChild(btn);
 if(clients.length>0){
-body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},"Recent Clients"));
+body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},g.recentClients));
 clients.slice(0,3).forEach(cl=>{
 const diff=cl.savedAt?Math.ceil((Date.now()-new Date(cl.savedAt))/(1000*60*60*24)):0;
 const due=diff>=3&&diff<=30;
 const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 10px",background:"#0d0d0d",borderRadius:"6px",marginBottom:"6px",cursor:"pointer",border:`1px solid ${due?"rgba(248,113,113,0.4)":G.border}`}});
 row.appendChild(el("div",{},
 el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},cl.clientName||"Client"),
-el("div",{style:{fontSize:"11px",color:due?"#f87171":G.muted}},due?"⚠ Follow-up due":`${cl.contactReason||""} · ${cl.savedAt||""}`)
+el("div",{style:{fontSize:"11px",color:due?"#f87171":G.muted}},due?g.followUpDue:`${cl.contactReason||""} · ${cl.savedAt||""}`)
 ));
-row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},"Re-run →"));
+row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},g.rerun));
 row.addEventListener("click",()=>setState({screen:"app2",prefill:cl}));
 body.appendChild(row);
 });
@@ -287,10 +355,10 @@ content.appendChild(appGrid);
 // Plan bar
 content.appendChild(el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"12px"}},
 el("div",{},
-el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:G.muted,marginBottom:"3px"}},"Your Plan"),
-el("div",{style:{fontSize:"14px",fontWeight:"700",color:G.white}},user.plan==="bundle"?"Complete Bundle — Both Apps":user.plan==="marketing"?"Marketing Tool — App 1 Only":"Outreach Tool — App 2 Only")
+el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:G.muted,marginBottom:"3px"}},g.yourPlan),
+el("div",{style:{fontSize:"14px",fontWeight:"700",color:G.white}},user.plan==="bundle"?g.bundle:user.plan==="marketing"?g.marketing:g.outreach)
 ),
-!user.subscribed&&el("a",{href:"https://streamflux.app/#pricing",target:"_blank",style:{background:G.aqua,color:"#080808",borderRadius:"8px",padding:"9px 16px",fontSize:"12px",fontWeight:"700",textDecoration:"none"}},"Upgrade →")
+!user.subscribed&&el("a",{href:"https://streamflux.app/#pricing",target:"_blank",style:{background:G.aqua,color:"#080808",borderRadius:"8px",padding:"9px 16px",fontSize:"12px",fontWeight:"700",textDecoration:"none"}},g.upgrade)
 ));
 
 wrap.appendChild(content);
@@ -484,7 +552,7 @@ const BUILDING=["Concierge Service","24/7 Security","Doorman","Valet Parking","R
 const TONES=[{value:"luxury",label:"Luxury & Prestige",desc:"High-end, aspirational"},{value:"friendly",label:"Warm & Friendly",desc:"Approachable, homey"},{value:"investment",label:"Investment Focus",desc:"ROI, numbers, opportunity"},{value:"lifestyle",label:"Lifestyle & Vibe",desc:"Energetic, aspirational"},{value:"urgent",label:"Urgency & FOMO",desc:"Act now, limited time"}];
 const TABS=[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"}];
 
-let s={step:1,mode:"",language:"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",customContext:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
+let s={step:1,mode:"",language:state.lang||"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",customContext:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
@@ -500,7 +568,7 @@ return!!s.tone;
 
 async function generate(){
 s.loading=true;s.error="";s.result=null;s.loadingPct=0;renderApp1Content();
-const langInstr=s.language==="Spanish"?"\n\nCRITICAL: You MUST write ALL content entirely in Spanish. Every single word must be in Spanish. No English at all.":"";
+const langInstr=(GL[s.language]||GL.English).langInstr?("\n\n"+(GL[s.language]||GL.English).langInstr):"";
 const propSummary=[`Mode:${s.mode}`,`${s.propType} at ${s.address}`,`Price:$${s.price}${s.oldPrice?` (was $${s.oldPrice})`:""}`,`Beds:${s.beds}|Baths:${s.baths}${s.sqft?`|${s.sqft}sqft`:""}`,s.condition&&`Condition:${s.condition}`,`City:${s.city}${s.neighbourhood?`,${s.neighbourhood}`:""}`,s.locationFeatures.length&&`Location:${s.locationFeatures.slice(0,8).join(",")}`,s.interior.length&&`Interior:${s.interior.slice(0,10).join(",")}`,s.outdoor.length&&`Outdoor:${s.outdoor.slice(0,8).join(",")}`,s.uniqueFeature&&`Unique:${s.uniqueFeature}`,s.customContext&&`AGENT'S OWN WORDS (use this above all else): ${s.customContext}`,`Tone:${s.tone}|Buyer:${s.targetBuyer||"general"}`,`Agent:${s.agentName||"Agent"}${s.agentPhone?`|${s.agentPhone}`:""}`].filter(Boolean).join("\n");
 try{
 s.loadingMsg=t.loading1;s.loadingPct=15;renderApp1Content();
@@ -781,7 +849,7 @@ const BUYER_CRITERIA=["Under $500K","$500K–$1M","$1M–$2M","$2M–$5M","$5M+"
 const SELLER_SITUATION=["Wants Quick Sale","Flexible on Timeline","Needs Top Dollar","Downsizing","Upsizing","Relocating","Divorce Settlement","Inherited Property","Investment Property Sale","Already Found New Home","Testing the Market"];
 const TABS=[{id:"messages",label:"💬 Messages"},{id:"voice",label:"🎙️ Voice"},{id:"email",label:"📧 Email"},{id:"letter",label:"✉️ Letter"},{id:"followups",label:"🔄 Follow-Ups"},{id:"schedule",label:"📅 Schedule"}];
 
-let s={language:"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
@@ -793,7 +861,7 @@ const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName&&
 
 async function generate(){
 s.loading=true;s.error="";s.result=null;renderApp2Content();
-const langInstr=s.language==="Spanish"?"\n\nCRITICAL: You MUST write ALL content entirely in Spanish. Every single word must be in Spanish. No English at all.":"";
+const langInstr=(GL[s.language]||GL.English).langInstr?("\n\n"+(GL[s.language]||GL.English).langInstr):"";
 const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\n${s.customSituation?"AGENT OWN WORDS - USE ABOVE ALL ELSE: "+s.customSituation+"\\n":""}AGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
 try{
 s.loadingMsg=(T2[s.language]||T2.English).loading1;renderApp2Content();
