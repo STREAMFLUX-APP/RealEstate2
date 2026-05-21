@@ -260,7 +260,7 @@ return buildLogin();
 // STORAGE HELPERS
 const SF={
 getListings:()=>{try{return JSON.parse(localStorage.getItem("sf_listings")||"[]");}catch{return[];}},
-saveListings:(arr)=>localStorage.setItem("sf_listings",JSON.stringify(arr.slice(0,5))),
+saveListings:(arr)=>localStorage.setItem("sf_listings",JSON.stringify(arr.slice(0,10))),
 getClients:()=>{try{return JSON.parse(localStorage.getItem("sf_clients")||"[]");}catch{return[];}},
 saveClients:(arr)=>localStorage.setItem("sf_clients",JSON.stringify(arr.slice(0,10))),
 addListing:(listing)=>{const arr=SF.getListings();arr.unshift({...listing,id:Date.now(),savedAt:new Date().toLocaleDateString()});SF.saveListings(arr);},
@@ -326,22 +326,31 @@ const c=el("div",{style:{background:G.card,border:`1px solid ${G.aquaBorder}`,bo
 c.appendChild(el("div",{style:{background:"#111",padding:"20px 22px 16px",borderBottom:`1px solid ${G.border}`}},
 el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"App 01"),
 el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},g.app1title),
-el("div",{style:{fontSize:"12px",color:G.muted}},"Complete listing package in 30 seconds")
+el("div",{style:{fontSize:"12px",color:G.muted}},g.app1sub)
 ));
 const body=el("div",{style:{padding:"16px 22px"}});
-const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},g.newListing);
-btn.addEventListener("click",()=>setState({screen:"app1",prefill1:null}));
+const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"14px"}},g.newListing);
+btn.addEventListener("click",()=>setState({screen:"app1"}));
 body.appendChild(btn);
 if(listings.length>0){
-body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},g.recentListings));
-listings.slice(0,3).forEach(l=>{
-const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 10px",background:"#0d0d0d",borderRadius:"6px",marginBottom:"6px",cursor:"pointer",border:`1px solid ${G.border}`}});
-row.appendChild(el("div",{},
-el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},l.address||(l.city?"Property in "+l.city:"Listing")),
+body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},
+state.lang==="Spanish"?"Últimas 10 Generaciones":"Last 10 Generated Packages"
+));
+listings.slice(0,10).forEach(l=>{
+const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#0d0d0d",borderRadius:"7px",marginBottom:"6px",border:`1px solid ${G.border}`}});
+row.appendChild(el("div",{style:{flex:"1",minWidth:"0",marginRight:"10px"}},
+el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
+l.address||(l.city?(state.lang==="Spanish"?"Propiedad en ":"Property in ")+l.city:(state.lang==="Spanish"?"Generado ":"Generated ")+l.savedAt||"")
+),
 el("div",{style:{fontSize:"11px",color:G.muted}},`${l.mode||""} · ${l.savedAt||""}`)
 ));
-row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},g.rerun));
-row.addEventListener("click",()=>setState({screen:"app1",prefill1:l}));
+if(l.result){
+const vBtn=el("button",{style:{background:G.aqua,color:"#080808",border:"none",borderRadius:"6px",padding:"5px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},
+state.lang==="Spanish"?"Ver →":"View →"
+);
+vBtn.addEventListener("click",()=>setState({screen:"app1_results",savedResult:l}));
+row.appendChild(vBtn);
+}
 body.appendChild(row);
 });
 }
@@ -357,21 +366,28 @@ el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3p
 el("div",{style:{fontSize:"12px",color:G.muted}},g.app2sub)
 ));
 const body=el("div",{style:{padding:"16px 22px"}});
-const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},g.newClient);
-btn.addEventListener("click",()=>setState({screen:"app2",prefill2:null}));
+const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"14px"}},g.newClient);
+btn.addEventListener("click",()=>setState({screen:"app2"}));
 body.appendChild(btn);
 if(clients.length>0){
-body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},g.recentClients));
-clients.slice(0,3).forEach(cl=>{
+body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},
+state.lang==="Spanish"?"Últimos 10 Clientes":"Last 10 Clients"
+));
+clients.slice(0,10).forEach(cl=>{
 const diff=cl.savedAt?Math.ceil((Date.now()-new Date(cl.savedAt))/(1000*60*60*24)):0;
 const due=diff>=3&&diff<=30;
-const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 10px",background:"#0d0d0d",borderRadius:"6px",marginBottom:"6px",cursor:"pointer",border:`1px solid ${due?"rgba(248,113,113,0.4)":G.border}`}});
-row.appendChild(el("div",{},
+const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#0d0d0d",borderRadius:"7px",marginBottom:"6px",border:`1px solid ${due?"rgba(248,113,113,0.4)":G.border}`}});
+row.appendChild(el("div",{style:{flex:"1",minWidth:"0",marginRight:"10px"}},
 el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},cl.clientName||"Client"),
 el("div",{style:{fontSize:"11px",color:due?"#f87171":G.muted}},due?g.followUpDue:`${cl.contactReason||""} · ${cl.savedAt||""}`)
 ));
-row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},g.rerun));
-row.addEventListener("click",()=>setState({screen:"app2",prefill2:cl}));
+if(cl.result){
+const vBtn=el("button",{style:{background:G.aqua,color:"#080808",border:"none",borderRadius:"6px",padding:"5px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},
+state.lang==="Spanish"?"Ver →":"View →"
+);
+vBtn.addEventListener("click",()=>setState({screen:"app2_results",savedResult:cl}));
+row.appendChild(vBtn);
+}
 body.appendChild(row);
 });
 }
@@ -572,14 +588,7 @@ loading1:"Escribiendo descripción y email...",loading2:"Escribiendo redes socia
 };
 
 let s={step:1,mode:"",language:state.lang||"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],building_extra:"",uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",customContext:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
-// Apply prefill from dashboard Re-run
-if(state.prefill1){
-const p=state.prefill1;
-s.mode=p.mode||"";s.address=p.address||"";s.city=p.city||"";s.price=p.price||"";
-s.beds=p.beds||"";s.baths=p.baths||"";s.tone=p.tone||"";s.language=p.language||s.language;
-s.propType=p.propType||"";s.step=s.mode?2:1;
-state.prefill1=null;
-}
+
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
@@ -634,7 +643,7 @@ const r5={schedule:isSpaSchedule?[
 ]};
 s.loadingPct=100;s.result={...r1,...r2,...r3,...r4,...r5};s.activeTab="listing";
 // Save to history
-SF.addListing({address:s.address,city:s.city,mode:s.mode,price:s.price,beds:s.beds,baths:s.baths,tone:s.tone,language:s.language});
+SF.addListing({address:s.address,city:s.city,mode:s.mode,price:s.price,beds:s.beds,baths:s.baths,tone:s.tone,language:s.language,propType:s.propType,result:s.result});
 }catch(err){s.error=err.message;}
 s.loading=false;renderApp1Content();
 }
@@ -1014,14 +1023,7 @@ aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
 }
 };
 let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
-// Apply prefill from dashboard Re-run
-if(state.prefill2){
-const p=state.prefill2;
-s.clientName=p.clientName||"";s.clientType=p.clientType||"";
-s.contactReason=p.contactReason||"";s.language=p.language||s.language;
-s.agentName=p.agentName||"";
-state.prefill2=null;
-}
+
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
@@ -1060,7 +1062,7 @@ const p3=`CLIENT: ${s.clientName} | TYPE: ${s.clientType} | REASON: ${s.contactR
 const part3=await safeClaude(p3,SYSTEM,1200);
 s.result={...part1,...part2,...part3};s.activeTab="messages";
 // Save to history
-SF.addClient({clientName:s.clientName,clientType:s.clientType,contactReason:s.contactReason,language:s.language,agentName:s.agentName});
+SF.addClient({clientName:s.clientName,clientType:s.clientType,contactReason:s.contactReason,language:s.language,agentName:s.agentName,result:s.result});
 }catch(err){s.error="Error: "+err.message;}
 s.loading=false;renderApp2Content();
 }
@@ -1276,6 +1278,116 @@ renderApp2Content();
 return wrap;
 }
 
+function renderSavedResults(app){
+const g=GL[state.lang]||GL.English;
+const saved=state.savedResult;
+const result=saved?.result||{};
+const isApp1=app==="app1";
+const isSpa=state.lang==="Spanish";
+let activeTab=isApp1?"listing":"messages";
+
+const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
+
+// Nav
+const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}});
+nav.appendChild(el("span",{style:{fontSize:"15px",fontWeight:"700",color:G.white}},
+isApp1?(isSpa?"📋 Resultados Guardados":"📋 Saved Results"):(isSpa?"📋 Resultados Guardados":"📋 Saved Results")
+));
+const backBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},
+isSpa?"← Panel Principal":"← Dashboard"
+);
+backBtn.addEventListener("click",()=>setState({screen:"dashboard",savedResult:null}));
+nav.appendChild(backBtn);
+wrap.appendChild(nav);
+
+const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"22px 16px 60px"}});
+
+// Info bar
+const info=el("div",{style:{background:"#111",border:`1px solid ${G.border}`,borderRadius:"8px",padding:"12px 16px",marginBottom:"18px"}});
+if(isApp1){
+info.appendChild(el("p",{style:{color:G.white,fontSize:"14px",fontWeight:"600",marginBottom:"2px"}},saved.address||(saved.city?(isSpa?"Propiedad en ":"Property in ")+saved.city:"")));
+info.appendChild(el("p",{style:{color:G.muted,fontSize:"12px"}},`${saved.mode||""} · ${saved.propType||""} · ${saved.price?"$"+saved.price:""} · ${saved.savedAt||""}`));
+}else{
+info.appendChild(el("p",{style:{color:G.white,fontSize:"14px",fontWeight:"600",marginBottom:"2px"}},saved.clientName||"Client"));
+info.appendChild(el("p",{style:{color:G.muted,fontSize:"12px"}},`${saved.contactReason||""} · ${saved.savedAt||""}`));
+}
+content.appendChild(info);
+
+// Tabs
+const app1Tabs=[{id:"listing",label:isSpa?"🏠 Propiedad":"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:isSpa?"🎯 Anuncios":"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:isSpa?"✉️ Vecinos":"✉️ Neighbours"},{id:"schedule",label:isSpa?"📅 Calendario":"📅 Schedule"}];
+const app2Tabs=[{id:"messages",label:isSpa?"💬 Mensajes":"💬 Messages"},{id:"voice",label:isSpa?"🎙️ Guión":"🎙️ Voice"},{id:"email",label:"📧 Email"},{id:"letter",label:isSpa?"✉️ Carta":"✉️ Letter"},{id:"followups",label:isSpa?"🔄 Seguimientos":"🔄 Follow-Ups"},{id:"schedule",label:isSpa?"📅 Calendario":"📅 Schedule"}];
+const tabs=isApp1?app1Tabs:app2Tabs;
+
+function renderTabContent(){
+const tabRow=el("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}});
+tabs.forEach(tab=>{
+const btn=el("button",{style:{background:activeTab===tab.id?G.aqua:"#0d0d0d",color:activeTab===tab.id?"#080808":G.muted,border:`1px solid ${activeTab===tab.id?G.aqua:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
+btn.addEventListener("click",()=>{activeTab=tab.id;const tc=content.querySelector(".tab-content");if(tc)tc.remove();const nc=buildTabContent();nc.className="tab-content";content.appendChild(nc);const tr=content.querySelector(".tab-row");if(tr)tr.remove();content.insertBefore(tabRow2(),content.querySelector(".tab-content"));});
+tabRow.appendChild(btn);
+});
+return tabRow;
+}
+
+function tabRow2(){
+const tabRow=el("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}});
+tabRow.className="tab-row";
+tabs.forEach(tab=>{
+const btn=el("button",{style:{background:activeTab===tab.id?G.aqua:"#0d0d0d",color:activeTab===tab.id?"#080808":G.muted,border:`1px solid ${activeTab===tab.id?G.aqua:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
+btn.addEventListener("click",()=>{activeTab=tab.id;const tc=content.querySelector(".tab-content");if(tc)tc.remove();const nc=buildTabContent();nc.className="tab-content";content.appendChild(nc);const tr=content.querySelector(".tab-row");if(tr){tr.remove();content.insertBefore(tabRow2(),content.querySelector(".tab-content"));}});
+tabRow.appendChild(btn);
+});
+return tabRow;
+}
+
+function buildTabContent(){
+const tc=el("div",{});
+if(isApp1){
+if(activeTab==="listing"){tc.appendChild(copyCard(isSpa?"Descripción MLS":"MLS Listing",result.listing,"🏠"));tc.appendChild(copyCard(isSpa?"Asunto del Email":"Email Subject",result.email_subject,"📧"));tc.appendChild(copyCard(isSpa?"Cuerpo del Email":"Email Body",result.email_body,"📨"));}
+if(activeTab==="social"){tc.appendChild(copyCard("Instagram",result.instagram,"📸"));tc.appendChild(copyCard("Facebook",result.facebook,"👥"));tc.appendChild(copyCard("Twitter / X",result.twitter,"⚡"));tc.appendChild(copyCard("LinkedIn",result.linkedin,"💼"));}
+if(activeTab==="ads"){tc.appendChild(copyCard(isSpa?"Blast SMS":"SMS Blast",result.sms_blast,"📱"));tc.appendChild(copyCard(isSpa?"Difusión WhatsApp":"WhatsApp Broadcast",result.whatsapp_broadcast,"💬"));tc.appendChild(copyCard("Google Ad",result.google_ad,"🔍"));tc.appendChild(copyCard(isSpa?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad",result.facebook_ad,"🎯"));}
+if(activeTab==="tiktok")tc.appendChild(copyCard(isSpa?"Guión TikTok":"TikTok Script",result.tiktok_script,"🎬"));
+if(activeTab==="neighbours")tc.appendChild(copyCard(isSpa?"Carta a Vecinos":"Neighbour Letter",result.neighbour_letter,"✉️"));
+if(activeTab==="schedule"&&result.schedule){
+tc.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 16px"}},isSpa?"Tu plan de acción día a día.":"Your day-by-day action plan."));
+result.schedule.forEach(d=>{
+const dc=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"8px",padding:"14px 16px",marginBottom:"10px"}});
+dc.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px",fontWeight:"700",color:G.white,fontSize:"14px"}},el("span",{},d.icon),el("span",{},d.day)));
+const ul=el("ul",{style:{paddingLeft:"18px",margin:"0"}});
+(d.tasks||[]).forEach(task=>ul.appendChild(el("li",{style:{color:"#cccccc",fontSize:"14px",lineHeight:"1.7",marginBottom:"4px",fontFamily:"inherit"}},task)));
+dc.appendChild(ul);
+tc.appendChild(dc);
+});
+}
+}else{
+if(activeTab==="messages"){tc.appendChild(copyCard("WhatsApp",result.whatsapp,"💬"));tc.appendChild(copyCard("SMS",result.sms,"📱"));}
+if(activeTab==="voice")tc.appendChild(copyCard(isSpa?"Guión Telefónico":"Phone Call Script",result.voice_script,"🎙️"));
+if(activeTab==="email"){tc.appendChild(copyCard(isSpa?"Asunto del Email":"Email Subject",result.email_subject,"📧"));tc.appendChild(copyCard(isSpa?"Cuerpo del Email":"Email Body",result.email_body,"📨"));}
+if(activeTab==="letter")tc.appendChild(copyCard(isSpa?"Carta Formal":"Formal Letter",result.formal_letter,"✉️"));
+if(activeTab==="followups"){tc.appendChild(copyCard("Follow-Up #1",result.followup_1,"💬"));tc.appendChild(copyCard("Follow-Up #2",result.followup_2,"💬"));tc.appendChild(copyCard("Follow-Up #3",result.followup_3,"💬"));tc.appendChild(copyCard("Follow-Up #4",result.followup_4,"💬"));}
+if(activeTab==="schedule"&&result.schedule){
+result.schedule.forEach(d=>{
+const dc=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"8px",padding:"14px 16px",marginBottom:"10px"}});
+dc.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px",fontWeight:"700",color:G.white,fontSize:"14px"}},el("span",{},d.icon||"📅"),el("span",{},d.day||d.label)));
+if(d.tasks){const ul=el("ul",{style:{paddingLeft:"18px",margin:"0"}});d.tasks.forEach(task=>ul.appendChild(el("li",{style:{color:"#cccccc",fontSize:"14px",lineHeight:"1.7",marginBottom:"4px",fontFamily:"inherit"}},task)));dc.appendChild(ul);}
+else if(d.content)dc.appendChild(el("p",{style:{color:"#cccccc",fontSize:"14px",lineHeight:"1.75",margin:"0",whiteSpace:"pre-wrap",fontFamily:"inherit"}},d.content));
+tc.appendChild(dc);
+});
+}
+}
+return tc;
+}
+
+const initialTabRow=tabRow2();
+content.appendChild(initialTabRow);
+const initialTabContent=buildTabContent();
+initialTabContent.className="tab-content";
+content.appendChild(initialTabContent);
+
+wrap.appendChild(content);
+return wrap;
+}
+
+
 function render(){
 // Set document language for spellcheck
 document.documentElement.lang=state.lang==="Spanish"?"es":"en";
@@ -1287,6 +1399,7 @@ else if(state.screen==="dashboard")root.appendChild(renderDashboard());
 else if(state.screen==="admin")root.appendChild(renderAdmin());
 else if(state.screen==="app1")root.appendChild(renderApp1());
 else if(state.screen==="app2")root.appendChild(renderApp2());
+else if(state.screen==="app1_results"||state.screen==="app2_results")root.appendChild(renderSavedResults(state.screen==="app1_results"?"app1":"app2"));
 }
 
 // CHECK SESSION ON LOAD
