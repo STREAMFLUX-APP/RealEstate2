@@ -647,11 +647,11 @@ btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
 tabs.appendChild(btn);
 });
 content.appendChild(tabs);
-if(s.activeTab==="listing"){content.appendChild(copyCard(s.language==="Spanish"?"Descripción MLS":"MLS Listing","🏠",s.result.listing));content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject","📧",s.result.email_subject));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body","📨",s.result.email_body));}
+if(s.activeTab==="listing"){content.appendChild(copyCard(s.language==="Spanish"?"Descripción MLS":"MLS Listing",s.result.listing,"🏠"));content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject",s.result.email_subject,"📧"));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body",s.result.email_body,"📨"));}
 if(s.activeTab==="social"){content.appendChild(copyCard("Instagram",s.result.instagram,"📸"));content.appendChild(copyCard("Facebook",s.result.facebook,"👥"));content.appendChild(copyCard("Twitter / X",s.result.twitter,"⚡"));content.appendChild(copyCard("LinkedIn",s.result.linkedin,"💼"));}
-if(s.activeTab==="ads"){content.appendChild(copyCard(s.language==="Spanish"?"Blast SMS":"SMS Blast","📱",s.result.sms_blast));content.appendChild(copyCard(s.language==="Spanish"?"Difusión WhatsApp":"WhatsApp Broadcast","💬",s.result.whatsapp_broadcast));content.appendChild(copyCard("Google Ad",s.result.google_ad,"🔍"));content.appendChild(copyCard(s.language==="Spanish"?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad","🎯",s.result.facebook_ad));}
-if(s.activeTab==="tiktok")content.appendChild(copyCard(s.language==="Spanish"?"Guión TikTok":"TikTok Script","🎬",s.result.tiktok_script));
-if(s.activeTab==="neighbours")content.appendChild(copyCard(s.language==="Spanish"?"Carta a Vecinos":"Neighbour Letter","✉️",s.result.neighbour_letter));
+if(s.activeTab==="ads"){content.appendChild(copyCard(s.language==="Spanish"?"Blast SMS":"SMS Blast",s.result.sms_blast,"📱"));content.appendChild(copyCard(s.language==="Spanish"?"Difusión WhatsApp":"WhatsApp Broadcast",s.result.whatsapp_broadcast,"💬"));content.appendChild(copyCard("Google Ad",s.result.google_ad,"🔍"));content.appendChild(copyCard(s.language==="Spanish"?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad",s.result.facebook_ad,"🎯"));}
+if(s.activeTab==="tiktok")content.appendChild(copyCard(s.language==="Spanish"?"Guión TikTok":"TikTok Script",s.result.tiktok_script,"🎬"));
+if(s.activeTab==="neighbours")content.appendChild(copyCard(s.language==="Spanish"?"Carta a Vecinos":"Neighbour Letter",s.result.neighbour_letter,"✉️"));
 if(s.activeTab==="schedule"&&s.result.schedule){
 content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},"Your day-by-day action plan. Follow this to maximise every listing."));
 s.result.schedule.forEach(day=>{
