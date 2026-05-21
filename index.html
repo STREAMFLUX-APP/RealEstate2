@@ -892,7 +892,7 @@ function tog(arr,val){return arr.includes(val)?arr.filter(x=>x!==val):[...arr,va
 const isBuyer=()=>s.clientType.includes("buyer")||s.clientType==="investor";
 const isSeller=()=>s.clientType.includes("seller");
 const isMatcher=()=>s.contactReason==="new_listing"&&isBuyer();
-const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName;
+const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason;
 
 async function generate(){
 s.loading=true;s.error="";s.result=null;renderApp2Content();
