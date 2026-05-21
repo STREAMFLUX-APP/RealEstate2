@@ -17,7 +17,13 @@ input,textarea,button,select{font-family:inherit}
 const G={bg:"#080808",card:"#111",border:"#222",aqua:"#2AB8D4",aquaDim:"rgba(42,184,212,0.1)",aquaBorder:"rgba(42,184,212,0.25)",gold:"#D4A843",white:"#fff",muted:"rgba(255,255,255,0.5)",green:"#3d9e5c",red:"#ef4444"};
 
 const apiAuth=async(body)=>{try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
-const apiAdmin=async(body)=>{try{const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
+const apiAdmin=async(body)=>{
+try{
+const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+const text=await r.text();
+try{return JSON.parse(text);}catch(e){return{error:"Server error: "+text.slice(0,100)};}
+}catch(e){return{error:e.message};}
+};
 const apiClaude=async(prompt,system,maxTokens=1000)=>{
 try{
 const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,system,maxTokens})});
@@ -442,7 +448,7 @@ const res=await apiAdmin({adminKey,action:"list_users"});
 if(res.success){authed=true;users=res.users||[];msg="";renderAdminContent();}
 else{msg="❌ "+(res.error||"Wrong admin key");renderAdminContent();}
 }catch(e){
-msg="❌ Connection error. Check your internet and try again.";
+msg="❌ Error: "+e.message;
 renderAdminContent();
 }
 });
