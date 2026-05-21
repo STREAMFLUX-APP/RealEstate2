@@ -104,13 +104,13 @@ function copyCard(title,content,icon,accentColor){
 accentColor=accentColor||G.aqua;
 const card=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"12px"}});
 let copied=false;
-const copyBtn=el("button",{style:{background:"#161616",border:`1px solid ${G.border}`,borderRadius:"6px",color:"#666",fontSize:"11px",padding:"4px 11px",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},"Copy");
+const copyBtn=el("button",{style:{background:"#161616",border:`1px solid ${G.border}`,borderRadius:"6px",color:"#666",fontSize:"11px",padding:"4px 11px",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},s.language==="Spanish"?"Copiar":"Copy");
 copyBtn.addEventListener("click",()=>{
 navigator.clipboard.writeText(content||"");
 copyBtn.textContent="✓ Copied";
 copyBtn.style.color="#4caf50";
 copyBtn.style.borderColor="#2a5a2a";
-setTimeout(()=>{copyBtn.textContent="Copy";copyBtn.style.color="#666";copyBtn.style.borderColor=G.border;},1800);
+setTimeout(()=>{copyBtn.textContent=s.language==="Spanish"?"Copiar":"Copy";copyBtn.style.color="#666";copyBtn.style.borderColor=G.border;},1800);
 });
 card.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},
 el("span",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"0.1em",color:accentColor,textTransform:"uppercase"}},`${icon} ${title}`),
@@ -571,7 +571,7 @@ const r3=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite th
 s.loadingPct=75;s.loadingMsg=t.loading4;renderApp1Content();
 const r4=await apiClaude(`Property info:\n${propSummary}${langInstr}\n\nWrite this JSON:\n{"tiktok_script":"TikTok: HOOK (3 sec), BODY (features), CTA. 45-55 seconds.","neighbour_letter":"200-220 word neighbour letter signed by ${s.agentName||"Your Agent"}${s.agentPhone?` | ${s.agentPhone}`:""}"}`,SYSTEM,900);
 s.loadingPct=90;s.loadingMsg=t.loading5;renderApp1Content();
-const r5=await apiClaude(`Property:\n${propSummary}\n\nReturn ONLY JSON:\n{"schedule":[{"day":"Day 1 — Launch","icon":"🚀","tasks":["Post MLS on all portals","Send WhatsApp broadcast","Post Instagram","Send SMS blast","Email your buyer list","Deliver neighbour letters"]},{"day":"Day 2","icon":"📱","tasks":["Post Facebook caption","Share LinkedIn post","Call back anyone who replied"]},{"day":"Day 3","icon":"🎯","tasks":["Launch Facebook and Instagram ads","Post Twitter update","Call email leads"]},{"day":"Day 5","icon":"🎬","tasks":["Post TikTok video","Share Instagram story"]},{"day":"Day 7","icon":"📊","tasks":["Check ad performance","Re-send WhatsApp to non-openers","Book viewing requests"]},{"day":"Day 14","icon":"💥","tasks":["Post fresh Instagram update","Send second email","Consider price review"]},{"day":"Day 21","icon":"📣","tasks":["Send final WhatsApp urgency message","Run last ad push","Post sold update if under offer"]}]}`,SYSTEM,900);
+const r5=await apiClaude(`Property:\n${propSummary}\n\nReturn ONLY JSON:\n{"schedule":[{"day":s.language==="Spanish"?"Día 1 — Lanzamiento":"Day 1 — Launch","icon":"🚀","tasks":["Post MLS on all portals","Send WhatsApp broadcast","Post Instagram","Send SMS blast","Email your buyer list","Deliver neighbour letters"]},{"day":s.language==="Spanish"?"Día 2":"Day 2","icon":"📱","tasks":["Post Facebook caption","Share LinkedIn post","Call back anyone who replied"]},{"day":s.language==="Spanish"?"Día 3":"Day 3","icon":"🎯","tasks":["Launch Facebook and Instagram ads","Post Twitter update","Call email leads"]},{"day":s.language==="Spanish"?"Día 5":"Day 5","icon":"🎬","tasks":["Post TikTok video","Share Instagram story"]},{"day":s.language==="Spanish"?"Día 7":"Day 7","icon":"📊","tasks":["Check ad performance","Re-send WhatsApp to non-openers","Book viewing requests"]},{"day":s.language==="Spanish"?"Día 14":"Day 14","icon":"💥","tasks":["Post fresh Instagram update","Send second email","Consider price review"]},{"day":s.language==="Spanish"?"Día 21":"Day 21","icon":"📣","tasks":["Send final WhatsApp urgency message","Run last ad push","Post sold update if under offer"]}]}`,SYSTEM,900);
 s.loadingPct=100;s.result={...r1,...r2,...r3,...r4,...r5};s.activeTab="listing";
 // Save to history
 SF.addListing({address:s.address,city:s.city,mode:s.mode,price:s.price,beds:s.beds,baths:s.baths,tone:s.tone,language:s.language});
@@ -614,11 +614,11 @@ btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
 tabs.appendChild(btn);
 });
 content.appendChild(tabs);
-if(s.activeTab==="listing"){content.appendChild(copyCard("MLS Listing","🏠",s.result.listing));content.appendChild(copyCard("Email Subject","📧",s.result.email_subject));content.appendChild(copyCard("Email Body","📨",s.result.email_body));}
+if(s.activeTab==="listing"){content.appendChild(copyCard(s.language==="Spanish"?"Descripción MLS":"MLS Listing","🏠",s.result.listing));content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject","📧",s.result.email_subject));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body","📨",s.result.email_body));}
 if(s.activeTab==="social"){content.appendChild(copyCard("Instagram","📸",s.result.instagram));content.appendChild(copyCard("Facebook","👥",s.result.facebook));content.appendChild(copyCard("Twitter / X","⚡",s.result.twitter));content.appendChild(copyCard("LinkedIn","💼",s.result.linkedin));}
-if(s.activeTab==="ads"){content.appendChild(copyCard("SMS Blast","📱",s.result.sms_blast));content.appendChild(copyCard("WhatsApp Broadcast","💬",s.result.whatsapp_broadcast));content.appendChild(copyCard("Google Ad","🔍",s.result.google_ad));content.appendChild(copyCard("Facebook/Instagram Ad","🎯",s.result.facebook_ad));}
-if(s.activeTab==="tiktok")content.appendChild(copyCard("TikTok Script","🎬",s.result.tiktok_script));
-if(s.activeTab==="neighbours")content.appendChild(copyCard("Neighbour Letter","✉️",s.result.neighbour_letter));
+if(s.activeTab==="ads"){content.appendChild(copyCard(s.language==="Spanish"?"Blast SMS":"SMS Blast","📱",s.result.sms_blast));content.appendChild(copyCard(s.language==="Spanish"?"Difusión WhatsApp":"WhatsApp Broadcast","💬",s.result.whatsapp_broadcast));content.appendChild(copyCard("Google Ad","🔍",s.result.google_ad));content.appendChild(copyCard(s.language==="Spanish"?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad","🎯",s.result.facebook_ad));}
+if(s.activeTab==="tiktok")content.appendChild(copyCard(s.language==="Spanish"?"Guión TikTok":"TikTok Script","🎬",s.result.tiktok_script));
+if(s.activeTab==="neighbours")content.appendChild(copyCard(s.language==="Spanish"?"Carta a Vecinos":"Neighbour Letter","✉️",s.result.neighbour_letter));
 if(s.activeTab==="schedule"&&s.result.schedule){
 content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},"Your day-by-day action plan. Follow this to maximise every listing."));
 s.result.schedule.forEach(day=>{
@@ -667,67 +667,67 @@ ctxBox.appendChild(ctxTa);
 ctxBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t.customBoxLeave));
 card.appendChild(ctxBox);
 card.appendChild(chips(s.language==="Spanish"?"Tipo de Propiedad":"Property Type",null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
-card.appendChild(field("Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
+card.appendChild(field(s.language==="Spanish"?"Dirección Completa":"Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
 if(s.mode==="price_reduction"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-g.appendChild(field("New Price ($)","text",s.price,v=>s.price=v,"895,000"));
-g.appendChild(field("Original Price ($)","text",s.oldPrice,v=>s.oldPrice=v,"995,000"));
+g.appendChild(field(s.language==="Spanish"?"Nuevo Precio ($)":"New Price ($)","text",s.price,v=>s.price=v,"895,000"));
+g.appendChild(field(s.language==="Spanish"?"Precio Original ($)":"Original Price ($)","text",s.oldPrice,v=>s.oldPrice=v,"995,000"));
 card.appendChild(g);
 }else if(s.mode==="sold"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-g.appendChild(field("List Price ($)","text",s.price,v=>s.price=v,"995,000"));
-g.appendChild(field("Sold Price ($)","text",s.soldPrice,v=>s.soldPrice=v,"980,000"));
-g.appendChild(field("Days on Market","number",s.daysOnMarket,v=>s.daysOnMarket=v,"12"));
+g.appendChild(field(s.language==="Spanish"?"Precio de Lista ($)":"List Price ($)","text",s.price,v=>s.price=v,"995,000"));
+g.appendChild(field(s.language==="Spanish"?"Precio de Venta ($)":"Sold Price ($)","text",s.soldPrice,v=>s.soldPrice=v,"980,000"));
+g.appendChild(field(s.language==="Spanish"?"Días en el Mercado":"Days on Market","number",s.daysOnMarket,v=>s.daysOnMarket=v,"12"));
 card.appendChild(g);
 }else{
 card.appendChild(field(s.language==="Spanish"?"Precio de Venta ($)":"Asking Price ($)","text",s.price,v=>s.price=v,"1,250,000"));
 }
 if(s.mode!=="sold"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-g.appendChild(field("Bedrooms","number",s.beds,v=>s.beds=v,"4"));
-g.appendChild(field("Bathrooms","number",s.baths,v=>s.baths=v,"3"));
-g.appendChild(field("Size (sq ft)","text",s.sqft,v=>s.sqft=v,"2,400"));
-g.appendChild(field("Year Built","text",s.yearBuilt,v=>s.yearBuilt=v,"2019"));
+g.appendChild(field(s.language==="Spanish"?"Habitaciones":"Bedrooms","number",s.beds,v=>s.beds=v,"4"));
+g.appendChild(field(s.language==="Spanish"?"Baños":"Bathrooms","number",s.baths,v=>s.baths=v,"3"));
+g.appendChild(field(s.language==="Spanish"?"Superficie (m²/ft²)":"Size (sq ft)","text",s.sqft,v=>s.sqft=v,"2,400"));
+g.appendChild(field(s.language==="Spanish"?"Año de Construcción":"Year Built","text",s.yearBuilt,v=>s.yearBuilt=v,"2019"));
 card.appendChild(g);
 }
 if(s.mode==="open_house"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-g.appendChild(field("Open House Date","text",s.openHouseDate,v=>s.openHouseDate=v,"Saturday, June 14"));
-g.appendChild(field("Open House Time","text",s.openHouseTime,v=>s.openHouseTime=v,"1:00 PM – 4:00 PM"));
+g.appendChild(field(s.language==="Spanish"?"Fecha de la Visita":"Open House Date","text",s.openHouseDate,v=>s.openHouseDate=v,"Saturday, June 14"));
+g.appendChild(field(s.language==="Spanish"?"Hora de la Visita":"Open House Time","text",s.openHouseTime,v=>s.openHouseTime=v,"1:00 PM – 4:00 PM"));
 card.appendChild(g);
 }
-card.appendChild(chips("Condition",null,CONDITIONS,s.condition,v=>{s.condition=v;renderApp1Content();},true));
+card.appendChild(chips(s.language==="Spanish"?"Estado":"Condition",null,CONDITIONS,s.condition,v=>{s.condition=v;renderApp1Content();},true));
 const g2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-g2.appendChild(field("Agent Name","text",s.agentName,v=>s.agentName=v,"James Rivera"));
-g2.appendChild(field("Agent Phone","text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
+g2.appendChild(field(s.language==="Spanish"?"Tu Nombre":"Agent Name","text",s.agentName,v=>s.agentName=v,"James Rivera"));
+g2.appendChild(field(s.language==="Spanish"?"Tu Teléfono":"Agent Phone","text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
 card.appendChild(g2);
 }
 
 if(s.step===3){
 card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.location));
-card.appendChild(field("City","text",s.city,v=>s.city=v,"Miami, Dubai, London..."));
-card.appendChild(field("Neighbourhood","text",s.neighbourhood,v=>s.neighbourhood=v,"South Beach, Beverly Hills..."));
-card.appendChild(chips("Location Features",null,LOCATION_FEATS,s.locationFeatures,v=>{s.locationFeatures=tog(s.locationFeatures,v);renderApp1Content();}));
-card.appendChild(field("Commute & Transport","text",s.commute,v=>s.commute=v,"2 blocks to metro, 20 min to downtown"));
+card.appendChild(field(s.language==="Spanish"?"Ciudad":"City","text",s.city,v=>s.city=v,"Miami, Dubai, London..."));
+card.appendChild(field(s.language==="Spanish"?"Barrio / Zona":"Neighbourhood","text",s.neighbourhood,v=>s.neighbourhood=v,"South Beach, Beverly Hills..."));
+card.appendChild(chips(s.language==="Spanish"?"Características de Ubicación":"Location Features",null,LOCATION_FEATS,s.locationFeatures,v=>{s.locationFeatures=tog(s.locationFeatures,v);renderApp1Content();}));
+card.appendChild(field(s.language==="Spanish"?"Transporte y Acceso":"Commute & Transport","text",s.commute,v=>s.commute=v,"2 blocks to metro, 20 min to downtown"));
 }
 
 if(s.step===4&&s.mode!=="sold"){
 card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.features));
-card.appendChild(chips("Interior Features",null,INTERIOR,s.interior,v=>{s.interior=tog(s.interior,v);renderApp1Content();}));
-card.appendChild(chips("Outdoor Features",null,OUTDOOR,s.outdoor,v=>{s.outdoor=tog(s.outdoor,v);renderApp1Content();}));
-card.appendChild(chips("Building Amenities",null,BUILDING,s.building,v=>{s.building=tog(s.building,v);renderApp1Content();}));
+card.appendChild(chips(s.language==="Spanish"?"Características Interiores":"Interior Features",null,INTERIOR,s.interior,v=>{s.interior=tog(s.interior,v);renderApp1Content();}));
+card.appendChild(chips(s.language==="Spanish"?"Características Exteriores":"Outdoor Features",null,OUTDOOR,s.outdoor,v=>{s.outdoor=tog(s.outdoor,v);renderApp1Content();}));
+card.appendChild(chips(s.language==="Spanish"?"Servicios del Edificio":"Building Amenities",null,BUILDING,s.building,v=>{s.building=tog(s.building,v);renderApp1Content();}));
 }
 
 if(s.step===5&&s.mode!=="sold"&&s.mode!=="open_house"){
 card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.standout));
-card.appendChild(textarea("The #1 Unique Feature",s.uniqueFeature,v=>s.uniqueFeature=v,"e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views",3,"Be vivid and specific"));
-card.appendChild(textarea("Additional Notes",s.agentNote,v=>s.agentNote=v,"e.g. Fully renovated 2024. Motivated seller.",2));
+card.appendChild(textarea(s.language==="Spanish"?"La Característica Más Especial":"The #1 Unique Feature",s.uniqueFeature,v=>s.uniqueFeature=v,s.language==="Spanish"?"ej. Un muelle privado de 12 metros con acceso directo al océano y vistas al atardecer":"e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views",3,s.language==="Spanish"?"Sé específico y descriptivo":"Be vivid and specific"));
+card.appendChild(textarea(s.language==="Spanish"?"Notas Adicionales":"Additional Notes",s.agentNote,v=>s.agentNote=v,s.language==="Spanish"?"ej. Completamente reformada en 2024. Vendedor motivado.":"e.g. Fully renovated 2024. Motivated seller.",2));
 }
 
 if((s.step===totalSteps())||(s.step===4&&s.mode==="sold")||(s.step===5&&s.mode==="open_house")){
 card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.toneTitle));
-card.appendChild(chips("Writing Tone",null,TONES,s.tone,v=>{s.tone=v;renderApp1Content();},true));
-card.appendChild(field("Ideal Buyer","text",s.targetBuyer,v=>s.targetBuyer=v,"High-net-worth families, crypto investors...","More specific = better content"));
+card.appendChild(chips(s.language==="Spanish"?"Tono de Escritura":"Writing Tone",null,TONES,s.tone,v=>{s.tone=v;renderApp1Content();},true));
+card.appendChild(field(s.language==="Spanish"?"Comprador Ideal":"Ideal Buyer","text",s.targetBuyer,v=>s.targetBuyer=v,s.language==="Spanish"?"Familias con alto patrimonio, inversores...":"High-net-worth families, crypto investors...",s.language==="Spanish"?"Más específico = mejor contenido":"More specific = better content"));
 }
 
 if(s.error){card.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginTop:"14px"}},`⚠ ${s.error}`));}
@@ -958,7 +958,7 @@ tabs.appendChild(btn);
 content.appendChild(tabs);
 if(s.activeTab==="messages"){content.appendChild(copyCard("WhatsApp","💬",s.result.whatsapp,G.aqua));content.appendChild(copyCard("SMS","📱",s.result.sms,G.aqua));}
 if(s.activeTab==="voice"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.noReply));content.appendChild(copyCard("Phone Call Script","🎙️",s.result.voice_script,G.aqua));}
-if(s.activeTab==="email"){content.appendChild(copyCard("Email Subject","📧",s.result.email_subject,G.aqua));content.appendChild(copyCard("Email Body","📨",s.result.email_body,G.aqua));}
+if(s.activeTab==="email"){content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject","📧",s.result.email_subject,G.aqua));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body","📨",s.result.email_body,G.aqua));}
 if(s.activeTab==="letter"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.replaceBrackets));content.appendChild(copyCard("Formal Letter","✉️",s.result.formal_letter,G.aqua));}
 if(s.activeTab==="followups"){
 content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.sendOrder));
