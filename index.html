@@ -132,29 +132,29 @@ signingIn:"Signing in...",signInBtn:"Sign In →",
 noAccount:"Don't have an account? Contact",
 chooseLanguage:"Choose your language",
 welcomeBack:"Welcome back",
-marketingSystem:g.marketingSystem,
-yourPlan:g.yourPlan,bundle:"Complete Bundle — Both Apps",marketing:"Marketing Tool — App 1 Only",outreach:"Outreach Tool — App 2 Only",
-upgrade:g.upgrade,signOut:g.signOut,admin:g.admin,
-daysLeft:"days left",active:g.active,
-newListing:g.newListing,newClient:g.newClient,
-recentListings:g.recentListings,recentClients:g.recentClients,
-activeListings:g.activeListings,clientsPipeline:g.clientsPipeline,followUpsDue:g.followUpsDue,totalGenerated:g.totalGenerated,
-rerun:g.rerun,followUpDue:g.followUpDue,
-app1title:g.app1title,app1sub:g.app1sub,
-app2title:g.app2title,app2sub:g.app2sub,
+marketingSystem:"Your marketing system is ready. Saves you time, saves you money, helps you close more.",
+yourPlan:"Your Plan",bundle:"Complete Bundle — Both Apps",marketing:"Marketing Tool — App 1 Only",outreach:"Outreach Tool — App 2 Only",
+upgrade:"Upgrade →",signOut:"Sign Out",admin:"⚙️ Admin",
+daysLeft:"days left",active:"✓ Active",
+newListing:"🚀 New Listing →",newClient:"🤝 New Client →",
+recentListings:"Recent Listings",recentClients:"Recent Clients",
+activeListings:"Active Listings",clientsPipeline:"Clients in Pipeline",followUpsDue:"Follow-Ups Due",totalGenerated:"Total Generated",
+rerun:"Re-run →",followUpDue:"⚠ Follow-up due",
+app1title:"Property Marketing Machine",app1sub:"Complete listing package in 30 seconds — every platform covered",
+app2title:"Client Outreach Machine",app2sub:"Personalised outreach for any client in seconds",
 langInstr:"",
 },
 Spanish:{
 tagline:"Marketing Inmobiliario con Inteligencia Artificial",
 signIn:"Iniciar Sesión en Tu Cuenta",
 emailLabel:"Correo Electrónico",passLabel:"Contraseña",
-signingIn:"Iniciando sesión...","signInBtn":"Iniciar Sesión →",
+signingIn:"Iniciando sesión...",signInBtn:"Iniciar Sesión →",
 noAccount:"¿No tienes cuenta? Contacta a",
 chooseLanguage:"Elige tu idioma",
 welcomeBack:"Bienvenido de vuelta",
 marketingSystem:"Tu sistema de marketing está listo. Ahorra tiempo, ahorra dinero, cierra más ventas.",
 yourPlan:"Tu Plan",bundle:"Paquete Completo — Ambas Apps",marketing:"Herramienta de Marketing — App 1",outreach:"Herramienta de Captación — App 2",
-upgrade:"Mejorar Plan →",signOut:"Cerrar Sesión",admin:g.admin,
+upgrade:"Mejorar Plan →",signOut:"Cerrar Sesión",admin:"⚙️ Admin",
 daysLeft:"días restantes",active:"✓ Activo",
 newListing:"🚀 Nueva Propiedad →",newClient:"🤝 Nuevo Cliente →",
 recentListings:"Propiedades Recientes",recentClients:"Clientes Recientes",
@@ -1102,7 +1102,7 @@ const saved=localStorage.getItem("sf_user");
 if(saved){
 const u=JSON.parse(saved);
 apiAuth({action:"check",userId:u.id}).then(res=>{
-if(res.success){state={screen:"dashboard",user:res.user};render();}
+if(res.success){state.screen="dashboard";state.user=res.user;render();}
 else{localStorage.removeItem("sf_user");render();}
 }).catch(()=>render());
 }else{render();}
