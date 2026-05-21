@@ -294,9 +294,8 @@ el("div",{style:{fontSize:"14px",fontWeight:"700",color:G.white}},user.plan==="b
 ));
 
 wrap.appendChild(content);
+return wrap;
 }
-
-// ADMIN PANEL
 function renderAdmin(){
 let adminKey="",authed=false,users=[],loading=false,msg="";
 let name="",email="",password="",plan="bundle",trialDays="7";
