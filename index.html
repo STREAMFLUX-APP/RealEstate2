@@ -428,13 +428,18 @@ content.appendChild(msgDiv);
 if(!authed){
 const authCard=el("div",{style:cardStyle});
 authCard.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"700",marginBottom:"16px",color:G.white}},"⚙️ Admin Panel"));
-const keyField=field("Admin Secret Key","password",adminKey,v=>adminKey=v,"Your admin secret key");
-authCard.appendChild(keyField);
-const authBtn=el("button",{style:{...btnStyle(false),width:"100%"}},"Access Admin →");
+const keyInp=el("input",{type:"password",placeholder:"Enter admin secret key",style:{...inputStyle,marginBottom:"12px"}});
+keyInp.value=adminKey;
+keyInp.addEventListener("input",e=>adminKey=e.target.value);
+authCard.appendChild(keyInp);
+if(msg)authCard.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px",color:"#f87171",fontSize:"13px",marginBottom:"12px"}},msg));
+const authBtn=el("button",{style:{background:G.aqua,color:"#080808",border:"none",borderRadius:"10px",padding:"14px",width:"100%",fontSize:"15px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"Access Admin →");
 authBtn.addEventListener("click",async()=>{
+if(!adminKey){msg="❌ Enter your admin key.";renderAdminContent();return;}
+authBtn.textContent="Checking...";authBtn.disabled=true;
 const res=await apiAdmin({adminKey,action:"list_users"});
-if(res.success){authed=true;users=res.users;msg="";renderAdminContent();}
-else{msg="❌ Wrong admin key";renderAdminContent();}
+if(res.success){authed=true;users=res.users||[];msg="";renderAdminContent();}
+else{msg="❌ "+(res.error||"Wrong admin key");renderAdminContent();}
 });
 authCard.appendChild(authBtn);
 content.appendChild(authCard);
