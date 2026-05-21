@@ -576,17 +576,17 @@ content.appendChild(prog);
 const card=el("div",{style:cardStyle});
 
 if(s.step===1){
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},"🌐 Output Language"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},`🌐 ${(T[s.language]||T.English).langLabel}`));
 const langSel=el("select",{style:{...inputStyle,cursor:"pointer",marginBottom:"20px"}});
 LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
-langSel.addEventListener("change",e=>s.language=e.target.value);
+langSel.addEventListener("change",e=>{s.language=e.target.value;renderApp1Content();});
 card.appendChild(langSel);
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},"🎯 What Are You Marketing?"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},t.whatMarketing));
 card.appendChild(chips(null,null,MODES,s.mode,v=>{s.mode=v;renderApp1Content();},true));
 }
 
 if(s.step===2){
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏠 Property Basics"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.propBasics));
 // CUSTOM CONTEXT BOX
 const ctxBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
 ctxBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t.customBoxTitle));
@@ -635,7 +635,7 @@ card.appendChild(g2);
 }
 
 if(s.step===3){
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"📍 Location & Views"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.location));
 card.appendChild(field("City","text",s.city,v=>s.city=v,"Miami, Dubai, London..."));
 card.appendChild(field("Neighbourhood","text",s.neighbourhood,v=>s.neighbourhood=v,"South Beach, Beverly Hills..."));
 card.appendChild(chips("Location Features",null,LOCATION_FEATS,s.locationFeatures,v=>{s.locationFeatures=tog(s.locationFeatures,v);renderApp1Content();}));
@@ -643,20 +643,20 @@ card.appendChild(field("Commute & Transport","text",s.commute,v=>s.commute=v,"2 
 }
 
 if(s.step===4&&s.mode!=="sold"){
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🛋️ Property Features"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.features));
 card.appendChild(chips("Interior Features",null,INTERIOR,s.interior,v=>{s.interior=tog(s.interior,v);renderApp1Content();}));
 card.appendChild(chips("Outdoor Features",null,OUTDOOR,s.outdoor,v=>{s.outdoor=tog(s.outdoor,v);renderApp1Content();}));
 card.appendChild(chips("Building Amenities",null,BUILDING,s.building,v=>{s.building=tog(s.building,v);renderApp1Content();}));
 }
 
 if(s.step===5&&s.mode!=="sold"&&s.mode!=="open_house"){
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"⭐ Standout Details"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.standout));
 card.appendChild(textarea("The #1 Unique Feature",s.uniqueFeature,v=>s.uniqueFeature=v,"e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views",3,"Be vivid and specific"));
 card.appendChild(textarea("Additional Notes",s.agentNote,v=>s.agentNote=v,"e.g. Fully renovated 2024. Motivated seller.",2));
 }
 
 if((s.step===totalSteps())||(s.step===4&&s.mode==="sold")||(s.step===5&&s.mode==="open_house")){
-card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🎯 Tone & Target Buyer"));
+card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.toneTitle));
 card.appendChild(chips("Writing Tone",null,TONES,s.tone,v=>{s.tone=v;renderApp1Content();},true));
 card.appendChild(field("Ideal Buyer","text",s.targetBuyer,v=>s.targetBuyer=v,"High-net-worth families, crypto investors...","More specific = better content"));
 }
@@ -897,19 +897,19 @@ const content=el("div",{style:{maxWidth:"660px",margin:"0 auto",padding:"30px 18
 
 // Language
 const langCard=el("div",{style:cardStyle});
-langCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},"🌐 Output Language"));
+langCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},`🌐 ${(T2[s.language]||T2.English).langLabel}`));
 const langSel=el("select",{style:{...inputStyle,cursor:"pointer"}});
 LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
-langSel.addEventListener("change",e=>s.language=e.target.value);
+langSel.addEventListener("change",e=>{s.language=e.target.value;renderApp2Content();});
 langCard.appendChild(langSel);
 content.appendChild(langCard);
 
 // Client info
+const t2form=T2[s.language]||T2.English;
 const clientCard=el("div",{style:cardStyle});
-clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"👤 Who Are You Contacting?"));
+clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.whoContact));
 // CUSTOM SITUATION BOX — App2
 const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
-const t2form=T2[s.language]||T2.English;
 sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
 sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2form.situationHint));
 const sitTa=el("textarea",{placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
@@ -941,7 +941,7 @@ content.appendChild(annCard);
 }
 
 const propCard=el("div",{style:cardStyle});
-propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏠 Property You're Offering"));
+propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
 propCard.appendChild(field("Property Address","text",s.propAddress,v=>s.propAddress=v,"42 Palm Drive, Miami Beach, FL 33139"));
 const pg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
 pg.appendChild(field("Asking Price ($)","text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
@@ -1007,7 +1007,7 @@ lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},`
 content.appendChild(lc);
 }
 
-const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px"}},s.loading?(T2[s.language]||T2.English).generating:(T2[s.language]||T2.English).generate);
+const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px"}},t2form.loading?t2form.generating:t2form.generate);
 genBtn.addEventListener("click",()=>{if(canGenerate()&&!s.loading)generate();});
 content.appendChild(genBtn);
 if(!canGenerate())content.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",marginTop:"8px",textAlign:"center"}},(T2[s.language]||T2.English).fillRequired));
