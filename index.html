@@ -666,7 +666,7 @@ ctxTa.addEventListener("input",e=>s.customContext=e.target.value);
 ctxBox.appendChild(ctxTa);
 ctxBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t.customBoxLeave));
 card.appendChild(ctxBox);
-card.appendChild(chips(t2form.propType,null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
+card.appendChild(chips(s.language==="Spanish"?"Tipo de Propiedad":"Property Type",null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
 card.appendChild(field("Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
 if(s.mode==="price_reduction"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
@@ -680,7 +680,7 @@ g.appendChild(field("Sold Price ($)","text",s.soldPrice,v=>s.soldPrice=v,"980,00
 g.appendChild(field("Days on Market","number",s.daysOnMarket,v=>s.daysOnMarket=v,"12"));
 card.appendChild(g);
 }else{
-card.appendChild(field(t2form.propPrice,"text",s.price,v=>s.price=v,"1,250,000"));
+card.appendChild(field(s.language==="Spanish"?"Precio de Venta ($)":"Asking Price ($)","text",s.price,v=>s.price=v,"1,250,000"));
 }
 if(s.mode!=="sold"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
@@ -777,9 +777,6 @@ situationTitle:"✨ Describe the Situation in Your Own Words",
 situationHint:"Write exactly what happened — the objection they raised, what they said, how you know them, what they want. The AI uses this for hyper-personalised messages. The form below is backup.",
 situationPlaceholder:"e.g. Sarah met me at the open house last Saturday. She loved the property but said $1.4M feels too high. She has two kids in school and her husband works from home so they need a home office. She seemed genuinely interested but nervous about the market.",
 situationLeave:"Leave blank to use the selections below.",
-propTitle:t2form.propTitle,matcherTitle:t2form.matcherTitle,
-buyerTitle:t2form.buyerTitle,sellerTitle:t2form.sellerTitle,
-contextTitle:t2form.contextTitle,agentTitle:t2form.agentTitle,
 generate:"✦ Generate Full Outreach Package",generating:"Generating...",
 fillRequired:"Fill in client name, type, contact reason, tone and your name to continue.",
 regenTitle:"✨ What Happened After Your First Message?",
@@ -792,21 +789,21 @@ sendOrder:"Send in order if no reply.",
 noReply:"Read naturally — don't sound like you're reading a script.",
 replaceBrackets:"Replace anything in brackets before printing.",
 followPlan:"Your exact follow-up plan for",
-propTitle:t2form.propTitle,matcherTitle:t2form.matcherTitle,
-buyerTitle:t2form.buyerTitle,sellerTitle:t2form.sellerTitle,
-contextTitle:t2form.contextTitle,agentTitle:t2form.agentTitle,
-priorLabel:t2form.priorLabel,priorHint:t2form.priorHint,
-priorPlaceholder:t2form.priorPlaceholder,
-noteLabel:t2form.noteLabel,noteHint:t2form.noteHint,
-notePlaceholder:t2form.notePlaceholder,
-agentName:t2form.agentName,agentPhone:t2form.agentPhone,agencyName:t2form.agencyName,
-objTitle:t2form.objTitle,annTitle:t2form.annTitle,annLabel:t2form.annLabel,
-clientFirstName:t2form.clientFirstName,clientType:t2form.clientType,contactReason:t2form.contactReason,
-urgencyLabel:t2form.urgencyLabel,toneLabel:t2form.toneLabel,
-matcherHint:t2form.matcherHint,
-buyerNeeds:t2form.buyerNeeds,optionLabel:"Option",
-propAddress:t2form.propAddress,propPrice:t2form.propPrice,propType:t2form.propType,propHighlights:t2form.propHighlights,propHighlightsHint:t2form.propHighlightsHint,
-aiMatchAnalysis:t2form.aiMatchAnalysis,
+propTitle:"🏠 Property You're Offering",matcherTitle:"🏆 Property Preference Matcher",
+buyerTitle:"🔍 Buyer Criteria",sellerTitle:"🏷️ Seller Situation",
+contextTitle:"💡 Personal Context",agentTitle:"🏷️ Your Details",
+priorLabel:"Prior Contact History",priorHint:"Have you spoken before? What did they say?",
+priorPlaceholder:"Met at open house 2 weeks ago...",
+noteLabel:"Personal Note",noteHint:"Kids, job, lifestyle — makes messages feel real",
+notePlaceholder:"Has 2 young kids, works from home...",
+agentName:"Your Name",agentPhone:"Your Phone",agencyName:"Agency / Company Name",
+objTitle:"🛡️ What Objection Did They Raise?",annTitle:"🎉 Anniversary Details",annLabel:"Years Since Purchase",
+clientFirstName:"Client First Name",clientType:"Client Type",contactReason:"Reason for Contacting",
+urgencyLabel:"Urgency Level",toneLabel:"Communication Tone",
+matcherHint:"Enter up to 3 properties. AI picks the best match and writes all messages around it.",
+buyerNeeds:"Buyer's Needs & Preferences",optionLabel:"Option",
+propAddress:"Property Address",propPrice:"Asking Price ($)",propType:"Property Type",propHighlights:"Key Highlights",propHighlightsHint:"Top 2-3 things perfect for this client",
+aiMatchAnalysis:"🏆 AI Property Match Analysis",
 },
 Spanish:{
 title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
