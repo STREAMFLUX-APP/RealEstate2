@@ -553,6 +553,7 @@ if(s.step===1)return!!s.mode;
 if(s.step===2)return s.propType&&s.address&&s.price&&(s.mode==="sold"?true:s.beds&&s.baths);
 if(s.step===3)return!!s.city;
 if(s.step===4)return s.mode==="sold"?!!s.tone:s.interior.length>0||s.outdoor.length>0;
+if(s.step===5&&s.mode!=="sold"&&s.mode!=="open_house")return true;
 return!!s.tone;
 }
 
