@@ -542,15 +542,16 @@ loading1:"Escribiendo descripción y email...",loading2:"Escribiendo redes socia
 }
 };
 
-const MODES=[{value:"new_listing",label:"🏠 New Listing",desc:"Full marketing package"},{value:"open_house",label:"🚪 Open House",desc:"Event invite & promotion"},{value:"price_reduction",label:"📉 Price Reduction",desc:"Re-market with new price"},{value:"sold",label:"🏆 Just Sold",desc:"Announce the sale"}];
-const PROP_TYPES=["House","Apartment","Condo","Townhouse","Villa","Penthouse","Studio","Duplex","Triplex","Land / Lot","Commercial","Mixed Use"];
-const CONDITIONS=["Brand New / Off-Plan","Newly Renovated","Move-in Ready","Good Condition","Needs TLC / Fixer-upper"];
-const LOCATION_FEATS=["Beachfront","Beach Access","Oceanfront","Ocean View","Lakefront","Lake View","Riverfront","River View","Mountain View","Golf Course View","Golf Course Community","City View","City Center","Waterfront","Marina / Boat Dock","Gated Community","Cul-de-Sac","Corner Lot","Quiet Street","Shopping & Dining Nearby","Top-Rated Schools","Parks & Green Space","Transport Links","Airport Nearby","Highway Access"];
-const INTERIOR=["Open Plan Living","High Ceilings","Hardwood Floors","Marble Floors","Modern Kitchen","Chef's Kitchen","Granite Countertops","Quartz Countertops","Kitchen Island","Butler's Pantry","Master Suite","Walk-in Wardrobe","En-suite Bathrooms","Double Vanity","Soaking Tub","Rainfall Shower","Home Office","Media Room / Cinema","Smart Home System","Fireplace","Wine Cellar","Wet Bar","Laundry Room","Solar Panels","Generator"];
-const OUTDOOR=["Private Pool","Heated Pool","Infinity Pool","Hot Tub / Jacuzzi","Rooftop Terrace","Covered Patio","Balcony","Private Garden","Landscaped Yard","Outdoor Kitchen","Built-in BBQ","Fire Pit","Boat Dock","Private Beach Access","Tennis Court","Basketball Court","Guest House","Garage (1 Car)","Garage (2 Car)","Garage (3+ Car)","EV Charging","Gated Entry","Security System"];
-const BUILDING=["Concierge Service","24/7 Security","Doorman","Valet Parking","Rooftop Pool","Fitness Center","Yoga Studio","Spa","Co-working Space","Pet-Friendly","Guest Suites","Low HOA Fees","No HOA"];
-const TONES=[{value:"luxury",label:"Luxury & Prestige",desc:"High-end, aspirational"},{value:"friendly",label:"Warm & Friendly",desc:"Approachable, homey"},{value:"investment",label:"Investment Focus",desc:"ROI, numbers, opportunity"},{value:"lifestyle",label:"Lifestyle & Vibe",desc:"Energetic, aspirational"},{value:"urgent",label:"Urgency & FOMO",desc:"Act now, limited time"}];
-const TABS=[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"}];
+const isSpa=s.language==="Spanish";
+const MODES=isSpa?[{value:"new_listing",label:"🏠 Nueva Propiedad",desc:"Paquete completo de marketing"},{value:"open_house",label:"🚪 Jornada de Puertas Abiertas",desc:"Invitación y promoción"},{value:"price_reduction",label:"📉 Reducción de Precio",desc:"Re-marketing con nuevo precio"},{value:"sold",label:"🏆 Vendida",desc:"Anunciar la venta"}]:[{value:"new_listing",label:"🏠 New Listing",desc:"Full marketing package"},{value:"open_house",label:"🚪 Open House",desc:"Event invite & promotion"},{value:"price_reduction",label:"📉 Price Reduction",desc:"Re-market with new price"},{value:"sold",label:"🏆 Just Sold",desc:"Announce the sale"}];
+const PROP_TYPES=isSpa?["Casa","Apartamento","Condominio","Adosado","Villa","Ático","Estudio","Dúplex","Tríplex","Terreno","Local Comercial","Uso Mixto"]:["House","Apartment","Condo","Townhouse","Villa","Penthouse","Studio","Duplex","Triplex","Land / Lot","Commercial","Mixed Use"];
+const CONDITIONS=isSpa?["Obra Nueva / Sobre Plano","Recién Reformado","Listo para Entrar","Buen Estado","Necesita Reforma"]:["Brand New / Off-Plan","Newly Renovated","Move-in Ready","Good Condition","Needs TLC / Fixer-upper"];
+const LOCATION_FEATS=isSpa?["Primera Línea de Playa","Acceso a la Playa","Frente al Mar","Vistas al Mar","Frente al Lago","Vistas al Lago","Frente al Río","Vistas al Río","Vistas a la Montaña","Vistas al Campo de Golf","Comunidad de Golf","Vistas a la Ciudad","Centro Ciudad","Frente al Agua","Puerto Deportivo","Urbanización Privada","Cul-de-Sac","Esquina","Calle Tranquila","Tiendas y Restaurantes Cerca","Colegios de Primera","Parques y Zonas Verdes","Transporte Público","Aeropuerto Cercano","Acceso a Autopista"]:["Beachfront","Beach Access","Oceanfront","Ocean View","Lakefront","Lake View","Riverfront","River View","Mountain View","Golf Course View","Golf Course Community","City View","City Center","Waterfront","Marina / Boat Dock","Gated Community","Cul-de-Sac","Corner Lot","Quiet Street","Shopping & Dining Nearby","Top-Rated Schools","Parks & Green Space","Transport Links","Airport Nearby","Highway Access"];
+const INTERIOR=isSpa?["Planta Abierta","Techos Altos","Suelos de Madera","Suelos de Mármol","Cocina Moderna","Cocina de Chef","Encimera de Granito","Encimera de Cuarzo","Isla de Cocina","Despensa","Suite Principal","Vestidor","Baños en Suite","Doble Lavabo","Bañera Exenta","Ducha de Lluvia","Oficina en Casa","Sala de Cine","Casa Domótica","Chimenea","Bodega","Bar Húmedo","Lavandería","Paneles Solares","Generador"]:["Open Plan Living","High Ceilings","Hardwood Floors","Marble Floors","Modern Kitchen","Chef's Kitchen","Granite Countertops","Quartz Countertops","Kitchen Island","Butler's Pantry","Master Suite","Walk-in Wardrobe","En-suite Bathrooms","Double Vanity","Soaking Tub","Rainfall Shower","Home Office","Media Room / Cinema","Smart Home System","Fireplace","Wine Cellar","Wet Bar","Laundry Room","Solar Panels","Generator"];
+const OUTDOOR=isSpa?["Piscina Privada","Piscina Climatizada","Piscina Infinita","Jacuzzi","Terraza en Azotea","Patio Cubierto","Balcón","Jardín Privado","Jardín Paisajístico","Cocina Exterior","Barbacoa Integrada","Hoguera","Embarcadero","Acceso Privado a la Playa","Pista de Tenis","Cancha de Baloncesto","Casa de Invitados","Garaje (1 Coche)","Garaje (2 Coches)","Garaje (3+ Coches)","Cargador Eléctrico","Entrada con Verja","Sistema de Seguridad"]:["Private Pool","Heated Pool","Infinity Pool","Hot Tub / Jacuzzi","Rooftop Terrace","Covered Patio","Balcony","Private Garden","Landscaped Yard","Outdoor Kitchen","Built-in BBQ","Fire Pit","Boat Dock","Private Beach Access","Tennis Court","Basketball Court","Guest House","Garage (1 Car)","Garage (2 Car)","Garage (3+ Car)","EV Charging","Gated Entry","Security System"];
+const BUILDING=isSpa?["Servicio de Conserjería","Seguridad 24/7","Portero","Valet","Piscina en Azotea","Gimnasio","Sala de Yoga","Spa","Coworking","Admite Mascotas","Suites de Invitados","Cuota Comunidad Baja","Sin Cuota de Comunidad"]:["Concierge Service","24/7 Security","Doorman","Valet Parking","Rooftop Pool","Fitness Center","Yoga Studio","Spa","Co-working Space","Pet-Friendly","Guest Suites","Low HOA Fees","No HOA"];
+const TONES=isSpa?[{value:"luxury",label:"Lujo y Prestigio",desc:"Premium y aspiracional"},{value:"friendly",label:"Cálido y Cercano",desc:"Accesible y hogareño"},{value:"investment",label:"Enfoque Inversor",desc:"ROI, números, oportunidad"},{value:"lifestyle",label:"Estilo de Vida",desc:"Energético y aspiracional"},{value:"urgent",label:"Urgencia y FOMO",desc:"Actúa ya, tiempo limitado"}]:[{value:"luxury",label:"Luxury & Prestige",desc:"High-end, aspirational"},{value:"friendly",label:"Warm & Friendly",desc:"Approachable, homey"},{value:"investment",label:"Investment Focus",desc:"ROI, numbers, opportunity"},{value:"lifestyle",label:"Lifestyle & Vibe",desc:"Energetic, aspirational"},{value:"urgent",label:"Urgency & FOMO",desc:"Act now, limited time"}];
+const TABS=isSpa?[{id:"listing",label:"🏠 Propiedad"},{id:"social",label:"📱 Redes Sociales"},{id:"ads",label:"🎯 Anuncios y SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Vecinos"},{id:"schedule",label:"📅 Calendario"}]:[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"}];
 
 let s={step:1,mode:"",language:state.lang||"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",customContext:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
 
@@ -665,7 +666,7 @@ ctxTa.addEventListener("input",e=>s.customContext=e.target.value);
 ctxBox.appendChild(ctxTa);
 ctxBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t.customBoxLeave));
 card.appendChild(ctxBox);
-card.appendChild(chips("Property Type",null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
+card.appendChild(chips(t2form.propType,null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
 card.appendChild(field("Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
 if(s.mode==="price_reduction"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
@@ -679,7 +680,7 @@ g.appendChild(field("Sold Price ($)","text",s.soldPrice,v=>s.soldPrice=v,"980,00
 g.appendChild(field("Days on Market","number",s.daysOnMarket,v=>s.daysOnMarket=v,"12"));
 card.appendChild(g);
 }else{
-card.appendChild(field("Asking Price ($)","text",s.price,v=>s.price=v,"1,250,000"));
+card.appendChild(field(t2form.propPrice,"text",s.price,v=>s.price=v,"1,250,000"));
 }
 if(s.mode!=="sold"){
 const g=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
@@ -776,9 +777,9 @@ situationTitle:"✨ Describe the Situation in Your Own Words",
 situationHint:"Write exactly what happened — the objection they raised, what they said, how you know them, what they want. The AI uses this for hyper-personalised messages. The form below is backup.",
 situationPlaceholder:"e.g. Sarah met me at the open house last Saturday. She loved the property but said $1.4M feels too high. She has two kids in school and her husband works from home so they need a home office. She seemed genuinely interested but nervous about the market.",
 situationLeave:"Leave blank to use the selections below.",
-propTitle:"🏠 Property You're Offering",matcherTitle:"🏆 Property Preference Matcher",
-buyerTitle:"🔍 Buyer Criteria",sellerTitle:"🏷️ Seller Situation",
-contextTitle:"💡 Personal Context",agentTitle:"🏷️ Your Details",
+propTitle:t2form.propTitle,matcherTitle:t2form.matcherTitle,
+buyerTitle:t2form.buyerTitle,sellerTitle:t2form.sellerTitle,
+contextTitle:t2form.contextTitle,agentTitle:t2form.agentTitle,
 generate:"✦ Generate Full Outreach Package",generating:"Generating...",
 fillRequired:"Fill in client name, type, contact reason, tone and your name to continue.",
 regenTitle:"✨ What Happened After Your First Message?",
@@ -791,6 +792,21 @@ sendOrder:"Send in order if no reply.",
 noReply:"Read naturally — don't sound like you're reading a script.",
 replaceBrackets:"Replace anything in brackets before printing.",
 followPlan:"Your exact follow-up plan for",
+propTitle:t2form.propTitle,matcherTitle:t2form.matcherTitle,
+buyerTitle:t2form.buyerTitle,sellerTitle:t2form.sellerTitle,
+contextTitle:t2form.contextTitle,agentTitle:t2form.agentTitle,
+priorLabel:t2form.priorLabel,priorHint:t2form.priorHint,
+priorPlaceholder:t2form.priorPlaceholder,
+noteLabel:t2form.noteLabel,noteHint:t2form.noteHint,
+notePlaceholder:t2form.notePlaceholder,
+agentName:t2form.agentName,agentPhone:t2form.agentPhone,agencyName:t2form.agencyName,
+objTitle:t2form.objTitle,annTitle:t2form.annTitle,annLabel:t2form.annLabel,
+clientFirstName:t2form.clientFirstName,clientType:t2form.clientType,contactReason:t2form.contactReason,
+urgencyLabel:t2form.urgencyLabel,toneLabel:t2form.toneLabel,
+matcherHint:t2form.matcherHint,
+buyerNeeds:t2form.buyerNeeds,optionLabel:"Option",
+propAddress:t2form.propAddress,propPrice:t2form.propPrice,propType:t2form.propType,propHighlights:t2form.propHighlights,propHighlightsHint:t2form.propHighlightsHint,
+aiMatchAnalysis:t2form.aiMatchAnalysis,
 },
 Spanish:{
 title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
@@ -814,6 +830,21 @@ sendOrder:"Envía en orden si no hay respuesta.",
 noReply:"Lee con naturalidad — no suenes como si estuvieras leyendo un guión.",
 replaceBrackets:"Reemplaza todo lo que esté entre corchetes antes de imprimir.",
 followPlan:"Tu plan exacto de seguimiento para",
+propTitle:"🏠 Propiedad que Ofreces",matcherTitle:"🏆 Comparador de Propiedades",
+buyerTitle:"🔍 Criterios del Comprador",sellerTitle:"🏷️ Situación del Vendedor",
+contextTitle:"💡 Contexto Personal",agentTitle:"🏷️ Tus Datos",
+priorLabel:"Historial de Contacto Previo",priorHint:"¿Has hablado antes? ¿Qué dijeron?",
+priorPlaceholder:"Nos conocimos en la jornada de puertas abiertas hace 2 semanas...",
+noteLabel:"Nota Personal",noteHint:"Hijos, trabajo, estilo de vida — hace los mensajes más reales",
+notePlaceholder:"Tiene 2 hijos pequeños, trabaja desde casa...",
+agentName:"Tu Nombre",agentPhone:"Tu Teléfono",agencyName:"Agencia / Empresa",
+objTitle:"🛡️ ¿Qué Objeción Plantearon?",annTitle:"🎉 Detalles del Aniversario",annLabel:"Años desde la Compra",
+clientFirstName:"Nombre del Cliente",clientType:"Tipo de Cliente",contactReason:"Motivo del Contacto",
+urgencyLabel:"Nivel de Urgencia",toneLabel:"Tono de Comunicación",
+matcherHint:"Introduce hasta 3 propiedades. La IA elige la mejor opción y escribe todos los mensajes.",
+buyerNeeds:"Necesidades y Preferencias del Comprador",optionLabel:"Opción",
+propAddress:"Dirección de la Propiedad",propPrice:"Precio de Venta ($)",propType:"Tipo de Propiedad",propHighlights:"Puntos Clave",propHighlightsHint:"Las 2-3 cosas perfectas para este cliente",
+aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
 },
 // Mexican Spanish removed
 "UNUSED":{
@@ -838,16 +869,32 @@ sendOrder:"Envía en orden si no hay respuesta.",
 noReply:"Lee con naturalidad — no suenes como si estuvieras leyendo un guión.",
 replaceBrackets:"Reemplaza todo lo que esté entre corchetes antes de imprimir.",
 followPlan:"Tu plan exacto de seguimiento para",
+propTitle:"🏠 Propiedad que Ofreces",matcherTitle:"🏆 Comparador de Propiedades",
+buyerTitle:"🔍 Criterios del Comprador",sellerTitle:"🏷️ Situación del Vendedor",
+contextTitle:"💡 Contexto Personal",agentTitle:"🏷️ Tus Datos",
+priorLabel:"Historial de Contacto Previo",priorHint:"¿Has hablado antes? ¿Qué dijeron?",
+priorPlaceholder:"Nos conocimos en la jornada de puertas abiertas hace 2 semanas...",
+noteLabel:"Nota Personal",noteHint:"Hijos, trabajo, estilo de vida — hace los mensajes más reales",
+notePlaceholder:"Tiene 2 hijos pequeños, trabaja desde casa...",
+agentName:"Tu Nombre",agentPhone:"Tu Teléfono",agencyName:"Agencia / Empresa",
+objTitle:"🛡️ ¿Qué Objeción Plantearon?",annTitle:"🎉 Detalles del Aniversario",annLabel:"Años desde la Compra",
+clientFirstName:"Nombre del Cliente",clientType:"Tipo de Cliente",contactReason:"Motivo del Contacto",
+urgencyLabel:"Nivel de Urgencia",toneLabel:"Tono de Comunicación",
+matcherHint:"Introduce hasta 3 propiedades. La IA elige la mejor opción y escribe todos los mensajes.",
+buyerNeeds:"Necesidades y Preferencias del Comprador",optionLabel:"Opción",
+propAddress:"Dirección de la Propiedad",propPrice:"Precio de Venta ($)",propType:"Tipo de Propiedad",propHighlights:"Puntos Clave",propHighlightsHint:"Las 2-3 cosas perfectas para este cliente",
+aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
 }
 };
-const CLIENT_TYPES=[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
-const CONTACT_REASONS=[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
-const TONES=[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
-const URGENCY=[{value:"high",label:"🔥 High Urgency",desc:"Must act now"},{value:"medium",label:"⏳ Medium Urgency",desc:"1-3 months"},{value:"low",label:"🌱 Low Urgency",desc:"Building relationship"}];
-const OBJECTIONS=[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
-const BUYER_CRITERIA=["Under $500K","$500K–$1M","$1M–$2M","$2M–$5M","$5M+","1 Bedroom","2 Bedrooms","3 Bedrooms","4+ Bedrooms","House","Apartment","Condo","Villa","Townhouse","Pool Wanted","Garden Wanted","Sea View Wanted","City Center","Quiet Area","Good Schools Nearby","Pet Friendly","Investment Purpose","Primary Residence"];
-const SELLER_SITUATION=["Wants Quick Sale","Flexible on Timeline","Needs Top Dollar","Downsizing","Upsizing","Relocating","Divorce Settlement","Inherited Property","Investment Property Sale","Already Found New Home","Testing the Market"];
-const TABS=[{id:"messages",label:"💬 Messages"},{id:"voice",label:"🎙️ Voice"},{id:"email",label:"📧 Email"},{id:"letter",label:"✉️ Letter"},{id:"followups",label:"🔄 Follow-Ups"},{id:"schedule",label:"📅 Schedule"}];
+const isSpa2=s.language==="Spanish";
+const CLIENT_TYPES=isSpa2?[{value:"buyer_active",label:"🔥 Comprador Activo",desc:"Buscando ahora, listo para comprar"},{value:"buyer_passive",label:"👀 Comprador Pasivo",desc:"Interesado pero sin urgencia"},{value:"seller_motivated",label:"⚡ Vendedor Motivado",desc:"Quiere vender rápido"},{value:"seller_exploring",label:"🤔 Vendedor Explorando",desc:"Considera vender"},{value:"investor",label:"💰 Inversor",desc:"Oportunidad de ROI"},{value:"cold_lead",label:"❄️ Lead Frío",desc:"Sin contacto previo"},{value:"past_client",label:"🤝 Cliente Anterior",desc:"Ya cerramos juntos"}]:[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
+const CONTACT_REASONS=isSpa2?[{value:"new_listing",label:"Nueva Propiedad Disponible",desc:"Propiedad que encaja con sus criterios"},{value:"price_drop",label:"Reducción de Precio",desc:"Bajó el precio de una propiedad"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},{value:"open_house",label:"Invitación a Visita",desc:"Invitar a ver una propiedad"},{value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Propiedad Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar un trato"},{value:"anniversary",label:"Aniversario de Compra",desc:"1 año+ desde que compraron"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
+const TONES=isSpa2?[{value:"warm",label:"Cálido y Personal",desc:"Amigable, relación primero"},{value:"professional",label:"Profesional",desc:"Pulido y creíble"},{value:"urgent",label:"Urgente y Directo",desc:"Con urgencia"},{value:"casual",label:"Casual y Relajado",desc:"Sin presión"},{value:"luxury",label:"Lujo y Prestigio",desc:"Premium y exclusivo"}]:[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
+const URGENCY=isSpa2?[{value:"high",label:"🔥 Alta Urgencia",desc:"Debe actuar ahora"},{value:"medium",label:"⏳ Urgencia Media",desc:"1-3 meses"},{value:"low",label:"🌱 Baja Urgencia",desc:"Construyendo relación"}]:[{value:"high",label:"🔥 High Urgency",desc:"Must act now"},{value:"medium",label:"⏳ Medium Urgency",desc:"1-3 months"},{value:"low",label:"🌱 Low Urgency",desc:"Building relationship"}];
+const OBJECTIONS=isSpa2?[{value:"too_expensive",label:"Demasiado Caro"},{value:"not_interested",label:"No Estoy Interesado"},{value:"happy_where_i_am",label:"Estoy Bien Donde Estoy"},{value:"already_have_agent",label:"Ya Tengo Agente"},{value:"market_too_slow",label:"El Mercado Está Lento"},{value:"need_more_time",label:"Necesito Más Tiempo"},{value:"bad_timing",label:"No Es Buen Momento"}]:[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
+const BUYER_CRITERIA=isSpa2?["Menos de $500K","$500K–$1M","$1M–$2M","$2M–$5M","$5M+","1 Habitación","2 Habitaciones","3 Habitaciones","4+ Habitaciones","Casa","Apartamento","Condominio","Villa","Adosado","Con Piscina","Con Jardín","Con Vistas al Mar","Centro Ciudad","Zona Tranquila","Buenos Colegios Cerca","Admite Mascotas","Para Inversión","Residencia Principal"]:["Under $500K","$500K–$1M","$1M–$2M","$2M–$5M","$5M+","1 Bedroom","2 Bedrooms","3 Bedrooms","4+ Bedrooms","House","Apartment","Condo","Villa","Townhouse","Pool Wanted","Garden Wanted","Sea View Wanted","City Center","Quiet Area","Good Schools Nearby","Pet Friendly","Investment Purpose","Primary Residence"];
+const SELLER_SITUATION=isSpa2?["Quiere Vender Rápido","Flexible con los Tiempos","Busca el Mejor Precio","Reduciendo Tamaño","Aumentando Tamaño","Reubicación","Acuerdo de Divorcio","Propiedad Heredada","Venta de Inversión","Ya Encontró Nueva Propiedad","Explorando el Mercado"]:["Wants Quick Sale","Flexible on Timeline","Needs Top Dollar","Downsizing","Upsizing","Relocating","Divorce Settlement","Inherited Property","Investment Property Sale","Already Found New Home","Testing the Market"];
+const TABS=isSpa2?[{id:"messages",label:"💬 Mensajes"},{id:"voice",label:"🎙️ Guión"},{id:"email",label:"📧 Email"},{id:"letter",label:"✉️ Carta"},{id:"followups",label:"🔄 Seguimientos"},{id:"schedule",label:"📅 Calendario"}]:[{id:"messages",label:"💬 Messages"},{id:"voice",label:"🎙️ Voice"},{id:"email",label:"📧 Email"},{id:"letter",label:"✉️ Letter"},{id:"followups",label:"🔄 Follow-Ups"},{id:"schedule",label:"📅 Schedule"}];
 
 let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
@@ -900,7 +947,7 @@ if(s.result){
 const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"22px 16px 60px"}});
 if(s.result.best_match_analysis){
 const matchBox=el("div",{style:{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"18px"}});
-matchBox.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"8px"}},"🏆 AI Property Match Analysis"));
+matchBox.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"8px"}},t2form.aiMatchAnalysis));
 matchBox.appendChild(el("p",{style:{color:"#d1fae5",fontSize:"14px",lineHeight:"1.7"}},s.result.best_match_analysis));
 content.appendChild(matchBox);
 }
@@ -987,51 +1034,51 @@ sitBox.appendChild(sitTa);
 sitBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t2form.situationLeave));
 content.appendChild(sitBox);
 
-clientCard.appendChild(field("Client First Name","text",s.clientName,v=>s.clientName=v,"Sarah"));
-clientCard.appendChild(chips("Client Type",null,CLIENT_TYPES,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
-clientCard.appendChild(chips("Reason for Contacting",null,CONTACT_REASONS,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
-clientCard.appendChild(chips("Urgency Level",null,URGENCY,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
-clientCard.appendChild(chips("Communication Tone",null,TONES,s.tone,v=>{s.tone=v;renderApp2Content();},true));
+clientCard.appendChild(field(t2form.clientFirstName,"text",s.clientName,v=>s.clientName=v,"Sarah"));
+clientCard.appendChild(chips(t2form.clientType,null,CLIENT_TYPES,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
+clientCard.appendChild(chips(t2form.contactReason,null,CONTACT_REASONS,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
+clientCard.appendChild(chips(t2form.urgencyLabel,null,URGENCY,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
+clientCard.appendChild(chips(t2form.toneLabel,null,TONES,s.tone,v=>{s.tone=v;renderApp2Content();},true));
 content.appendChild(clientCard);
 
 if(s.contactReason==="objection_handle"){
 const objCard=el("div",{style:cardStyle});
-objCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🛡️ What Objection Did They Raise?"));
+objCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.objTitle));
 objCard.appendChild(chips(null,null,OBJECTIONS,s.objection,v=>{s.objection=v;renderApp2Content();},true));
 content.appendChild(objCard);
 }
 
 if(s.contactReason==="anniversary"){
 const annCard=el("div",{style:cardStyle});
-annCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},"🎉 Anniversary Details"));
-annCard.appendChild(field("Years Since Purchase","number",s.anniversaryYears,v=>s.anniversaryYears=v,"1"));
+annCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},t2form.annTitle));
+annCard.appendChild(field(t2form.annLabel,"number",s.anniversaryYears,v=>s.anniversaryYears=v,"1"));
 content.appendChild(annCard);
 }
 
 const propCard=el("div",{style:cardStyle});
 propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
-propCard.appendChild(field("Property Address","text",s.propAddress,v=>s.propAddress=v,"42 Palm Drive, Miami Beach, FL 33139"));
+propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,"42 Palm Drive, Miami Beach, FL 33139"));
 const pg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-pg.appendChild(field("Asking Price ($)","text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
-pg.appendChild(field("Property Type","text",s.propType,v=>s.propType=v,"4-bed villa with pool"));
+pg.appendChild(field(t2form.propPrice,"text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
+pg.appendChild(field(t2form.propType,"text",s.propType,v=>s.propType=v,"4-bed villa with pool"));
 propCard.appendChild(pg);
-propCard.appendChild(textarea("Key Highlights",s.propHighlights,v=>s.propHighlights=v,"Ocean views, private pool, just reduced by $50K",2,"Top 2-3 things perfect for this client"));
+propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
 content.appendChild(propCard);
 
 if(isMatcher()){
 const matchCard=el("div",{style:cardStyle});
-matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏆 Property Preference Matcher"));
-matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},"Enter up to 3 properties. AI picks the best match and writes all messages around it."));
-matchCard.appendChild(textarea("Buyer's Needs & Preferences",s.buyerNeeds,v=>s.buyerNeeds=v,"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
+matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.matcherTitle));
+matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},t2form.matcherHint));
+matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
 s.matcherProps.forEach((p,i)=>{
 const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
-pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.gold,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`Option ${i+1}`));
+pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.gold,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
 const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
 pg2.appendChild(field("Address","text",p.address,v=>{s.matcherProps[i].address=v;},"123 Main St, Miami"));
 pg2.appendChild(field("Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
 pCard.appendChild(pg2);
-pCard.appendChild(field("Property Type","text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
-pCard.appendChild(field("Key Highlights","text",p.highlights,v=>{s.matcherProps[i].highlights=v;},"Ocean view, renovated kitchen, top school district"));
+pCard.appendChild(field(t2form.propType,"text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
+pCard.appendChild(field(t2form.propHighlights,"text",p.highlights,v=>{s.matcherProps[i].highlights=v;},"Ocean view, renovated kitchen, top school district"));
 matchCard.appendChild(pCard);
 });
 content.appendChild(matchCard);
@@ -1039,31 +1086,31 @@ content.appendChild(matchCard);
 
 if(isBuyer()&&!isMatcher()){
 const buyCard=el("div",{style:cardStyle});
-buyCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🔍 Buyer Criteria"));
+buyCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.buyerTitle));
 buyCard.appendChild(chips(null,null,BUYER_CRITERIA,s.buyerCriteria,v=>{s.buyerCriteria=tog(s.buyerCriteria,v);renderApp2Content();}));
 content.appendChild(buyCard);
 }
 
 if(isSeller()){
 const sellCard=el("div",{style:cardStyle});
-sellCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏷️ Seller Situation"));
+sellCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.sellerTitle));
 sellCard.appendChild(chips(null,null,SELLER_SITUATION,s.sellerSituation,v=>{s.sellerSituation=tog(s.sellerSituation,v);renderApp2Content();}));
 content.appendChild(sellCard);
 }
 
 const ctxCard=el("div",{style:cardStyle});
-ctxCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"💡 Personal Context"));
-ctxCard.appendChild(textarea("Prior Contact History",s.priorContact,v=>s.priorContact=v,"Met at open house 2 weeks ago...",2,"Have you spoken before? What did they say?"));
-ctxCard.appendChild(textarea("Personal Note",s.personalNote,v=>s.personalNote=v,"Has 2 young kids, works from home...",2,"Kids, job, lifestyle — makes messages feel real"));
+ctxCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.contextTitle));
+ctxCard.appendChild(textarea(t2form.priorLabel,s.priorContact,v=>s.priorContact=v,t2form.priorPlaceholder,2,t2form.priorHint));
+ctxCard.appendChild(textarea(t2form.noteLabel,s.personalNote,v=>s.personalNote=v,t2form.notePlaceholder,2,t2form.noteHint));
 content.appendChild(ctxCard);
 
 const agentCard=el("div",{style:cardStyle});
-agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏷️ Your Details"));
+agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.agentTitle));
 const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-ag.appendChild(field("Your Name","text",s.agentName,v=>s.agentName=v,"James Rivera"));
-ag.appendChild(field("Your Phone","text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
+ag.appendChild(field(t2form.agentName,"text",s.agentName,v=>s.agentName=v,"James Rivera"));
+ag.appendChild(field(t2form.agentPhone,"text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
 agentCard.appendChild(ag);
-agentCard.appendChild(field("Agency / Company Name","text",s.agencyName,v=>s.agencyName=v,"Rivera Real Estate Group"));
+agentCard.appendChild(field(t2form.agencyName,"text",s.agencyName,v=>s.agencyName=v,"Rivera Real Estate Group"));
 content.appendChild(agentCard);
 
 if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"12px 16px",color:"#f87171",fontSize:"13px",marginBottom:"16px",fontFamily:"monospace"}},`⚠ ${s.error}`));
@@ -1071,7 +1118,7 @@ if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px
 if(s.loading){
 const lc=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"18px 22px",marginBottom:"16px",textAlign:"center"}});
 lc.appendChild(el("p",{style:{color:G.aqua,fontSize:"14px",margin:"0",fontWeight:"600"}},s.loadingMsg));
-lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},`Generating in ${s.language}. Please wait...`));
+lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},isSpa?"Generando en español. Por favor espera...":"Generating. Please wait..."));
 content.appendChild(lc);
 }
 
