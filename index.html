@@ -616,8 +616,8 @@ tabs.appendChild(btn);
 });
 content.appendChild(tabs);
 if(s.activeTab==="listing"){content.appendChild(copyCard(s.language==="Spanish"?"Descripción MLS":"MLS Listing","🏠",s.result.listing));content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject","📧",s.result.email_subject));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body","📨",s.result.email_body));}
-if(s.activeTab==="social"){content.appendChild(copyCard("Instagram","📸",s.result.instagram));content.appendChild(copyCard("Facebook","👥",s.result.facebook));content.appendChild(copyCard("Twitter / X","⚡",s.result.twitter));content.appendChild(copyCard("LinkedIn","💼",s.result.linkedin));}
-if(s.activeTab==="ads"){content.appendChild(copyCard(s.language==="Spanish"?"Blast SMS":"SMS Blast","📱",s.result.sms_blast));content.appendChild(copyCard(s.language==="Spanish"?"Difusión WhatsApp":"WhatsApp Broadcast","💬",s.result.whatsapp_broadcast));content.appendChild(copyCard("Google Ad","🔍",s.result.google_ad));content.appendChild(copyCard(s.language==="Spanish"?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad","🎯",s.result.facebook_ad));}
+if(s.activeTab==="social"){content.appendChild(copyCard("Instagram",s.result.instagram,"📸"));content.appendChild(copyCard("Facebook",s.result.facebook,"👥"));content.appendChild(copyCard("Twitter / X",s.result.twitter,"⚡"));content.appendChild(copyCard("LinkedIn",s.result.linkedin,"💼"));}
+if(s.activeTab==="ads"){content.appendChild(copyCard(s.language==="Spanish"?"Blast SMS":"SMS Blast","📱",s.result.sms_blast));content.appendChild(copyCard(s.language==="Spanish"?"Difusión WhatsApp":"WhatsApp Broadcast","💬",s.result.whatsapp_broadcast));content.appendChild(copyCard("Google Ad",s.result.google_ad,"🔍"));content.appendChild(copyCard(s.language==="Spanish"?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad","🎯",s.result.facebook_ad));}
 if(s.activeTab==="tiktok")content.appendChild(copyCard(s.language==="Spanish"?"Guión TikTok":"TikTok Script","🎬",s.result.tiktok_script));
 if(s.activeTab==="neighbours")content.appendChild(copyCard(s.language==="Spanish"?"Carta a Vecinos":"Neighbour Letter","✉️",s.result.neighbour_letter));
 if(s.activeTab==="schedule"&&s.result.schedule){
@@ -950,7 +950,7 @@ if(s.result){
 const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"22px 16px 60px"}});
 if(s.result.best_match_analysis){
 const matchBox=el("div",{style:{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:"10px",padding:"15px 17px",marginBottom:"18px"}});
-matchBox.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"8px"}},t2form.aiMatchAnalysis));
+matchBox.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:"#4ade80",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"8px"}},s.language==="Spanish"?"🏆 Análisis de Coincidencia IA":"🏆 AI Property Match Analysis"));
 matchBox.appendChild(el("p",{style:{color:"#d1fae5",fontSize:"14px",lineHeight:"1.7"}},s.result.best_match_analysis));
 content.appendChild(matchBox);
 }
@@ -962,16 +962,16 @@ btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp2Content();});
 tabs.appendChild(btn);
 });
 content.appendChild(tabs);
-if(s.activeTab==="messages"){content.appendChild(copyCard("WhatsApp","💬",s.result.whatsapp,G.aqua));content.appendChild(copyCard("SMS","📱",s.result.sms,G.aqua));}
-if(s.activeTab==="voice"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.noReply));content.appendChild(copyCard("Phone Call Script","🎙️",s.result.voice_script,G.aqua));}
-if(s.activeTab==="email"){content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject","📧",s.result.email_subject,G.aqua));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body","📨",s.result.email_body,G.aqua));}
-if(s.activeTab==="letter"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.replaceBrackets));content.appendChild(copyCard("Formal Letter","✉️",s.result.formal_letter,G.aqua));}
+if(s.activeTab==="messages"){content.appendChild(copyCard("WhatsApp",s.result.whatsapp,"💬",G.aqua));content.appendChild(copyCard("SMS",s.result.sms,"📱",G.aqua));}
+if(s.activeTab==="voice"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.noReply));content.appendChild(copyCard("Phone Call Script",s.result.voice_script,"🎙️",G.aqua));}
+if(s.activeTab==="email"){content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject",s.result.email_subject,"📧",G.aqua));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body",s.result.email_body,"📨",G.aqua));}
+if(s.activeTab==="letter"){content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.replaceBrackets));content.appendChild(copyCard("Formal Letter",s.result.formal_letter,"✉️",G.aqua));}
 if(s.activeTab==="followups"){
 content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 12px"}},t2.sendOrder));
-content.appendChild(copyCard("Follow-Up #1","💬",s.result.followup_1,G.aqua));
-content.appendChild(copyCard("Follow-Up #2","💬",s.result.followup_2,G.aqua));
-content.appendChild(copyCard("Follow-Up #3","💬",s.result.followup_3,G.aqua));
-content.appendChild(copyCard("Follow-Up #4","💬",s.result.followup_4,G.aqua));
+content.appendChild(copyCard("Follow-Up #1",s.result.followup_1,"💬",G.aqua));
+content.appendChild(copyCard("Follow-Up #2",s.result.followup_2,"💬",G.aqua));
+content.appendChild(copyCard("Follow-Up #3",s.result.followup_3,"💬",G.aqua));
+content.appendChild(copyCard("Follow-Up #4",s.result.followup_4,"💬",G.aqua));
 // REGENERATE FOLLOW-UPS BOX
 const regenBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"18px",marginTop:"20px"}});
 regenBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2.regenTitle));
