@@ -699,8 +699,8 @@ card.appendChild(g);
 }
 card.appendChild(chips(s.language==="Spanish"?"Estado":"Condition",null,CONDITIONS,s.condition,v=>{s.condition=v;renderApp1Content();},true));
 const g2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-g2.appendChild(field(s.language==="Spanish"?"Tu Nombre":"Agent Name","text",s.agentName,v=>s.agentName=v,"James Rivera"));
-g2.appendChild(field(s.language==="Spanish"?"Tu Teléfono":"Agent Phone","text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
+g2.appendChild(field(s.language==="Spanish"?"Tu Nombre":"Agent Name","text",s.agentName,v=>s.agentName=v,s.language==="Spanish"?"Carlos García":"James Rivera"));
+g2.appendChild(field(s.language==="Spanish"?"Tu Teléfono":"Agent Phone","text",s.agentPhone,v=>s.agentPhone=v,s.language==="Spanish"?"+34 600 000 000":"+1 305 555 0199"));
 card.appendChild(g2);
 }
 
@@ -897,6 +897,11 @@ const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName&&
 async function generate(){
 s.loading=true;s.error="";s.result=null;renderApp2Content();
 const langInstr=(GL[s.language]||GL.English).langInstr?("\n\n"+(GL[s.language]||GL.English).langInstr):"";
+const isSpa2=s.language==="Spanish";
+const CLIENT_TYPES=isSpa2?[{value:"buyer_active",label:"Comprador Activo"},{value:"buyer_passive",label:"Comprador Pasivo"},{value:"seller_motivated",label:"Vendedor Motivado"},{value:"seller_exploring",label:"Vendedor Explorando"},{value:"investor",label:"Inversor"},{value:"cold_lead",label:"Lead Frío"},{value:"past_client",label:"Cliente Anterior"}]:[{value:"buyer_active",label:"Active Buyer"},{value:"buyer_passive",label:"Passive Buyer"},{value:"seller_motivated",label:"Motivated Seller"},{value:"seller_exploring",label:"Exploring Seller"},{value:"investor",label:"Investor"},{value:"cold_lead",label:"Cold Lead"},{value:"past_client",label:"Past Client"}];
+const CONTACT_REASONS=isSpa2?[{value:"new_listing",label:"Nueva Propiedad"},{value:"price_drop",label:"Reducción de Precio"},{value:"first_contact",label:"Primer Contacto"},{value:"reconnect",label:"Retomar Contacto"},{value:"open_house",label:"Invitación a Visita"},{value:"market_update",label:"Actualización del Mercado"},{value:"off_market",label:"Propiedad Exclusiva"},{value:"just_sold",label:"Recién Vendido"},{value:"referral_request",label:"Pedir Referidos"},{value:"anniversary",label:"Aniversario"},{value:"objection_handle",label:"Manejar Objeción"}]:[{value:"new_listing",label:"New Listing"},{value:"price_drop",label:"Price Reduction"},{value:"first_contact",label:"First Outreach"},{value:"reconnect",label:"Reconnecting"},{value:"open_house",label:"Open House"},{value:"market_update",label:"Market Update"},{value:"off_market",label:"Off-Market Deal"},{value:"just_sold",label:"Just Sold"},{value:"referral_request",label:"Referral Request"},{value:"anniversary",label:"Anniversary"},{value:"objection_handle",label:"Handle Objection"}];
+const URGENCY=isSpa2?[{value:"high",label:"Alta Urgencia"},{value:"medium",label:"Urgencia Media"},{value:"low",label:"Baja Urgencia"}]:[{value:"high",label:"High Urgency"},{value:"medium",label:"Medium Urgency"},{value:"low",label:"Low Urgency"}];
+const TONES=isSpa2?[{value:"warm",label:"Cálido y Personal"},{value:"professional",label:"Profesional"},{value:"urgent",label:"Urgente"},{value:"casual",label:"Casual"},{value:"luxury",label:"Lujo"}]:[{value:"warm",label:"Warm & Personal"},{value:"professional",label:"Professional"},{value:"urgent",label:"Urgent"},{value:"casual",label:"Casual"},{value:"luxury",label:"Luxury"}];
 const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\n${s.customSituation?"AGENT OWN WORDS - USE ABOVE ALL ELSE: "+s.customSituation+"\\n":""}AGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
 try{
 s.loadingMsg=(T2[s.language]||T2.English).loading1;renderApp2Content();
@@ -1032,7 +1037,7 @@ sitBox.appendChild(sitTa);
 sitBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t2form.situationLeave));
 content.appendChild(sitBox);
 
-clientCard.appendChild(field(t2form.clientFirstName,"text",s.clientName,v=>s.clientName=v,"Sarah"));
+clientCard.appendChild(field(t2form.clientFirstName,"text",s.clientName,v=>s.clientName=v,s.language==="Spanish"?"María":"Sarah"));
 clientCard.appendChild(chips(t2form.clientType,null,CLIENT_TYPES,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
 clientCard.appendChild(chips(t2form.contactReason,null,CONTACT_REASONS,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
 clientCard.appendChild(chips(t2form.urgencyLabel,null,URGENCY,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
@@ -1055,28 +1060,28 @@ content.appendChild(annCard);
 
 const propCard=el("div",{style:cardStyle});
 propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
-propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,"42 Palm Drive, Miami Beach, FL 33139"));
+propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,s.language==="Spanish"?"Calle Gran Vía 42, Madrid / 42 Palm Drive, Miami":"42 Palm Drive, Miami Beach, FL 33139"));
 const pg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
 pg.appendChild(field(t2form.propPrice,"text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
-pg.appendChild(field(t2form.propType,"text",s.propType,v=>s.propType=v,"4-bed villa with pool"));
+pg.appendChild(field(t2form.propType,"text",s.propType,v=>s.propType=v,s.language==="Spanish"?"Villa de 4 habitaciones con piscina":"4-bed villa with pool"));
 propCard.appendChild(pg);
-propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
+propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,s.language==="Spanish"?"Vistas al mar, piscina privada, precio rebajado":"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
 content.appendChild(propCard);
 
 if(isMatcher()){
 const matchCard=el("div",{style:cardStyle});
 matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.matcherTitle));
 matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},t2form.matcherHint));
-matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
+matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,s.language==="Spanish"?"4 habitaciones, piscina, buenos colegios, menos de $1.5M":"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
 s.matcherProps.forEach((p,i)=>{
 const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
 pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.gold,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
 const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
-pg2.appendChild(field("Address","text",p.address,v=>{s.matcherProps[i].address=v;},"123 Main St, Miami"));
-pg2.appendChild(field("Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
+pg2.appendChild(field(s.language==="Spanish"?"Dirección":"Address","text",p.address,v=>{s.matcherProps[i].address=v;},s.language==="Spanish"?"Calle Mayor 1, Miami":"123 Main St, Miami"));
+pg2.appendChild(field(s.language==="Spanish"?"Precio ($)":"Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
 pCard.appendChild(pg2);
 pCard.appendChild(field(t2form.propType,"text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
-pCard.appendChild(field(t2form.propHighlights,"text",p.highlights,v=>{s.matcherProps[i].highlights=v;},"Ocean view, renovated kitchen, top school district"));
+pCard.appendChild(field(t2form.propHighlights,"text",p.highlights,v=>{s.matcherProps[i].highlights=v;},s.language==="Spanish"?"Vistas al mar, cocina reformada, zona escolar de élite":"Ocean view, renovated kitchen, top school district"));
 matchCard.appendChild(pCard);
 });
 content.appendChild(matchCard);
@@ -1105,10 +1110,10 @@ content.appendChild(ctxCard);
 const agentCard=el("div",{style:cardStyle});
 agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.agentTitle));
 const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-ag.appendChild(field(t2form.agentName,"text",s.agentName,v=>s.agentName=v,"James Rivera"));
-ag.appendChild(field(t2form.agentPhone,"text",s.agentPhone,v=>s.agentPhone=v,"+1 305 555 0199"));
+ag.appendChild(field(t2form.agentName,"text",s.agentName,v=>s.agentName=v,s.language==="Spanish"?"Carlos García":"James Rivera"));
+ag.appendChild(field(t2form.agentPhone,"text",s.agentPhone,v=>s.agentPhone=v,s.language==="Spanish"?"+34 600 000 000":"+1 305 555 0199"));
 agentCard.appendChild(ag);
-agentCard.appendChild(field(t2form.agencyName,"text",s.agencyName,v=>s.agencyName=v,"Rivera Real Estate Group"));
+agentCard.appendChild(field(t2form.agencyName,"text",s.agencyName,v=>s.agencyName=v,s.language==="Spanish"?"García Inmobiliaria":"Rivera Real Estate Group"));
 content.appendChild(agentCard);
 
 if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"12px 16px",color:"#f87171",fontSize:"13px",marginBottom:"16px",fontFamily:"monospace"}},`⚠ ${s.error}`));
@@ -1120,7 +1125,7 @@ lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},s
 content.appendChild(lc);
 }
 
-const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px"}},s.loading?t2form.generating:t2form.generate);
+const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px",background:canGenerate()&&!s.loading?G.aqua:undefined,color:canGenerate()&&!s.loading?"#080808":undefined}},s.loading?t2form.generating:t2form.generate);
 genBtn.addEventListener("click",()=>{if(canGenerate()&&!s.loading)generate();});
 content.appendChild(genBtn);
 if(!canGenerate())content.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",marginTop:"8px",textAlign:"center"}},(T2[s.language]||T2.English).fillRequired));
