@@ -572,6 +572,14 @@ loading1:"Escribiendo descripción y email...",loading2:"Escribiendo redes socia
 };
 
 let s={step:1,mode:"",language:state.lang||"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],building_extra:"",uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",customContext:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
+// Apply prefill from dashboard Re-run
+if(state.prefill){
+const p=state.prefill;
+s.mode=p.mode||"";s.address=p.address||"";s.city=p.city||"";s.price=p.price||"";
+s.beds=p.beds||"";s.baths=p.baths||"";s.tone=p.tone||"";s.language=p.language||s.language;
+s.propType=p.propType||"";s.step=s.mode?2:1;
+state.prefill=null;
+}
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
@@ -1006,6 +1014,14 @@ aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
 }
 };
 let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+// Apply prefill from dashboard Re-run
+if(state.prefill){
+const p=state.prefill;
+s.clientName=p.clientName||"";s.clientType=p.clientType||"";
+s.contactReason=p.contactReason||"";s.language=p.language||s.language;
+s.agentName=p.agentName||"";
+state.prefill=null;
+}
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
