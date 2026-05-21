@@ -212,7 +212,7 @@ el("p",{style:{color:G.muted,fontSize:"14px"}},"Your marketing system is ready. 
 
 // Pipeline stats
 const statsRow=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:"12px",marginBottom:"24px"}});
-[[`🏠`,listings.length,"Active Listings",G.aqua],[`🤝`,clients.length,"Clients in Pipeline",G.gold],[`🔔`,followUpsDue,"Follow-Ups Due","#f87171"],[`⚡`,listings.length+clients.length,"Total Generated","#a78bfa"]].forEach(([icon,num,label,color])=>{
+[[`🏠`,listings.length,"Active Listings",G.aqua],[`🤝`,clients.length,"Clients in Pipeline",G.gold],[`🔔`,followUpsDue,"Follow-Ups Due","#f87171"],[`⚡`,listings.length+clients.length,"Total Generated","#2AB8D4"]].forEach(([icon,num,label,color])=>{
 const c=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 18px"}});
 c.appendChild(el("div",{style:{fontSize:"20px",marginBottom:"6px"}},icon));
 c.appendChild(el("div",{style:{fontSize:"22px",fontWeight:"800",color,marginBottom:"2px"}},String(num)));
@@ -426,7 +426,7 @@ return wrap;
 // APP 1 - Property Marketing Machine
 function renderApp1(){
 const SYSTEM="You are the world's best real estate copywriter. You ALWAYS respond with ONLY a valid JSON object. No markdown. No backticks. No explanation.";
-const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"},{value:"Mexican Spanish",label:"🇲🇽 Español Mexicano"}];
+const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}];
 
 const T={
 English:{
@@ -457,7 +457,8 @@ everythingReady:"Todo listo en",tapCopy:"Toca Copiar en cualquier pieza para usa
 dayByDay:"Tu plan de acción día a día. Síguelo para maximizar cada propiedad.",
 loading1:"Escribiendo descripción y email...",loading2:"Escribiendo redes sociales...",loading3:"Escribiendo anuncios y SMS...",loading4:"Escribiendo TikTok y carta...",loading5:"Creando calendario...",
 },
-"Mexican Spanish":{
+// Mexican Spanish removed
+"UNUSED":{
 title:"🏡 Máquina de Marketing Inmobiliario",back:"← Panel Principal",step:"Paso",newListing:"← Nueva Propiedad",
 langLabel:"Idioma de Salida",whatMarketing:"🎯 ¿Qué Estás Promocionando?",propBasics:"🏠 Datos de la Propiedad",
 location:"📍 Ubicación y Vistas",features:"🛋️ Características de la Propiedad",standout:"⭐ Detalles Destacados",
@@ -499,7 +500,7 @@ return!!s.tone;
 
 async function generate(){
 s.loading=true;s.error="";s.result=null;s.loadingPct=0;renderApp1Content();
-const langInstr=s.language!=="English"?`\n\nIMPORTANT: Write ALL content in ${s.language}.`:"";
+const langInstr=s.language==="Spanish"?"\n\nCRITICAL: You MUST write ALL content entirely in Spanish. Every single word must be in Spanish. No English at all.":"";
 const propSummary=[`Mode:${s.mode}`,`${s.propType} at ${s.address}`,`Price:$${s.price}${s.oldPrice?` (was $${s.oldPrice})`:""}`,`Beds:${s.beds}|Baths:${s.baths}${s.sqft?`|${s.sqft}sqft`:""}`,s.condition&&`Condition:${s.condition}`,`City:${s.city}${s.neighbourhood?`,${s.neighbourhood}`:""}`,s.locationFeatures.length&&`Location:${s.locationFeatures.slice(0,8).join(",")}`,s.interior.length&&`Interior:${s.interior.slice(0,10).join(",")}`,s.outdoor.length&&`Outdoor:${s.outdoor.slice(0,8).join(",")}`,s.uniqueFeature&&`Unique:${s.uniqueFeature}`,s.customContext&&`AGENT'S OWN WORDS (use this above all else): ${s.customContext}`,`Tone:${s.tone}|Buyer:${s.targetBuyer||"general"}`,`Agent:${s.agentName||"Agent"}${s.agentPhone?`|${s.agentPhone}`:""}`].filter(Boolean).join("\n");
 try{
 s.loadingMsg=t.loading1;s.loadingPct=15;renderApp1Content();
@@ -587,14 +588,14 @@ card.appendChild(chips(null,null,MODES,s.mode,v=>{s.mode=v;renderApp1Content();}
 if(s.step===2){
 card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"🏠 Property Basics"));
 // CUSTOM CONTEXT BOX
-const ctxBox=el("div",{style:{background:"rgba(139,92,246,0.08)",border:"1.5px solid rgba(139,92,246,0.5)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
-ctxBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#a78bfa",marginBottom:"6px"}},t.customBoxTitle));
-ctxBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(167,139,250,0.8)",marginBottom:"10px",lineHeight:"1.6"}},t.customBoxHint));
-const ctxTa=el("textarea",{placeholder:t.customBoxPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(139,92,246,0.4)",background:"#0d0d0d"}});
+const ctxBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
+ctxBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t.customBoxTitle));
+ctxBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t.customBoxHint));
+const ctxTa=el("textarea",{placeholder:t.customBoxPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
 ctxTa.value=s.customContext||"";
 ctxTa.addEventListener("input",e=>s.customContext=e.target.value);
 ctxBox.appendChild(ctxTa);
-ctxBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(167,139,250,0.5)",marginTop:"6px"}},t.customBoxLeave));
+ctxBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t.customBoxLeave));
 card.appendChild(ctxBox);
 card.appendChild(chips("Property Type",null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
 card.appendChild(field("Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
@@ -697,7 +698,7 @@ return wrap;
 // APP 2 - Client Outreach Machine
 function renderApp2(){
 const SYSTEM="You are an elite real estate sales coach. Return ONLY raw JSON — no markdown, no explanation.";
-const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"},{value:"Mexican Spanish",label:"🇲🇽 Español Mexicano"}];
+const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}];
 
 const T2={
 English:{
@@ -746,7 +747,8 @@ noReply:"Lee con naturalidad — no suenes como si estuvieras leyendo un guión.
 replaceBrackets:"Reemplaza todo lo que esté entre corchetes antes de imprimir.",
 followPlan:"Tu plan exacto de seguimiento para",
 },
-"Mexican Spanish":{
+// Mexican Spanish removed
+"UNUSED":{
 title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
 langLabel:"Idioma de Salida",whoContact:"👤 ¿A Quién Estás Contactando?",
 situationTitle:"✨ Describe la Situación con Tus Propias Palabras",
@@ -791,7 +793,7 @@ const canGenerate=()=>s.clientName&&s.clientType&&s.contactReason&&s.agentName&&
 
 async function generate(){
 s.loading=true;s.error="";s.result=null;renderApp2Content();
-const langInstr=s.language!=="English"?`\n\nIMPORTANT: Write ALL content in ${s.language}.`:"";
+const langInstr=s.language==="Spanish"?"\n\nCRITICAL: You MUST write ALL content entirely in Spanish. Every single word must be in Spanish. No English at all.":"";
 const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\n${s.customSituation?"AGENT OWN WORDS - USE ABOVE ALL ELSE: "+s.customSituation+"\\n":""}AGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
 try{
 s.loadingMsg=(T2[s.language]||T2.English).loading1;renderApp2Content();
@@ -853,19 +855,19 @@ content.appendChild(copyCard("Follow-Up #2","💬",s.result.followup_2,G.aqua));
 content.appendChild(copyCard("Follow-Up #3","💬",s.result.followup_3,G.aqua));
 content.appendChild(copyCard("Follow-Up #4","💬",s.result.followup_4,G.aqua));
 // REGENERATE FOLLOW-UPS BOX
-const regenBox=el("div",{style:{background:"rgba(139,92,246,0.08)",border:"1.5px solid rgba(139,92,246,0.5)",borderRadius:"10px",padding:"18px",marginTop:"20px"}});
-regenBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#a78bfa",marginBottom:"6px"}},t2.regenTitle));
-regenBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(167,139,250,0.8)",marginBottom:"10px",lineHeight:"1.6"}},t2.regenHint));
-const regenTa=el("textarea",{placeholder:t2.regenPlaceholder,rows:3,style:{...inputStyle,resize:"vertical",borderColor:"rgba(139,92,246,0.4)",background:"#0d0d0d",marginBottom:"10px"}});
+const regenBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"18px",marginTop:"20px"}});
+regenBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2.regenTitle));
+regenBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2.regenHint));
+const regenTa=el("textarea",{placeholder:t2.regenPlaceholder,rows:3,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d",marginBottom:"10px"}});
 regenTa.value=s.regenContext||"";
 regenTa.addEventListener("input",e=>s.regenContext=e.target.value);
 regenBox.appendChild(regenTa);
-const regenBtn=el("button",{style:{...btnStyle(s.regenLoading),background:s.regenLoading?"#1a1a1a":"rgba(139,92,246,0.8)",color:s.regenLoading?G.muted:"#fff",width:"100%"}},s.regenLoading?t2.regenLoading:t2.regenBtn);
+const regenBtn=el("button",{style:{...btnStyle(s.regenLoading),background:s.regenLoading?"#1a1a1a":"#2AB8D4",color:s.regenLoading?G.muted:"#fff",width:"100%"}},s.regenLoading?t2.regenLoading:t2.regenBtn);
 regenBtn.addEventListener("click",async()=>{
 if(!s.regenContext||s.regenLoading)return;
 s.regenLoading=true;renderApp2Content();
 try{
-const regenPrompt=`Original context: CLIENT ${s.clientName} | ${s.contactReason}\nWhat happened after first message: ${s.regenContext}\nLanguage: ${s.language}\n\nGenerate 4 fresh follow-up messages based on what happened. Write ALL content in ${s.language}. Return ONLY JSON:\n{"followup_1":"New follow-up Day 3 based on what happened. 50-60 words.","followup_2":"New follow-up Week 1 with fresh angle. 50-60 words.","followup_3":"New follow-up Week 2 casual. 40-50 words.","followup_4":"New follow-up Month 1 final. 40-50 words."}`;
+const regenPrompt=`Original context: CLIENT ${s.clientName} | ${s.contactReason}\nWhat happened after first message: ${s.regenContext}\n${s.language==="Spanish"?"CRITICAL: Write ALL content entirely in Spanish. No English at all.":""}\n\nGenerate 4 fresh follow-up messages based on what happened. Return ONLY JSON:\n{"followup_1":"New follow-up Day 3 based on what happened. 50-60 words.","followup_2":"New follow-up Week 1 with fresh angle. 50-60 words.","followup_3":"New follow-up Week 2 casual. 40-50 words.","followup_4":"New follow-up Month 1 final. 40-50 words."}`;
 const regen=await apiClaude(regenPrompt,"You are an elite real estate sales coach. Return ONLY raw JSON.",800);
 s.result={...s.result,...regen};
 s.regenContext="";
@@ -906,15 +908,15 @@ content.appendChild(langCard);
 const clientCard=el("div",{style:cardStyle});
 clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},"👤 Who Are You Contacting?"));
 // CUSTOM SITUATION BOX — App2
-const sitBox=el("div",{style:{background:"rgba(139,92,246,0.08)",border:"1.5px solid rgba(139,92,246,0.5)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
+const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
 const t2form=T2[s.language]||T2.English;
-sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#a78bfa",marginBottom:"6px"}},t2form.situationTitle));
-sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(167,139,250,0.8)",marginBottom:"10px",lineHeight:"1.6"}},t2form.situationHint));
-const sitTa=el("textarea",{placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(139,92,246,0.4)",background:"#0d0d0d"}});
+sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
+sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2form.situationHint));
+const sitTa=el("textarea",{placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
 sitTa.value=s.customSituation||"";
 sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
 sitBox.appendChild(sitTa);
-sitBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(167,139,250,0.5)",marginTop:"6px"}},t2form.situationLeave));
+sitBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t2form.situationLeave));
 content.appendChild(sitBox);
 
 clientCard.appendChild(field("Client First Name","text",s.clientName,v=>s.clientName=v,"Sarah"));
