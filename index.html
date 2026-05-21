@@ -344,13 +344,11 @@ l.address||(l.city?(state.lang==="Spanish"?"Propiedad en ":"Property in ")+l.cit
 ),
 el("div",{style:{fontSize:"11px",color:G.muted}},`${l.mode||""} · ${l.savedAt||""}`)
 ));
-if(l.result){
-const vBtn=el("button",{style:{background:G.aqua,color:"#080808",border:"none",borderRadius:"6px",padding:"5px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},
+const vBtn=el("button",{style:{background:l.result?G.aqua:"#333",color:l.result?"#080808":G.muted,border:"none",borderRadius:"6px",padding:"5px 12px",fontSize:"11px",fontWeight:"700",cursor:l.result?"pointer":"default",fontFamily:"inherit",flexShrink:"0"}},
 state.lang==="Spanish"?"Ver →":"View →"
 );
-vBtn.addEventListener("click",()=>setState({screen:"app1_results",savedResult:l}));
+if(l.result)vBtn.addEventListener("click",()=>setState({screen:"app1_results",savedResult:l}));
 row.appendChild(vBtn);
-}
 body.appendChild(row);
 });
 }
@@ -381,13 +379,11 @@ row.appendChild(el("div",{style:{flex:"1",minWidth:"0",marginRight:"10px"}},
 el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},cl.clientName||"Client"),
 el("div",{style:{fontSize:"11px",color:due?"#f87171":G.muted}},due?g.followUpDue:`${cl.contactReason||""} · ${cl.savedAt||""}`)
 ));
-if(cl.result){
-const vBtn=el("button",{style:{background:G.aqua,color:"#080808",border:"none",borderRadius:"6px",padding:"5px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},
+const vBtn2=el("button",{style:{background:cl.result?G.aqua:"#333",color:cl.result?"#080808":G.muted,border:"none",borderRadius:"6px",padding:"5px 12px",fontSize:"11px",fontWeight:"700",cursor:cl.result?"pointer":"default",fontFamily:"inherit",flexShrink:"0"}},
 state.lang==="Spanish"?"Ver →":"View →"
 );
-vBtn.addEventListener("click",()=>setState({screen:"app2_results",savedResult:cl}));
-row.appendChild(vBtn);
-}
+if(cl.result)vBtn2.addEventListener("click",()=>setState({screen:"app2_results",savedResult:cl}));
+row.appendChild(vBtn2);
 body.appendChild(row);
 });
 }
@@ -1402,6 +1398,15 @@ else if(state.screen==="app2")root.appendChild(renderApp2());
 else if(state.screen==="app1_results"||state.screen==="app2_results")root.appendChild(renderSavedResults(state.screen==="app1_results"?"app1":"app2"));
 }
 
+// Clear old history entries that have no result saved (legacy data)
+try{
+const oldL=JSON.parse(localStorage.getItem("sf_listings")||"[]");
+const oldC=JSON.parse(localStorage.getItem("sf_clients")||"[]");
+// Keep only entries that were saved with this version (have savedAt)
+// Reset if any entries are the old format without result key defined
+if(oldL.length>0&&!("result" in oldL[0])){localStorage.removeItem("sf_listings");}
+if(oldC.length>0&&!("result" in oldC[0])){localStorage.removeItem("sf_clients");}
+}catch(e){}
 // CHECK SESSION ON LOAD
 const saved=localStorage.getItem("sf_user");
 if(saved){
