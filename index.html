@@ -437,9 +437,14 @@ const authBtn=el("button",{style:{background:G.aqua,color:"#080808",border:"none
 authBtn.addEventListener("click",async()=>{
 if(!adminKey){msg="❌ Enter your admin key.";renderAdminContent();return;}
 authBtn.textContent="Checking...";authBtn.disabled=true;
+try{
 const res=await apiAdmin({adminKey,action:"list_users"});
 if(res.success){authed=true;users=res.users||[];msg="";renderAdminContent();}
 else{msg="❌ "+(res.error||"Wrong admin key");renderAdminContent();}
+}catch(e){
+msg="❌ Connection error. Check your internet and try again.";
+renderAdminContent();
+}
 });
 authCard.appendChild(authBtn);
 content.appendChild(authCard);
