@@ -100,7 +100,7 @@ function textarea(label,value,onChange,placeholder,rows,hint){
 const wrap=el("div",{style:{marginBottom:"16px"}});
 if(label)wrap.appendChild(el("label",{style:labelStyle},label));
 if(hint)wrap.appendChild(el("p",{style:{fontSize:"12px",color:"#444",margin:"0 0 5px",fontStyle:"italic"}},hint));
-const ta=el("textarea",{placeholder,rows:rows||3,style:{...inputStyle,resize:"vertical"}});
+const ta=el("textarea",{spellcheck:"false",placeholder,rows:rows||3,style:{...inputStyle,resize:"vertical"}});
 ta.value=value||"";
 ta.addEventListener("input",e=>onChange(e.target.value));
 wrap.appendChild(ta);
@@ -145,7 +145,7 @@ card.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",
 el("span",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"0.1em",color:accentColor,textTransform:"uppercase"}},`${icon} ${title}`),
 copyBtn
 ));
-card.appendChild(el("p",{style:{color:"#ccc",fontSize:"14px",lineHeight:"1.75",margin:"0",whiteSpace:"pre-wrap"}},content||""));
+card.appendChild(el("p",{style:{color:"#ffffff",fontSize:"14px",lineHeight:"1.75",margin:"0",whiteSpace:"pre-wrap",fontFamily:"inherit"}},content||""));
 return card;
 }
 
@@ -693,7 +693,7 @@ card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"
 const ctxBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
 ctxBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t.customBoxTitle));
 ctxBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t.customBoxHint));
-const ctxTa=el("textarea",{placeholder:t.customBoxPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
+const ctxTa=el("textarea",{spellcheck:"false",placeholder:t.customBoxPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
 ctxTa.value=s.customContext||"";
 ctxTa.addEventListener("input",e=>s.customContext=e.target.value);
 ctxBox.appendChild(ctxTa);
@@ -1010,7 +1010,7 @@ content.appendChild(copyCard("Follow-Up #4",s.result.followup_4,"💬",G.aqua));
 const regenBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"18px",marginTop:"20px"}});
 regenBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2.regenTitle));
 regenBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2.regenHint));
-const regenTa=el("textarea",{placeholder:t2.regenPlaceholder,rows:3,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d",marginBottom:"10px"}});
+const regenTa=el("textarea",{spellcheck:"false",placeholder:t2.regenPlaceholder,rows:3,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d",marginBottom:"10px"}});
 regenTa.value=s.regenContext||"";
 regenTa.addEventListener("input",e=>s.regenContext=e.target.value);
 regenBox.appendChild(regenTa);
@@ -1064,7 +1064,7 @@ clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBo
 const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
 sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
 sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2form.situationHint));
-const sitTa=el("textarea",{placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
+const sitTa=el("textarea",{spellcheck:"false",placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
 sitTa.value=s.customSituation||"";
 sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
 sitBox.appendChild(sitTa);
@@ -1172,6 +1172,8 @@ return wrap;
 }
 
 function render(){
+// Set document language for spellcheck
+document.documentElement.lang=state.lang==="Spanish"?"es":"en";
 const root=document.getElementById("root");
 root.innerHTML="";
 if(state.screen==="login")root.appendChild(renderLogin());
