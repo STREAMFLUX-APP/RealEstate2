@@ -60,7 +60,7 @@ throw e;
 function safeGet(obj,key,fallback){return(obj&&obj[key]!==undefined&&obj[key]!==null)?obj[key]:fallback;}
 
 // STATE
-let state={screen:"login",user:null,lang:"English"};
+let state={screen:"login",user:null,lang:"English",prefill1:null,prefill2:null};
 const setState=(updates)=>{state={...state,...updates};render();};
 
 // STYLES
@@ -330,7 +330,7 @@ el("div",{style:{fontSize:"12px",color:G.muted}},"Complete listing package in 30
 ));
 const body=el("div",{style:{padding:"16px 22px"}});
 const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},g.newListing);
-btn.addEventListener("click",()=>setState({screen:"app1",prefill:null}));
+btn.addEventListener("click",()=>setState({screen:"app1",prefill1:null}));
 body.appendChild(btn);
 if(listings.length>0){
 body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},g.recentListings));
@@ -341,7 +341,7 @@ el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},l.address||(l.
 el("div",{style:{fontSize:"11px",color:G.muted}},`${l.mode||""} · ${l.savedAt||""}`)
 ));
 row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},g.rerun));
-row.addEventListener("click",()=>setState({screen:"app1",prefill:l}));
+row.addEventListener("click",()=>setState({screen:"app1",prefill1:l}));
 body.appendChild(row);
 });
 }
@@ -358,7 +358,7 @@ el("div",{style:{fontSize:"12px",color:G.muted}},g.app2sub)
 ));
 const body=el("div",{style:{padding:"16px 22px"}});
 const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"12px"}},g.newClient);
-btn.addEventListener("click",()=>setState({screen:"app2",prefill:null}));
+btn.addEventListener("click",()=>setState({screen:"app2",prefill2:null}));
 body.appendChild(btn);
 if(clients.length>0){
 body.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"1px",color:G.muted,textTransform:"uppercase",marginBottom:"8px"}},g.recentClients));
@@ -371,7 +371,7 @@ el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white}},cl.clientName|
 el("div",{style:{fontSize:"11px",color:due?"#f87171":G.muted}},due?g.followUpDue:`${cl.contactReason||""} · ${cl.savedAt||""}`)
 ));
 row.appendChild(el("span",{style:{fontSize:"11px",color:G.aqua,flexShrink:"0"}},g.rerun));
-row.addEventListener("click",()=>setState({screen:"app2",prefill:cl}));
+row.addEventListener("click",()=>setState({screen:"app2",prefill2:cl}));
 body.appendChild(row);
 });
 }
@@ -573,12 +573,12 @@ loading1:"Escribiendo descripción y email...",loading2:"Escribiendo redes socia
 
 let s={step:1,mode:"",language:state.lang||"English",propType:"",address:"",price:"",oldPrice:"",beds:"",baths:"",sqft:"",yearBuilt:"",condition:"",soldPrice:"",daysOnMarket:"",openHouseDate:"",openHouseTime:"",city:"",neighbourhood:"",locationFeatures:[],commute:"",interior:[],outdoor:[],building:[],building_extra:"",uniqueFeature:"",agentNote:"",tone:"",targetBuyer:"",agentName:"",agentPhone:"",customContext:"",loading:false,loadingMsg:"",loadingPct:0,result:null,error:"",activeTab:"listing"};
 // Apply prefill from dashboard Re-run
-if(state.prefill){
-const p=state.prefill;
+if(state.prefill1){
+const p=state.prefill1;
 s.mode=p.mode||"";s.address=p.address||"";s.city=p.city||"";s.price=p.price||"";
 s.beds=p.beds||"";s.baths=p.baths||"";s.tone=p.tone||"";s.language=p.language||s.language;
 s.propType=p.propType||"";s.step=s.mode?2:1;
-state.prefill=null;
+state.prefill1=null;
 }
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -1015,12 +1015,12 @@ aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
 };
 let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 // Apply prefill from dashboard Re-run
-if(state.prefill){
-const p=state.prefill;
+if(state.prefill2){
+const p=state.prefill2;
 s.clientName=p.clientName||"";s.clientType=p.clientType||"";
 s.contactReason=p.contactReason||"";s.language=p.language||s.language;
 s.agentName=p.agentName||"";
-state.prefill=null;
+state.prefill2=null;
 }
 
 const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
