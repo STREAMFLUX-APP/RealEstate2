@@ -239,6 +239,8 @@ function renderLogin(){
     const passInp=el("input",{type:"password",placeholder:"••••••••",style:inputStyle});
     passInp.value=password;
     passInp.addEventListener("input",e=>password=e.target.value);
+    passInp.addEventListener("keydown",e=>{if(e.key==="Enter")loginBtn.click();});
+    emailInp.addEventListener("keydown",e=>{if(e.key==="Enter")passInp.focus();});
     passWrap.appendChild(passInp);
     card.appendChild(passWrap);
 
