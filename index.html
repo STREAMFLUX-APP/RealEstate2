@@ -794,20 +794,24 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
     wrap.appendChild(nav);
 
     if(s.result){
-      const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"0 0 60px"},class:"fade-in"});
+      // Full white background page
+      wrap.style.background="#f5f5f5";
+      const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"0 0 80px"},class:"fade-in"});
       // White header
-      const rHead=el("div",{style:{background:"#ffffff",padding:"18px 20px 14px",borderBottom:"1px solid #e5e5e5",marginBottom:"16px"}});
+      const rHead=el("div",{style:{background:"#ffffff",padding:"18px 20px 14px",borderBottom:"1px solid #e5e5e5",marginBottom:"0"}});
       rHead.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"800",color:"#060608",marginBottom:"3px",fontFamily:"inherit"}},"Your Package is Ready"));
       rHead.appendChild(el("p",{style:{color:"#555",fontSize:"13px",fontFamily:"inherit"}},`Everything in ${s.language}. Tap Copy on any section to use it instantly.`));
       content.appendChild(rHead);
-      const resultInner=el("div",{style:{padding:"0 16px"}});
-      const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"20px",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.aquaBorder}`}});
+      // Tab bar in white section
+      const tabSection=el("div",{style:{background:"#ffffff",padding:"12px 16px 0",borderBottom:"1px solid #e5e5e5",marginBottom:"16px"}});
+      const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"0",flexWrap:"wrap",background:"#f0f0f0",padding:"4px",borderRadius:"10px",border:"1px solid #e0e0e0"}});
       TABS.forEach(tab=>{
         const btn=el("button",{style:{background:s.activeTab===tab.id?G.aquaDim:"transparent",color:s.activeTab===tab.id?G.aqua:G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:"transparent"}`,borderRadius:"8px",padding:"7px 12px",fontSize:"11px",fontWeight:s.activeTab===tab.id?"700":"500",fontFamily:"inherit",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}},tab.label);
         btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
         tabs.appendChild(btn);
       });
-      content.appendChild(tabs);
+      tabSection.appendChild(tabs);
+      content.appendChild(tabSection);
       if(s.activeTab==="listing"){content.appendChild(copyCard(s.language==="Spanish"?"Descripción MLS":"MLS Listing",s.result.listing,"🏠"));content.appendChild(copyCard(s.language==="Spanish"?"Asunto del Email":"Email Subject",s.result.email_subject,"📧"));content.appendChild(copyCard(s.language==="Spanish"?"Cuerpo del Email":"Email Body",s.result.email_body,"📨"));}
       if(s.activeTab==="social"){content.appendChild(copyCard("Instagram",s.result.instagram,"📸"));content.appendChild(copyCard("Facebook",s.result.facebook,"👥"));content.appendChild(copyCard("Twitter / X",s.result.twitter,"⚡"));content.appendChild(copyCard("LinkedIn",s.result.linkedin,"💼"));}
       if(s.activeTab==="ads"){content.appendChild(copyCard(s.language==="Spanish"?"Blast SMS":"SMS Blast",s.result.sms_blast,"📱"));content.appendChild(copyCard(s.language==="Spanish"?"Difusión WhatsApp":"WhatsApp Broadcast",s.result.whatsapp_broadcast,"💬"));content.appendChild(copyCard("Google Ad",s.result.google_ad,"🔍"));content.appendChild(copyCard(s.language==="Spanish"?"Anuncio Facebook/Instagram":"Facebook/Instagram Ad",s.result.facebook_ad,"🎯"));}
@@ -817,7 +821,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
         content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},"Your day-by-day action plan. Follow this to maximise every listing."));
         s.result.schedule.forEach(day=>{
           const dayCard=el("div",{style:{background:G.bg1,border:`1px solid ${G.border2}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"8px"}});
-          dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.gold}},day.day)));
+          dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.aqua}},day.day)));
           if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.aqua,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
           content.appendChild(dayCard);
         });
@@ -837,7 +841,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
             ));
             const pColor=G.aqua;
             rrow.appendChild(el("div",{style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px",flexShrink:"0"}},
-              el("div",{style:{fontSize:"12px",fontWeight:"700",color:"#22c55e"}},`+ ${r.roi||""}`),
+              el("div",{style:{fontSize:"12px",fontWeight:"700",color:G.aqua}},`+ ${r.roi||""}`),
               el("span",{style:{fontSize:"10px",fontWeight:"700",color:"#060608",background:"#ffffff",border:`1px solid rgba(42,184,212,0.4)`,borderRadius:"100px",padding:"2px 10px"}},r.priority||"")
             ));
             rc.appendChild(rrow);
@@ -927,7 +931,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
           win.document.close();
         });
         fw.appendChild(printBtn);
-        resultInner.appendChild(fw);
+        content.appendChild(fw);
       }
       const newBtn=el("button",{style:{...btnStyle(false),marginTop:"16px"}},t.newListing);
       newBtn.addEventListener("click",()=>{s.result=null;s.step=1;s.mode="";renderApp1Content();});
