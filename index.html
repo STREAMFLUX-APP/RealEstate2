@@ -307,284 +307,163 @@ function renderDashboard(){
   const hasApp2=user.plan==="outreach"||user.plan==="bundle";
   const listings=SF.getListings();
   const clients=SF.getClients();
-  const followUpsDue=clients.filter(c=>{
-    if(!c.savedAt)return false;
-    const d=new Date(c.savedAt);
-    const diff=Math.ceil((Date.now()-d)/(1000*60*60*24));
-    return diff>=3&&diff<=30;
-  }).length;
+  const followUpsDue=clients.filter(c=>{if(!c.savedAt)return false;return Math.ceil((Date.now()-new Date(c.savedAt))/864e5)>=3&&Math.ceil((Date.now()-new Date(c.savedAt))/864e5)<=30;}).length;
 
-  const wrap=el("div",{style:{minHeight:"100vh",background:G.bg,backgroundImage:"radial-gradient(ellipse 80% 40% at 50% -5%,rgba(42,184,212,0.06) 0%,transparent 60%)"}});
-
-  // Nav
-  const nav=el("div",{style:{background:G.bg1,borderBottom:`1px solid ${G.border}`,padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"58px",position:"sticky",top:"0",zIndex:"100",backdropFilter:"blur(10px)"}});
-  nav.appendChild(el("div",{style:{fontSize:"18px",fontWeight:"800",letterSpacing:"4px",color:G.white}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
-  const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}});
-  if(user.trialActive)navRight.appendChild(el("span",{style:{fontSize:"12px",background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 12px",color:G.aqua,fontWeight:"600"}},`🎯 ${user.daysLeft} ${g.daysLeft}`));
-  if(user.subscribed)navRight.appendChild(el("span",{style:{fontSize:"12px",background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:"100px",padding:"4px 12px",color:G.aqua,fontWeight:"600"}},g.active));
-  const adminBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},g.admin);
-  adminBtn.addEventListener("click",()=>setState({screen:"admin"}));
-  navRight.appendChild(adminBtn);
-  const logoutBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},g.signOut);
-  logoutBtn.addEventListener("click",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});});
-  navRight.appendChild(logoutBtn);
-  nav.appendChild(navRight);
-  wrap.appendChild(nav);
-
-  const content=el("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"36px 24px 80px"}});
-
-  // Welcome
-  content.appendChild(el("div",{style:{marginBottom:"28px"}},
-    el("h1",{style:{fontSize:"22px",fontWeight:"700",color:G.white,marginBottom:"4px",letterSpacing:"-0.01em"}},[`${g.welcomeBack}, `,el("span",{style:{color:G.aqua}},user.name.split(" ")[0])," 👋"]),
-    el("p",{style:{color:G.muted,fontSize:"14px"}},g.marketingSystem)
-  ));
-
-  // Pipeline stats
-  const statsRow=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:"12px",marginBottom:"24px"}});
-  [[`🏠`,listings.length,g.activeListings,G.aqua],[`🤝`,clients.length,g.clientsPipeline,G.gold],[`🔔`,followUpsDue,g.followUpsDue,"#f87171"],[`⚡`,listings.length+clients.length,g.totalGenerated,"#2AB8D4"]].forEach(([icon,num,label,color])=>{
-    const c=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 18px"}});
-    c.appendChild(el("div",{style:{fontSize:"20px",marginBottom:"6px"}},icon));
-    c.appendChild(el("div",{style:{fontSize:"26px",fontWeight:"800",color,marginBottom:"2px",fontFamily:"DM Mono,monospace",letterSpacing:"-0.02em"}},String(num)));
-    c.appendChild(el("div",{style:{fontSize:"11px",color:G.muted,textTransform:"uppercase",letterSpacing:"1px"}},label));
-    statsRow.appendChild(c);
-  });
-  content.appendChild(statsRow);
-
-  // App cards
-  const appGrid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"16px",marginBottom:"24px"}});
-
-  if(hasApp1){
-    const c=el("div",{style:{background:G.card,border:`1px solid ${G.aquaBorder}`,borderRadius:"14px",overflow:"hidden"}});
-    c.appendChild(el("div",{style:{background:"#111",padding:"20px 22px 16px",borderBottom:`1px solid ${G.border}`}},
-      el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"App 01"),
-      el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},g.app1title),
-      el("div",{style:{fontSize:"12px",color:G.muted}},g.app1sub)
-    ));
-    const body=el("div",{style:{padding:"16px 22px"}});
-    const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"14px"}},g.newListing);
-    btn.addEventListener("click",()=>setState({screen:"app1"}));
-    body.appendChild(btn);
-    if(listings.length>0){
-      let listingsOpen=false;
-      const listToggleBtn=el("div",{style:{marginTop:"6px"}});
-      const ltb=el("button",{style:{background:G.aquaDim,color:G.aqua,border:"1px solid rgba(42,184,212,0.35)",borderRadius:"8px",padding:"9px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",width:"100%",letterSpacing:"0.04em",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"all 0.15s"}},
-        el("span",{},(state.lang==="Spanish")?("📦 Últimos "+listings.length+" paquetes generados"):("📦 Last "+listings.length+" packages generated")),
-        el("span",{style:{fontSize:"11px"}},"▼")
-      );
-      ltb.addEventListener("mouseenter",function(){ltb.style.background="rgba(42,184,212,0.15)";ltb.style.borderColor=G.aqua;});
-      ltb.addEventListener("mouseleave",function(){ltb.style.background=G.aquaDim;ltb.style.borderColor="rgba(42,184,212,0.35)";});
-      const listingsContainer=el("div",{style:{display:"none",marginTop:"8px",maxHeight:"300px",overflowY:"auto"}});
-      listings.slice(0,10).forEach(function(l){
-        const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 10px",background:G.bg,borderRadius:"8px",marginBottom:"5px",border:"1px solid "+G.border,transition:"border-color 0.15s"}});
-        row.addEventListener("mouseenter",function(){row.style.borderColor=G.border2;});
-        row.addEventListener("mouseleave",function(){row.style.borderColor=G.border;});
-        const addr=l.address||(l.city?((state.lang==="Spanish"?"Propiedad en ":"Property in ")+l.city):("Generated "+l.savedAt||""));
-        row.appendChild(el("div",{style:{flex:"1",minWidth:"0",marginRight:"8px"}},
-          el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},addr),
-          el("div",{style:{fontSize:"10px",color:G.muted,marginTop:"1px"}},(l.mode||"")+" · "+(l.savedAt||""))
-        ));
-        if(l.result){const vBtn=el("button",{style:{background:"transparent",color:G.aqua,border:"1px solid rgba(42,184,212,0.25)",borderRadius:"6px",padding:"4px 10px",fontSize:"10px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},(state.lang==="Spanish")?"Abrir →":"Open →");vBtn.addEventListener("click",function(){setState({screen:"app1_results",savedResult:l});});row.appendChild(vBtn);}
-        listingsContainer.appendChild(row);
-      });
-      ltb.addEventListener("click",function(){listingsOpen=!listingsOpen;listingsContainer.style.display=listingsOpen?"block":"none";ltb.querySelector("span:last-child").textContent=listingsOpen?"▲":"▼";});
-      listToggleBtn.appendChild(ltb);listToggleBtn.appendChild(listingsContainer);body.appendChild(listToggleBtn);
-    }
-    c.appendChild(body);
-    appGrid.appendChild(c);
-  }
-
-  if(hasApp2){
-    const c=el("div",{style:{background:G.card,border:`1px solid ${G.aquaBorder}`,borderRadius:"14px",overflow:"hidden"}});
-    c.appendChild(el("div",{style:{background:"#111",padding:"20px 22px 16px",borderBottom:`1px solid ${G.border}`}},
-      el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"App 02"),
-      el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},g.app2title),
-      el("div",{style:{fontSize:"12px",color:G.muted}},g.app2sub)
-    ));
-    const body=el("div",{style:{padding:"16px 22px"}});
-    const btn=el("button",{style:{...btnStyle(false),width:"100%",marginBottom:"14px"}},g.newClient);
-    btn.addEventListener("click",()=>setState({screen:"app2"}));
-    body.appendChild(btn);
-    if(clients.length>0){
-      let clientsOpen=false;
-      const clientToggleBtn=el("div",{style:{marginTop:"6px"}});
-      const ctb=el("button",{style:{background:G.goldDim,color:G.gold,border:"1px solid rgba(201,150,58,0.35)",borderRadius:"8px",padding:"9px 14px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",width:"100%",letterSpacing:"0.04em",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"all 0.15s"}},
-        el("span",{},(state.lang==="Spanish")?("📦 Últimos "+clients.length+" paquetes generados"):("📦 Last "+clients.length+" packages generated")),
-        el("span",{style:{fontSize:"11px"}},"▼")
-      );
-      ctb.addEventListener("mouseenter",function(){ctb.style.background="rgba(201,150,58,0.18)";ctb.style.borderColor=G.gold;});
-      ctb.addEventListener("mouseleave",function(){ctb.style.background=G.goldDim;ctb.style.borderColor="rgba(201,150,58,0.35)";});
-      const clientsContainer=el("div",{style:{display:"none",marginTop:"8px",maxHeight:"300px",overflowY:"auto"}});
-      clients.slice(0,10).forEach(function(cl){
-        const due=cl.savedAt&&Math.ceil((Date.now()-new Date(cl.savedAt))/864e5)>=3;
-        const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 10px",background:G.bg,borderRadius:"8px",marginBottom:"5px",border:"1px solid "+G.border,transition:"border-color 0.15s"}});
-        row.addEventListener("mouseenter",function(){row.style.borderColor=G.border2;});
-        row.addEventListener("mouseleave",function(){row.style.borderColor=G.border;});
-        row.appendChild(el("div",{style:{flex:"1",minWidth:"0",marginRight:"8px"}},
-          el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},cl.clientName||"Client"),
-          el("div",{style:{fontSize:"10px",color:due?"#f87171":G.muted,marginTop:"1px"}},due?g.followUpDue:((cl.contactReason||"")+" · "+(cl.savedAt||"")))
-        ));
-        if(cl.result){const vBtn2=el("button",{style:{background:"transparent",color:G.gold,border:"1px solid rgba(201,150,58,0.25)",borderRadius:"6px",padding:"4px 10px",fontSize:"10px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0"}},(state.lang==="Spanish")?"Abrir →":"Open →");vBtn2.addEventListener("click",function(){setState({screen:"app2_results",savedResult:cl});});row.appendChild(vBtn2);}
-        clientsContainer.appendChild(row);
-      });
-      ctb.addEventListener("click",function(){clientsOpen=!clientsOpen;clientsContainer.style.display=clientsOpen?"block":"none";ctb.querySelector("span:last-child").textContent=clientsOpen?"▲":"▼";});
-      clientToggleBtn.appendChild(ctb);clientToggleBtn.appendChild(clientsContainer);body.appendChild(clientToggleBtn);
-    }
-    c.appendChild(body);
-    appGrid.appendChild(c);
-  }
-
-  content.appendChild(appGrid);
-
-  // Plan bar
-  content.appendChild(el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"12px"}},
-    el("div",{},
-      el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:G.muted,marginBottom:"3px"}},g.yourPlan),
-      el("div",{style:{fontSize:"14px",fontWeight:"700",color:G.white}},user.plan==="bundle"?g.bundle:user.plan==="marketing"?g.marketing:g.outreach)
-    ),
-    !user.subscribed&&el("a",{href:"https://streamflux.app/#pricing",target:"_blank",style:{background:G.aqua,color:"#060608",borderRadius:"8px",padding:"9px 16px",fontSize:"12px",fontWeight:"700",textDecoration:"none"}},g.upgrade)
-  ));
-
-  wrap.appendChild(content);
-  return wrap;
-}
-function renderAdmin(){
-  let adminKey="",authed=false,users=[],loading=false,msg="";
-  let name="",email="",password="",plan="bundle",trialDays="7";
-  
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
-  const nav=el("div",{style:{background:G.card,borderBottom:`1px solid ${G.border}`,padding:"14px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}});
-  nav.appendChild(el("span",{style:{fontSize:"15px",fontWeight:"700"}},"⚙️ Admin Panel"));
-  const backBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"← Dashboard");
-  backBtn.addEventListener("click",()=>setState({screen:"dashboard"}));
-  nav.appendChild(backBtn);
-  wrap.appendChild(nav);
-  
-  const content=el("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"32px 20px 60px"}});
-  
-  function renderAdminContent(){
-    content.innerHTML="";
-    
-    const msgDiv=el("div",{style:{background:"#0a1f0a",border:`1px solid ${G.green}`,borderRadius:"8px",padding:"10px 14px",color:"#4ade80",fontSize:"13px",marginBottom:"16px",display:msg?"block":"none"}},msg);
-    content.appendChild(msgDiv);
-    
-    if(!authed){
-      const authCard=el("div",{style:cardStyle});
-      authCard.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"700",marginBottom:"16px",color:G.white}},"⚙️ Admin Panel"));
-      const keyInp=el("input",{type:"password",placeholder:"Enter admin secret key",style:{...inputStyle,marginBottom:"12px"}});
-      keyInp.value=adminKey;
-      keyInp.addEventListener("input",e=>adminKey=e.target.value);
-      authCard.appendChild(keyInp);
-      if(msg)authCard.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px",color:"#f87171",fontSize:"13px",marginBottom:"12px"}},msg));
-      const authBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"10px",padding:"14px",width:"100%",fontSize:"15px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"Access Admin →");
-      authBtn.addEventListener("click",async()=>{
-        if(!adminKey){msg="❌ Enter your admin key.";renderAdminContent();return;}
-        authBtn.textContent="Checking...";authBtn.disabled=true;
-        try{
-          const res=await apiAdmin({adminKey,action:"list_users"});
-          if(res.success){authed=true;users=res.users||[];msg="";renderAdminContent();}
-          else{msg="❌ "+(res.error||"Wrong admin key");renderAdminContent();}
-        }catch(e){
-          msg="❌ Error: "+e.message;
-          renderAdminContent();
-        }
-      });
-      authCard.appendChild(authBtn);
-      content.appendChild(authCard);
-      return;
-    }
-    
-    // Add user form
-    const addCard=el("div",{style:cardStyle});
-    addCard.appendChild(el("h3",{style:{fontSize:"16px",fontWeight:"700",color:G.white,marginBottom:"16px"}},"➕ Add New Client"));
-    const grid=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-    grid.appendChild(field("Full Name","text",name,v=>name=v,"Sarah Johnson"));
-    grid.appendChild(field("Email","email",email,v=>email=v,"sarah@email.com"));
-    grid.appendChild(field("Password","text",password,v=>password=v,"Welcome2024!"));
-    grid.appendChild(field("Trial Days","number",trialDays,v=>trialDays=v,"7"));
-    addCard.appendChild(grid);
-    
-    const planWrap=el("div",{style:{marginBottom:"16px"}});
-    planWrap.appendChild(el("label",{style:labelStyle},"Plan"));
-    const sel=el("select",{style:{...inputStyle,cursor:"pointer"}},
-      el("option",{value:"marketing"},"Marketing Tool — $125/mo (App 1 only)"),
-      el("option",{value:"outreach"},"Outreach Tool — $125/mo (App 2 only)"),
-      el("option",{value:"bundle"},"Complete Bundle — $157/mo (Both Apps)")
-    );
-    sel.value=plan;
-    sel.addEventListener("change",e=>plan=e.target.value);
-    planWrap.appendChild(sel);
-    addCard.appendChild(planWrap);
-    
-    const addBtn=el("button",{style:btnStyle(false)},"Add Client →");
-    addBtn.addEventListener("click",async()=>{
-      if(!name||!email||!password){msg="❌ Fill in all fields.";renderAdminContent();return;}
-      const res=await apiAdmin({adminKey,action:"add_user",name,email,password,plan,trialDays:parseInt(trialDays)});
-      if(res.success){msg="✅ Client added: "+res.user.email;name="";email="";password="";}
-      else msg="❌ "+res.error;
-      const r2=await apiAdmin({adminKey,action:"list_users"});
-      if(r2.success)users=r2.users;
-      renderAdminContent();
-    });
-    addCard.appendChild(addBtn);
-    content.appendChild(addCard);
-    
-    // Users list
-    const usersCard=el("div",{style:cardStyle});
-    usersCard.appendChild(el("h3",{style:{fontSize:"16px",fontWeight:"700",color:G.white,marginBottom:"16px"}},`👥 All Clients (${users.length})`));
-    
-    if(users.length===0){
-      usersCard.appendChild(el("p",{style:{color:G.muted,fontSize:"14px"}},"No clients yet."));
-    }else{
-      users.forEach(u=>{
-        const trial=new Date(u.trial_ends_at);
-        const now=new Date();
-        const trialActive=now<trial;
-        const daysLeft=trialActive?Math.ceil((trial-now)/(1000*60*60*24)):0;
-        
-        const row=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"10px"}});
-        const rowTop=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:"10px"}});
-        
-        const info=el("div",{});
-        info.appendChild(el("div",{style:{fontWeight:"700",color:G.white,fontSize:"14px"}},u.name));
-        info.appendChild(el("div",{style:{color:G.muted,fontSize:"12px",marginTop:"2px"}},u.email));
-        const tags=el("div",{style:{display:"flex",gap:"8px",marginTop:"6px",flexWrap:"wrap"}});
-        tags.appendChild(el("span",{style:{fontSize:"11px",background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"2px 10px",color:G.aqua,fontWeight:"600"}},u.plan==="bundle"?"Bundle":u.plan==="marketing"?"Marketing":"Outreach"));
-        if(u.subscribed)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(61,158,92,0.1)",border:"1px solid rgba(61,158,92,0.3)",borderRadius:"100px",padding:"2px 10px",color:"#4ade80",fontWeight:"600"}},"✓ Paid"));
-        if(trialActive&&!u.subscribed)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(212,168,67,0.1)",border:"1px solid rgba(212,168,67,0.3)",borderRadius:"100px",padding:"2px 10px",color:G.gold,fontWeight:"600"}},`Trial: ${daysLeft}d left`));
-        if(!trialActive&&!u.subscribed)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:"100px",padding:"2px 10px",color:G.red,fontWeight:"600"}},"Trial Expired"));
-        if(!u.active)tags.appendChild(el("span",{style:{fontSize:"11px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:"100px",padding:"2px 10px",color:G.red,fontWeight:"600"}},"Deactivated"));
-        info.appendChild(tags);
-        rowTop.appendChild(info);
-        
-        const btns=el("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}});
-        if(!u.subscribed){
-          const paidBtn=el("button",{style:{background:"transparent",color:G.green,border:`1px solid ${G.green}`,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Mark Paid");
-          paidBtn.addEventListener("click",async()=>{await apiAdmin({adminKey,action:"subscribe_user",userId:u.id});msg="✅ Marked as paid.";const r=await apiAdmin({adminKey,action:"list_users"});if(r.success)users=r.users;renderAdminContent();});
-          btns.appendChild(paidBtn);
-        }
-        if(u.active){
-          const deactBtn=el("button",{style:{background:"transparent",color:G.red,border:`1px solid ${G.red}`,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Deactivate");
-          deactBtn.addEventListener("click",async()=>{if(!confirm(`Deactivate ${u.name}?`))return;await apiAdmin({adminKey,action:"deactivate_user",userId:u.id});msg="✅ Deactivated.";const r=await apiAdmin({adminKey,action:"list_users"});if(r.success)users=r.users;renderAdminContent();});
-          btns.appendChild(deactBtn);
-        }else{
-          const actBtn=el("button",{style:{background:"transparent",color:G.green,border:`1px solid ${G.green}`,borderRadius:"8px",padding:"5px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Activate");
-          actBtn.addEventListener("click",async()=>{await apiAdmin({adminKey,action:"activate_user",userId:u.id});msg="✅ Activated.";const r=await apiAdmin({adminKey,action:"list_users"});if(r.success)users=r.users;renderAdminContent();});
-          btns.appendChild(actBtn);
-        }
-        rowTop.appendChild(btns);
-        row.appendChild(rowTop);
-        usersCard.appendChild(row);
-      });
-    }
-    content.appendChild(usersCard);
+
+  // ── NAV ──────────────────────────────────────────────
+  const nav=el("div",{style:{background:G.bg1,borderBottom:`1px solid ${G.border}`,padding:"0 32px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:"0",zIndex:"100"}});
+  nav.appendChild(el("div",{style:{fontSize:"17px",fontWeight:"800",letterSpacing:"5px",color:G.white}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
+  const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+  if(user.trialActive){
+    const tb=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 14px",display:"flex",alignItems:"center",gap:"6px"}});
+    tb.appendChild(el("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:G.aqua,animation:"pulse 2s infinite"}}));
+    tb.appendChild(el("span",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,letterSpacing:"0.05em"}}),`${user.daysLeft} days left`);
+    navRight.appendChild(tb);
   }
-  
-  renderAdminContent();
+  if(user.subscribed){
+    const sb=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 14px",display:"flex",alignItems:"center",gap:"6px"}});
+    sb.appendChild(el("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:G.aqua}}));
+    sb.appendChild(el("span",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,letterSpacing:"0.05em"}},"Active"));
+    navRight.appendChild(sb);
+  }
+  [["Admin",()=>setState({screen:"admin"})],[g.signOut||"Sign Out",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});}]].forEach(([label,fn])=>{
+    const b=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.05em",transition:"all 0.15s"}},label);
+    b.addEventListener("mouseenter",()=>{b.style.borderColor=G.border2;b.style.color=G.white;});
+    b.addEventListener("mouseleave",()=>{b.style.borderColor=G.border;b.style.color=G.muted;});
+    b.addEventListener("click",fn);navRight.appendChild(b);
+  });
+  nav.appendChild(navRight);wrap.appendChild(nav);
+
+  // ── CONTENT ───────────────────────────────────────────
+  const content=el("div",{style:{maxWidth:"980px",margin:"0 auto",padding:"48px 28px 100px"}});
+
+  // ── HERO WELCOME ──────────────────────────────────────
+  const hero=el("div",{style:{marginBottom:"48px",paddingBottom:"40px",borderBottom:`1px solid ${G.border}`}});
+  const heroTop=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:"20px"}});
+  const heroLeft=el("div",{});
+  heroLeft.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.muted,marginBottom:"8px",fontFamily:"DM Mono,monospace"}},"DASHBOARD"));
+  heroLeft.appendChild(el("h1",{style:{fontSize:"clamp(28px,4vw,42px)",fontWeight:"800",color:G.white,lineHeight:"1.1",letterSpacing:"-0.03em",marginBottom:"10px"}},[`Good to see you,`,el("br",{}),el("span",{style:{color:G.aqua}},user.name.split(" ")[0])+"."]))  ;
+  heroLeft.appendChild(el("p",{style:{color:G.muted,fontSize:"14px",maxWidth:"420px",lineHeight:"1.6"}},"Your AI marketing system is ready. Every listing, every client, every platform — in minutes."));
+  heroTop.appendChild(heroLeft);
+  // Quick action buttons
+  const heroActions=el("div",{style:{display:"flex",flexDirection:"column",gap:"8px",alignItems:"flex-end"}});
+  if(hasApp1){
+    const b1=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"10px",padding:"13px 22px",fontSize:"13px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.02em",transition:"opacity 0.15s",whiteSpace:"nowrap"}},g.newListing||"+ New Listing");
+    b1.addEventListener("mouseenter",()=>b1.style.opacity="0.85");b1.addEventListener("mouseleave",()=>b1.style.opacity="1");
+    b1.addEventListener("click",()=>setState({screen:"app1"}));heroActions.appendChild(b1);
+  }
+  if(hasApp2){
+    const b2=el("button",{style:{background:"transparent",color:G.aqua,border:`1px solid ${G.aquaBorder}`,borderRadius:"10px",padding:"13px 22px",fontSize:"13px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.02em",transition:"all 0.15s",whiteSpace:"nowrap"}},g.newClient||"+ New Client");
+    b2.addEventListener("mouseenter",()=>{b2.style.background=G.aquaDim;});b2.addEventListener("mouseleave",()=>{b2.style.background="transparent";});
+    b2.addEventListener("click",()=>setState({screen:"app2"}));heroActions.appendChild(b2);
+  }
+  heroTop.appendChild(heroActions);
+  hero.appendChild(heroTop);
+  content.appendChild(hero);
+
+  // ── STATS ROW ─────────────────────────────────────────
+  const statsGrid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"1px",background:G.border,borderRadius:"12px",overflow:"hidden",marginBottom:"48px",border:`1px solid ${G.border}`}});
+  [
+    [String(listings.length),"Listings Generated","Total listing packages created"],
+    [String(clients.length),"Clients Outreached","Total client outreach packages"],
+    [String(followUpsDue),"Follow-Ups Due","Clients needing follow-up now"],
+    [String(listings.length+clients.length),"Total Packages","All AI packages generated"],
+  ].forEach(([num,label,sub])=>{
+    const cell=el("div",{style:{background:G.bg1,padding:"24px 22px",position:"relative",overflow:"hidden"}});
+    cell.appendChild(el("div",{style:{fontSize:"32px",fontWeight:"800",color:G.aqua,fontFamily:"DM Mono,monospace",letterSpacing:"-0.04em",lineHeight:"1",marginBottom:"8px"}},num));
+    cell.appendChild(el("div",{style:{fontSize:"12px",fontWeight:"700",color:G.white,marginBottom:"3px",letterSpacing:"0.02em"}},label));
+    cell.appendChild(el("div",{style:{fontSize:"11px",color:G.muted,lineHeight:"1.4"}},sub));
+    statsGrid.appendChild(cell);
+  });
+  content.appendChild(statsGrid);
+
+  // ── TOOLS SECTION ─────────────────────────────────────
+  content.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.muted,marginBottom:"16px",display:"flex",alignItems:"center",gap:"12px"}},"YOUR TOOLS",el("div",{style:{flex:"1",height:"1px",background:G.border}})));
+
+  const toolsGrid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"2px",background:G.border,borderRadius:"14px",overflow:"hidden",border:`1px solid ${G.border}`}});
+
+  function mkToolCard(num,title,sub,onNew,btnLabel,hist,isApp1,accent){
+    const card=el("div",{style:{background:G.bg1,padding:"28px",display:"flex",flexDirection:"column",gap:"0",transition:"background 0.15s"}});
+    card.addEventListener("mouseenter",()=>card.style.background=G.bg2);
+    card.addEventListener("mouseleave",()=>card.style.background=G.bg1);
+    // Top
+    const top=el("div",{style:{marginBottom:"20px"}});
+    top.appendChild(el("div",{style:{fontSize:"9px",fontWeight:"700",letterSpacing:"0.3em",textTransform:"uppercase",color:accent||G.aqua,marginBottom:"10px",fontFamily:"DM Mono,monospace"}},`// ${num}`));
+    top.appendChild(el("div",{style:{fontSize:"18px",fontWeight:"700",color:G.white,marginBottom:"5px",letterSpacing:"-0.01em"}},title));
+    top.appendChild(el("div",{style:{fontSize:"12px",color:G.muted,lineHeight:"1.5"}},sub));
+    card.appendChild(top);
+    // CTA
+    const ctaBtn=el("button",{style:{background:accent||G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"12px 18px",fontSize:"13px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",width:"100%",letterSpacing:"0.02em",transition:"opacity 0.15s",marginBottom:"16px"}},btnLabel);
+    ctaBtn.addEventListener("mouseenter",()=>ctaBtn.style.opacity="0.85");
+    ctaBtn.addEventListener("mouseleave",()=>ctaBtn.style.opacity="1");
+    ctaBtn.addEventListener("click",onNew);
+    card.appendChild(ctaBtn);
+    // History toggle
+    if(hist&&hist.length>0){
+      let open=false;
+      const tBorder=`1px solid ${(accent||G.aqua)}33`;
+      const tBtn=el("button",{style:{background:"transparent",color:accent||G.aqua,border:tBorder,borderRadius:"8px",padding:"8px 14px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"all 0.15s"}},
+        el("span",{},[`${hist.length} recent package${hist.length===1?"":"s"}`]),
+        el("span",{style:{fontSize:"10px",opacity:"0.6"}},"▼")
+      );
+      tBtn.addEventListener("mouseenter",()=>tBtn.style.background=(accent||G.aqua)+"1a");
+      tBtn.addEventListener("mouseleave",()=>tBtn.style.background="transparent");
+      const list=el("div",{style:{display:"none",marginTop:"8px"}});
+      hist.slice(0,10).forEach(item=>{
+        const row=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 12px",background:G.bg,borderRadius:"8px",marginBottom:"4px",border:`1px solid ${G.border}`,cursor:"pointer",transition:"border-color 0.15s"}});
+        row.addEventListener("mouseenter",()=>row.style.borderColor=G.border2);
+        row.addEventListener("mouseleave",()=>row.style.borderColor=G.border);
+        const lbl=isApp1?(item.address||(item.city?"Property in "+item.city:"Package "+item.savedAt)):(item.clientName||"Client");
+        const sub2=isApp1?((item.mode||"")+" · "+(item.savedAt||"")):(item.contactReason||"")+" · "+(item.savedAt||"");
+        row.appendChild(el("div",{style:{flex:"1",minWidth:"0",marginRight:"8px"}},
+          el("div",{style:{fontSize:"12px",fontWeight:"600",color:G.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},lbl),
+          el("div",{style:{fontSize:"10px",color:G.muted,marginTop:"2px",fontFamily:"DM Mono,monospace"}},sub2)
+        ));
+        if(item.result){
+          const vb=el("button",{style:{background:"transparent",color:accent||G.aqua,border:`1px solid ${(accent||G.aqua)}33`,borderRadius:"6px",padding:"4px 10px",fontSize:"10px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",flexShrink:"0",transition:"all 0.15s"}},"Open →");
+          vb.addEventListener("mouseenter",()=>vb.style.background=(accent||G.aqua)+"1a");
+          vb.addEventListener("mouseleave",()=>vb.style.background="transparent");
+          vb.addEventListener("click",()=>setState({screen:isApp1?"app1_results":"app2_results",savedResult:item}));
+          row.appendChild(vb);
+        }
+        list.appendChild(row);
+      });
+      tBtn.addEventListener("click",()=>{open=!open;list.style.display=open?"block":"none";tBtn.querySelector("span:last-child").textContent=open?"▲":"▼";});
+      card.appendChild(tBtn);card.appendChild(list);
+    }
+    return card;
+  }
+
+  if(hasApp1)toolsGrid.appendChild(mkToolCard("APP 01",g.app1title||"Property Marketing Machine","Generate 13 marketing outputs for any listing in minutes.",()=>setState({screen:"app1"}),g.newListing||"+ New Listing",listings,true,G.aqua));
+  if(hasApp2)toolsGrid.appendChild(mkToolCard("APP 02",g.app2title||"Client Outreach Machine","Personalised outreach packages for any client, any situation.",()=>setState({screen:"app2"}),g.newClient||"+ New Client",clients,false,G.aqua));
+  // Newsletter always visible
+  const nlCard=el("div",{style:{background:G.bg1,padding:"28px",display:"flex",flexDirection:"column",transition:"background 0.15s"}});
+  nlCard.addEventListener("mouseenter",()=>nlCard.style.background=G.bg2);
+  nlCard.addEventListener("mouseleave",()=>nlCard.style.background=G.bg1);
+  nlCard.appendChild(el("div",{style:{fontSize:"9px",fontWeight:"700",letterSpacing:"0.3em",textTransform:"uppercase",color:G.aqua,marginBottom:"10px",fontFamily:"DM Mono,monospace"}},"// APP 03"));
+  nlCard.appendChild(el("div",{style:{fontSize:"18px",fontWeight:"700",color:G.white,marginBottom:"5px",letterSpacing:"-0.01em"}},g.app3title||"Newsletter Generator"));
+  nlCard.appendChild(el("div",{style:{fontSize:"12px",color:G.muted,lineHeight:"1.5",marginBottom:"20px"}},g.app3sub||"Monthly client newsletter ready to send."));
+  const nlBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"12px 18px",fontSize:"13px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",width:"100%",letterSpacing:"0.02em",transition:"opacity 0.15s"}},g.newNewsletter||"+ New Newsletter");
+  nlBtn.addEventListener("mouseenter",()=>nlBtn.style.opacity="0.85");nlBtn.addEventListener("mouseleave",()=>nlBtn.style.opacity="1");
+  nlBtn.addEventListener("click",()=>setState({screen:"app3"}));
+  nlCard.appendChild(nlBtn);toolsGrid.appendChild(nlCard);
+  content.appendChild(toolsGrid);
+
+  // ── PLAN BAR ──────────────────────────────────────────
+  if(!user.subscribed){
+    const planBar=el("div",{style:{marginTop:"2px",background:G.bg1,border:`1px solid ${G.border}`,borderRadius:"0 0 14px 14px",padding:"16px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"16px",flexWrap:"wrap"}});
+    planBar.appendChild(el("p",{style:{fontSize:"13px",color:G.muted,margin:"0"}},user.trialActive?`Trial active — ${user.daysLeft} days remaining. Upgrade to keep access after your trial.`:"Your trial has ended. Subscribe to continue using Streamflux."));
+    const ub=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"10px 20px",fontSize:"12px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.02em",transition:"opacity 0.15s",flexShrink:"0"}},"Subscribe Now →");
+    ub.addEventListener("mouseenter",()=>ub.style.opacity="0.85");ub.addEventListener("mouseleave",()=>ub.style.opacity="1");
+    ub.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));
+    planBar.appendChild(ub);content.appendChild(planBar);
+  }
+
   wrap.appendChild(content);
   return wrap;
 }
 
-// APP 1 - Property Marketing Machine
 function renderApp1(){
   const SYSTEM="You are an elite real estate copywriter. You MUST respond with ONLY a raw valid JSON object. No markdown. No backticks. No explanation. No preamble. Start your response with { and end with }. Nothing else.";
   const LANGUAGES=[{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}];
@@ -795,16 +674,16 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
 
     if(s.result){
       // Full white background page
-      wrap.style.background="#f5f5f5";
+      
       const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"0 0 80px"},class:"fade-in"});
       // White header
-      const rHead=el("div",{style:{background:"#ffffff",padding:"18px 20px 14px",borderBottom:"1px solid #e5e5e5",marginBottom:"0"}});
-      rHead.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"800",color:"#060608",marginBottom:"3px",fontFamily:"inherit"}},"Your Package is Ready"));
-      rHead.appendChild(el("p",{style:{color:"#555",fontSize:"13px",fontFamily:"inherit"}},`Everything in ${s.language}. Tap Copy on any section to use it instantly.`));
+      const rHead=el("div",{style:{padding:"20px 16px 16px",marginBottom:"0"}});
+      rHead.appendChild(el("h2",{style:{fontSize:"20px",fontWeight:"800",color:G.white,marginBottom:"4px",letterSpacing:"-0.02em"}},s.language==="Spanish"?"Tu Paquete Está Listo":"Your Package is Ready"));
+      rHead.appendChild(el("p",{style:{color:G.muted,fontSize:"13px"}},`Everything in ${s.language}. Tap Copy on any section to use it instantly.`));
       content.appendChild(rHead);
       // Tab bar in white section
-      const tabSection=el("div",{style:{background:"#ffffff",padding:"12px 16px 0",borderBottom:"1px solid #e5e5e5",marginBottom:"16px"}});
-      const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"0",flexWrap:"wrap",background:"#f0f0f0",padding:"4px",borderRadius:"10px",border:"1px solid #e0e0e0"}});
+      const tabSection=el("div",{style:{background:G.bg,padding:"12px 16px 8px",borderBottom:`1px solid ${G.border}`,marginBottom:"16px"}});
+      const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"0",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.border2}`"}});
       TABS.forEach(tab=>{
         const btn=el("button",{style:{background:s.activeTab===tab.id?G.aquaDim:"transparent",color:s.activeTab===tab.id?G.aqua:G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:"transparent"}`,borderRadius:"8px",padding:"7px 12px",fontSize:"11px",fontWeight:s.activeTab===tab.id?"700":"500",fontFamily:"inherit",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}},tab.label);
         btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
@@ -820,7 +699,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       if(s.activeTab==="schedule"&&s.result.schedule){
         content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},"Your day-by-day action plan. Follow this to maximise every listing."));
         s.result.schedule.forEach(day=>{
-          const dayCard=el("div",{style:{background:G.bg1,border:`1px solid ${G.border2}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"8px"}});
+          const dayCard=el("div",{style:{background:"#0c0c10",border:"1px solid #252530",borderRadius:"10px",padding:"14px 16px",marginBottom:"8px",boxShadow:"0 2px 8px rgba(0,0,0,0.4)"}});
           dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.aqua}},day.day)));
           if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.aqua,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
           content.appendChild(dayCard);
@@ -1054,7 +933,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       const loadCard=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 20px",marginBottom:"16px"}});
       loadCard.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"8px"}},el("p",{style:{color:G.aqua,fontSize:"13px",margin:"0",fontWeight:"600"}},s.loadingMsg),el("span",{style:{color:G.muted,fontSize:"12px"}},`${s.loadingPct}%`)));
       const bar=el("div",{style:{width:"100%",height:"4px",background:G.border,borderRadius:"2px"}});
-      bar.appendChild(el("div",{style:{width:`${s.loadingPct}%`,height:"100%",background:G.gold,borderRadius:"2px",transition:"width 0.5s ease"}}));
+      bar.appendChild(el("div",{style:{width:`${s.loadingPct}%`,height:"100%",background:G.aqua,borderRadius:"2px",transition:"width 0.5s ease"}}));
       loadCard.appendChild(bar);
       content.appendChild(loadCard);
     }
@@ -1316,7 +1195,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       if(s.activeTab==="schedule"&&s.result.schedule){
         content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},`${(T2[s.language]||T2.English).followPlan} ${s.clientName}.`));
         s.result.schedule.forEach(day=>{
-          const dayCard=el("div",{style:{background:G.bg1,border:`1px solid ${G.border2}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"8px"}});
+          const dayCard=el("div",{style:{background:"#0c0c10",border:"1px solid #252530",borderRadius:"10px",padding:"14px 16px",marginBottom:"8px",boxShadow:"0 2px 8px rgba(0,0,0,0.4)"}});
           dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.aqua}},day.day)));
           if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.aqua,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
           content.appendChild(dayCard);
