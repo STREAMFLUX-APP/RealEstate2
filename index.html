@@ -142,7 +142,7 @@ function chips(label,hint,options,selected,onToggle,single){
     const lbl=typeof opt==="string"?opt:opt.label;
     const sub=typeof opt==="object"?opt.desc:null;
     const active=single?selected===val:(selected||[]).includes(val);
-    const btn=el("button",{style:{background:active?G.aquaDim:G.bg,border:"1px solid "+(active?G.aqua:G.border2),borderRadius:"8px",color:active?G.aqua:"rgba(240,240,248,0.92)",fontSize:"12px",padding:sub?"10px 14px":"7px 12px",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}},
+    const btn=el("button",{style:{background:active?G.aquaDim:G.bg,border:"1px solid "+(active?G.aqua:"rgba(42,184,212,0.18)"),borderRadius:"8px",color:active?G.aqua:"rgba(240,240,248,0.92)",fontSize:"12px",padding:sub?"10px 14px":"7px 12px",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}},
       el("div",{style:{fontWeight:active?"700":"400"}},lbl),
       ...(sub?[el("div",{style:{fontSize:"11px",color:active?"rgba(42,184,212,0.7)":G.muted,marginTop:"2px"}},sub)]:[])
     );
@@ -794,11 +794,16 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
     wrap.appendChild(nav);
 
     if(s.result){
-      const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"22px 16px 60px"},class:"fade-in"});
-      content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},`${t.everythingReady} ${s.language}. ${t.tapCopy}`));
+      const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"0 0 60px"},class:"fade-in"});
+      // White header
+      const rHead=el("div",{style:{background:"#ffffff",padding:"18px 20px 14px",borderBottom:"1px solid #e5e5e5",marginBottom:"16px"}});
+      rHead.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"800",color:"#060608",marginBottom:"3px",fontFamily:"inherit"}},"Your Package is Ready"));
+      rHead.appendChild(el("p",{style:{color:"#555",fontSize:"13px",fontFamily:"inherit"}},`Everything in ${s.language}. Tap Copy on any section to use it instantly.`));
+      content.appendChild(rHead);
+      const resultInner=el("div",{style:{padding:"0 16px"}});
       const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"20px",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.aquaBorder}`}});
       TABS.forEach(tab=>{
-        const btn=el("button",{style:{background:s.activeTab===tab.id?G.gold:"#0d0d0d",color:s.activeTab===tab.id?"#060608":G.muted,border:`1px solid ${s.activeTab===tab.id?G.gold:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:s.activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
+        const btn=el("button",{style:{background:s.activeTab===tab.id?G.aquaDim:"transparent",color:s.activeTab===tab.id?G.aqua:G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:"transparent"}`,borderRadius:"8px",padding:"7px 12px",fontSize:"11px",fontWeight:s.activeTab===tab.id?"700":"500",fontFamily:"inherit",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}},tab.label);
         btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
         tabs.appendChild(btn);
       });
@@ -813,7 +818,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
         s.result.schedule.forEach(day=>{
           const dayCard=el("div",{style:{background:G.bg1,border:`1px solid ${G.border2}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"8px"}});
           dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.gold}},day.day)));
-          if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.gold,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
+          if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.aqua,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
           content.appendChild(dayCard);
         });
       }
@@ -830,10 +835,10 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
               el("div",{style:{fontSize:"14px",fontWeight:"700",color:G.white,marginBottom:"3px"}},`${i+1}. ${r.title||""}`),
               el("div",{style:{fontSize:"12px",color:G.muted}},(isSpaReno?"Costo estimado: ":"Est. Cost: ")+(r.estimated_cost||""))
             ));
-            const pColor=r.priority==="High"?"#22c55e":r.priority==="Medium"?G.gold:G.muted;
+            const pColor=G.aqua;
             rrow.appendChild(el("div",{style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px",flexShrink:"0"}},
               el("div",{style:{fontSize:"12px",fontWeight:"700",color:"#22c55e"}},`+ ${r.roi||""}`),
-              el("span",{style:{fontSize:"10px",fontWeight:"700",color:pColor,background:pColor+"22",border:`1px solid ${pColor}44`,borderRadius:"100px",padding:"2px 8px"}},r.priority||"")
+              el("span",{style:{fontSize:"10px",fontWeight:"700",color:"#060608",background:"#ffffff",border:`1px solid rgba(42,184,212,0.4)`,borderRadius:"100px",padding:"2px 10px"}},r.priority||"")
             ));
             rc.appendChild(rrow);
             rc.appendChild(el("div",{style:{height:"1px",background:G.border,marginBottom:"10px"}}));
@@ -847,66 +852,82 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
         }
       }
       if(s.activeTab==="flyer"){
-        const flyerWrap=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"12px",padding:"20px",marginBottom:"16px"}});
-        flyerWrap.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},"Your branded listing flyer — ready to print or share digitally. Click Print/Save to export as PDF."));
-        // Flyer design
-        const flyer=el("div",{id:"sf-flyer",style:{background:"#fff",borderRadius:"10px",overflow:"hidden",maxWidth:"520px",margin:"0 auto",fontFamily:"Georgia,serif",boxShadow:"0 4px 32px rgba(0,0,0,0.4)"}});
-        // Header bar
-        const fHeader=el("div",{style:{background:"#060608",padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}});
-        fHeader.appendChild(el("div",{style:{fontSize:"18px",fontWeight:"700",letterSpacing:"3px",color:"#fff"}},`STREAM`,el("span",{style:{color:"#2AB8D4"}},"FLUX")));
-        const modeLabel=s.mode==="open_house"?"OPEN HOUSE":s.mode==="price_reduction"?"PRICE REDUCTION":s.mode==="sold"?"JUST SOLD":"NEW LISTING";
-        fHeader.appendChild(el("div",{style:{background:"#2AB8D4",color:"#060608",fontSize:"11px",fontWeight:"800",letterSpacing:"2px",padding:"4px 12px",borderRadius:"4px"}},modeLabel));
-        flyer.appendChild(fHeader);
-        // Price band
-        const priceBand=el("div",{style:{background:"#2AB8D4",padding:"12px 24px",textAlign:"center"}});
-        priceBand.appendChild(el("div",{style:{fontSize:"28px",fontWeight:"800",color:"#060608",letterSpacing:"1px"}},`$${s.price||"—"}`));
-        flyer.appendChild(priceBand);
-        // Address
-        const addrBlock=el("div",{style:{background:"#f9f9f9",padding:"14px 24px",borderBottom:"1px solid #eee"}});
-        addrBlock.appendChild(el("div",{style:{fontSize:"15px",fontWeight:"700",color:"#060608",marginBottom:"4px"}},s.address||"Property Address"));
-        addrBlock.appendChild(el("div",{style:{fontSize:"13px",color:"#555"}},`${s.city||""}${s.neighbourhood?", "+s.neighbourhood:""}`));
+        const isSpaF=s.language==="Spanish";
+        const fw=el("div",{style:{marginBottom:"16px"}});
+        fw.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px",textAlign:"center"}},isSpaF?"Flyer listo para imprimir o compartir digitalmente.":"Print-ready branded flyer. Click Print / Save PDF to export."));
+
+        // Build premium flyer
+        const flyer=el("div",{id:"sf-flyer-premium",style:{background:"#ffffff",borderRadius:"12px",overflow:"hidden",maxWidth:"500px",margin:"0 auto",boxShadow:"0 8px 48px rgba(0,0,0,0.5)",fontFamily:"'Syne',sans-serif"}});
+
+        // Top bar - full aqua
+        const topBar=el("div",{style:{background:"#2AB8D4",padding:"10px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+        const modeLabel=s.mode==="open_house"?(isSpaF?"JORNADA PUERTAS ABIERTAS":"OPEN HOUSE"):s.mode==="price_reduction"?(isSpaF?"REDUCCIÓN DE PRECIO":"PRICE REDUCTION"):s.mode==="sold"?(isSpaF?"VENDIDA":"JUST SOLD"):s.mode==="rental"?(isSpaF?"EN ALQUILER":"FOR RENT"):(isSpaF?"NUEVA PROPIEDAD":"NEW LISTING");
+        topBar.appendChild(el("div",{style:{fontSize:"11px",fontWeight:"800",letterSpacing:"3px",color:"#060608",fontFamily:"inherit"}},modeLabel));
+        topBar.appendChild(el("div",{style:{fontSize:"13px",fontWeight:"800",letterSpacing:"3px",color:"#060608",fontFamily:"inherit"}},"STREAM",el("span",{style:{color:"rgba(0,0,0,0.4)"}},"FLUX")));
+        flyer.appendChild(topBar);
+
+        // Price hero
+        const priceHero=el("div",{style:{background:"#060608",padding:"20px 24px",textAlign:"center",position:"relative"}});
+        priceHero.appendChild(el("div",{style:{fontSize:"36px",fontWeight:"800",color:"#ffffff",fontFamily:"inherit",letterSpacing:"-0.02em"}},"$"+(s.price||"—")));
+        if(s.oldPrice){priceHero.appendChild(el("div",{style:{fontSize:"14px",color:"rgba(255,255,255,0.4)",fontFamily:"inherit",textDecoration:"line-through",marginTop:"2px"}},"Was $"+s.oldPrice));}
+        flyer.appendChild(priceHero);
+
+        // Address block
+        const addrBlock=el("div",{style:{background:"#f9f9f9",padding:"14px 24px",borderBottom:"2px solid #2AB8D4"}});
+        addrBlock.appendChild(el("div",{style:{fontSize:"15px",fontWeight:"800",color:"#060608",marginBottom:"3px",fontFamily:"inherit"}},s.address||"Property Address"));
+        addrBlock.appendChild(el("div",{style:{fontSize:"13px",color:"#666",fontFamily:"inherit"}},(s.city||"")+(s.neighbourhood?", "+s.neighbourhood:"")));
         flyer.appendChild(addrBlock);
+
         // Stats row
-        const statsRow=el("div",{style:{display:"flex",background:"#fff",borderBottom:"1px solid #eee"}});
-        [[s.beds||"—","Beds"],[s.baths||"—","Baths"],[s.sqft||"—","Sq Ft"],[s.propType||"—","Type"]].forEach(([val,lbl])=>{
-          const cell=el("div",{style:{flex:"1",padding:"12px 8px",textAlign:"center",borderRight:"1px solid #eee"}});
-          cell.appendChild(el("div",{style:{fontSize:"18px",fontWeight:"800",color:"#060608"}},String(val)));
-          cell.appendChild(el("div",{style:{fontSize:"10px",color:"#888",letterSpacing:"1px",textTransform:"uppercase"}},lbl));
+        const statsRow=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",background:"#ffffff",borderBottom:"1px solid #f0f0f0"}});
+        [[s.beds||"—",isSpaF?"Hab.":"Beds"],[s.baths||"—",isSpaF?"Baños":"Baths"],[s.sqft||"—","Sq Ft"],[s.propType||"—",isSpaF?"Tipo":"Type"]].forEach(function(item){
+          const cell=el("div",{style:{padding:"14px 8px",textAlign:"center",borderRight:"1px solid #f0f0f0"}});
+          cell.appendChild(el("div",{style:{fontSize:"20px",fontWeight:"800",color:"#060608",fontFamily:"inherit",lineHeight:"1"}},String(item[0])));
+          cell.appendChild(el("div",{style:{fontSize:"10px",color:"#999",letterSpacing:"1px",textTransform:"uppercase",fontFamily:"inherit",marginTop:"4px"}},item[1]));
           statsRow.appendChild(cell);
         });
         flyer.appendChild(statsRow);
-        // MLS snippet
-        const descBlock=el("div",{style:{padding:"16px 24px",background:"#fff",borderBottom:"1px solid #eee"}});
-        const shortDesc=(s.result.listing||"").split(" ").slice(0,45).join(" ")+(s.result.listing&&s.result.listing.split(" ").length>45?"...":"");
-        descBlock.appendChild(el("p",{style:{fontSize:"13px",color:"#333",lineHeight:"1.7",margin:"0"}},shortDesc));
+
+        // Description
+        const descBlock=el("div",{style:{padding:"16px 24px",background:"#ffffff",borderBottom:"1px solid #f0f0f0"}});
+        const shortDesc=(s.result.listing||"").split(" ").slice(0,50).join(" ")+((s.result.listing||"").split(" ").length>50?"...":"");
+        descBlock.appendChild(el("p",{style:{fontSize:"13px",color:"#333",lineHeight:"1.75",margin:"0",fontFamily:"inherit"}},shortDesc||isSpaF?"Descripción de la propiedad disponible.":"Property description available."));
         flyer.appendChild(descBlock);
-        // Features
-        const feats=[...s.interior.slice(0,3),...s.outdoor.slice(0,3)].slice(0,5);
-        if(feats.length>0){
-          const featBlock=el("div",{style:{padding:"12px 24px",background:"#f5f5f5",display:"flex",flexWrap:"wrap",gap:"6px",borderBottom:"1px solid #eee"}});
-          feats.forEach(f=>{
-            featBlock.appendChild(el("span",{style:{background:"#060608",color:"#2AB8D4",fontSize:"11px",fontWeight:"600",padding:"3px 10px",borderRadius:"3px"}},f));
+
+        // Features pills
+        const featsList=[].concat(s.interior.slice(0,3),s.outdoor.slice(0,3)).slice(0,6);
+        if(featsList.length>0){
+          const featsBlock=el("div",{style:{padding:"12px 24px",background:"#f9f9f9",display:"flex",flexWrap:"wrap",gap:"6px",borderBottom:"1px solid #f0f0f0"}});
+          featsList.forEach(function(f){
+            featsBlock.appendChild(el("span",{style:{background:"#060608",color:"#2AB8D4",fontSize:"10px",fontWeight:"700",padding:"4px 11px",borderRadius:"100px",fontFamily:"inherit",letterSpacing:"0.5px"}},f));
           });
-          flyer.appendChild(featBlock);
+          flyer.appendChild(featsBlock);
         }
+
         // Agent footer
-        const agentFooter=el("div",{style:{background:"#060608",padding:"14px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}});
-        agentFooter.appendChild(el("div",{},
-          el("div",{style:{fontSize:"14px",fontWeight:"700",color:"#fff"}},s.agentName||"Agent Name"),
-          el("div",{style:{fontSize:"12px",color:"#2AB8D4"}},s.agentPhone||""),
+        const agentFoot=el("div",{style:{background:"#060608",padding:"16px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+        const agentLeft=el("div",{});
+        agentLeft.appendChild(el("div",{style:{fontSize:"14px",fontWeight:"700",color:"#ffffff",fontFamily:"inherit",marginBottom:"2px"}},s.agentName||isSpaF?"Tu Nombre":"Agent Name"));
+        if(s.agentPhone)agentLeft.appendChild(el("div",{style:{fontSize:"12px",color:"#2AB8D4",fontFamily:"inherit"}},s.agentPhone));
+        agentFoot.appendChild(agentLeft);
+        agentFoot.appendChild(el("div",{style:{textAlign:"right"}},
+          el("div",{style:{fontSize:"11px",color:"rgba(255,255,255,0.3)",fontFamily:"inherit",letterSpacing:"1px"}},"STREAMFLUX.APP")
         ));
-        agentFooter.appendChild(el("div",{style:{fontSize:"11px",color:"rgba(255,255,255,0.4)"}},`streamflux.app`));
-        flyer.appendChild(agentFooter);
-        flyerWrap.appendChild(flyer);
+        flyer.appendChild(agentFoot);
+
+        fw.appendChild(flyer);
+
         // Print button
-        const printBtn=el("button",{style:{...btnStyle(false),marginTop:"16px",width:"100%"}},s.language==="Spanish"?"🖨️ Imprimir / Guardar PDF":"🖨️ Print / Save as PDF");
-        printBtn.addEventListener("click",()=>{
+        const printBtn=el("button",{style:{background:"#2AB8D4",color:"#060608",border:"none",borderRadius:"8px",padding:"13px",fontSize:"13px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",width:"100%",marginTop:"16px",maxWidth:"500px",display:"block",margin:"16px auto 0",transition:"opacity 0.15s"}},isSpaF?"🖨️ Imprimir / Guardar PDF":"🖨️ Print / Save as PDF");
+        printBtn.addEventListener("mouseenter",function(){printBtn.style.opacity="0.85";});
+        printBtn.addEventListener("mouseleave",function(){printBtn.style.opacity="1";});
+        printBtn.addEventListener("click",function(){
           const win=window.open("","_blank");
-          win.document.write(`<html><head><title>Streamflux Flyer</title><style>body{margin:0;font-family:Georgia,serif;background:#fff}@media print{body{margin:0}}</style></head><body>${flyer.outerHTML}<script>window.print();<\/script></body></html>`);
+          win.document.write('<html><head><title>Streamflux Flyer</title><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{margin:0;font-family:Syne,sans-serif;background:#fff;display:flex;justify-content:center;padding:20px}@media print{body{padding:0}@page{margin:0}}</style></head><body>'+flyer.outerHTML+'<script>setTimeout(function(){window.print();},500);<\/script></body></html>');
           win.document.close();
         });
-        flyerWrap.appendChild(printBtn);
-        content.appendChild(flyerWrap);
+        fw.appendChild(printBtn);
+        resultInner.appendChild(fw);
       }
       const newBtn=el("button",{style:{...btnStyle(false),marginTop:"16px"}},t.newListing);
       newBtn.addEventListener("click",()=>{s.result=null;s.step=1;s.mode="";renderApp1Content();});
@@ -1027,7 +1048,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
 
     if(s.loading){
       const loadCard=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 20px",marginBottom:"16px"}});
-      loadCard.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"8px"}},el("p",{style:{color:G.gold,fontSize:"13px",margin:"0",fontWeight:"600"}},s.loadingMsg),el("span",{style:{color:G.muted,fontSize:"12px"}},`${s.loadingPct}%`)));
+      loadCard.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"8px"}},el("p",{style:{color:G.aqua,fontSize:"13px",margin:"0",fontWeight:"600"}},s.loadingMsg),el("span",{style:{color:G.muted,fontSize:"12px"}},`${s.loadingPct}%`)));
       const bar=el("div",{style:{width:"100%",height:"4px",background:G.border,borderRadius:"2px"}});
       bar.appendChild(el("div",{style:{width:`${s.loadingPct}%`,height:"100%",background:G.gold,borderRadius:"2px",transition:"width 0.5s ease"}}));
       loadCard.appendChild(bar);
