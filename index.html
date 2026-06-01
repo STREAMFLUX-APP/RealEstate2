@@ -35,7 +35,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--aqua)!im
 <script>
 const G={bg:"#060608",card:"#111",border:"#222",aqua:"#2AB8D4",aquaDim:"rgba(42,184,212,0.1)",aquaBorder:"rgba(42,184,212,0.25)",gold:"#D4A843",white:"#fff",muted:"rgba(255,255,255,0.5)",green:"#3d9e5c",red:"#ef4444"};
 
-const apiAuth=async(body)=>{try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
+const apiAuth=async(body)=>{try{const ac=new AbortController();const at=setTimeout(()=>ac.abort(),5000);const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:ac.signal});clearTimeout(at);return r.json();}catch(e){return{error:e.message};}};
 const apiAdmin=async(body)=>{
   try{
     const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -683,7 +683,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       content.appendChild(rHead);
       // Tab bar in white section
       const tabSection=el("div",{style:{background:G.bg,padding:"12px 16px 8px",borderBottom:`1px solid ${G.border}`,marginBottom:"16px"}});
-      const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"0",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.border2}`"}});
+      const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"0",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.border2}`}});
       TABS.forEach(tab=>{
         const btn=el("button",{style:{background:s.activeTab===tab.id?G.aquaDim:"transparent",color:s.activeTab===tab.id?G.aqua:G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:"transparent"}`,borderRadius:"8px",padding:"7px 12px",fontSize:"11px",fontWeight:s.activeTab===tab.id?"700":"500",fontFamily:"inherit",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}},tab.label);
         btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
@@ -1593,10 +1593,13 @@ try{
 const saved=sessionStorage.getItem("sf_user");
 if(saved){
   const u=JSON.parse(saved);
+  // Timeout fallback - if API doesn't respond in 4s, go to login
+  const initTimeout=setTimeout(()=>{sessionStorage.removeItem("sf_user");render();},4000);
   apiAuth({action:"check",userId:u.id}).then(res=>{
+    clearTimeout(initTimeout);
     if(res.success){state.screen="dashboard";state.user=res.user;render();}
     else{sessionStorage.removeItem("sf_user");render();}
-  }).catch(()=>render());
+  }).catch(()=>{clearTimeout(initTimeout);render();});
 }else{render();}
 </script>
 </body>
