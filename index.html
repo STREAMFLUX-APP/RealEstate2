@@ -888,7 +888,7 @@ function renderApp2(){
       aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
     }
   };
-  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition:"",propInterior:[],propOutdoor:[],propBuilding:[],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition:"",propInterior:[],propOutdoor:[],propBuilding:[],cmaComps:[{addr:"",price:"",beds:"",baths:"",sqft:""},{addr:"",price:"",beds:"",baths:"",sqft:""},{addr:"",price:"",beds:"",baths:"",sqft:""}],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
 
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -909,7 +909,7 @@ function renderApp2(){
     const CONTACT_REASONS=isSpa2?[{value:"new_listing",label:"Nueva Propiedad"},{value:"price_drop",label:"Reducción de Precio"},{value:"first_contact",label:"Primer Contacto"},{value:"reconnect",label:"Retomar Contacto"},{value:"open_house",label:"Invitación a Visita"},{value:"market_update",label:"Actualización del Mercado"},{value:"off_market",label:"Propiedad Exclusiva"},{value:"just_sold",label:"Recién Vendido"},{value:"referral_request",label:"Pedir Referidos"},{value:"anniversary",label:"Aniversario"},{value:"objection_handle",label:"Manejar Objeción"}]:[{value:"new_listing",label:"New Listing"},{value:"price_drop",label:"Price Reduction"},{value:"first_contact",label:"First Outreach"},{value:"reconnect",label:"Reconnecting"},{value:"open_house",label:"Open House"},{value:"market_update",label:"Market Update"},{value:"off_market",label:"Off-Market Deal"},{value:"just_sold",label:"Just Sold"},{value:"referral_request",label:"Referral Request"},{value:"anniversary",label:"Anniversary"},{value:"objection_handle",label:"Handle Objection"}];
     const URGENCY=isSpa2?[{value:"high",label:"Alta Urgencia"},{value:"medium",label:"Urgencia Media"},{value:"low",label:"Baja Urgencia"}]:[{value:"high",label:"High Urgency"},{value:"medium",label:"Medium Urgency"},{value:"low",label:"Low Urgency"}];
     const TONES=isSpa2?[{value:"warm",label:"Cálido y Personal"},{value:"professional",label:"Profesional"},{value:"urgent",label:"Urgente"},{value:"casual",label:"Casual"},{value:"luxury",label:"Lujo"}]:[{value:"warm",label:"Warm & Personal"},{value:"professional",label:"Professional"},{value:"urgent",label:"Urgent"},{value:"casual",label:"Casual"},{value:"luxury",label:"Luxury"}];
-    const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\n${s.customSituation?"AGENT OWN WORDS - USE ABOVE ALL ELSE: "+s.customSituation+"\\n":""}AGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
+    const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"}\n${s.contactReason==="free_valuation"&&s.cmaComps&&s.cmaComps.filter(c=>c.addr).length>0?("CMA COMPARABLES:\n"+s.cmaComps.filter(c=>c.addr).map((c,i)=>"Comp "+(i+1)+": "+c.addr+" | Sold $"+c.price+" | "+c.beds+"bed/"+c.baths+"bath | "+c.sqft+"sqft").join("\n")+"\nSUBJECT PROPERTY: "+s.propAddress+" | Asking $"+s.propPrice+" | "+s.propBeds+"bed/"+s.propBaths+"bath | "+s.propSqft+"sqft | Condition: "+s.propCondition+"\nINSTRUCTION: Calculate suggested price range from comparables and prepare valuation outreach."):("PROPERTY: "+(s.propAddress||"N/A")+" | $"+(s.propPrice||"N/A")+" | "+(s.propType||"")+" | Beds:"+(s.propBeds||"")+" | Baths:"+(s.propBaths||"")+" | Condition:"+(s.propCondition||"")+" | "+(s.propInterior&&s.propInterior.length?s.propInterior.join(","):"")+" | "+(s.propOutdoor&&s.propOutdoor.length?s.propOutdoor.join(","):"")+" | "+(s.propHighlights||""))}\n${isBuyer()?("BUYER TYPE: "+s.clientType):""}${isSeller()?("SELLER SITUATION: "+(s.sellerSituation&&s.sellerSituation.join(",")||"")):""}\n${s.customSituation?"AGENT CONTEXT: "+s.customSituation+"\n":""}AGENT: ${s.agentName}${s.agentPhone?"|"+s.agentPhone:""}${s.agencyName?"|"+s.agencyName:""}` 
     try{
       s.loadingMsg=(T2[s.language]||T2.English).loading1;renderApp2Content();
       let p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp. Warm, personal, use ${s.clientName}'s first name. End with easy question.","sms":"SMS max 160 chars. Punchy and personal.","voice_script":"Call script: OPENING, REASON FOR CALL, VALUE PITCH, CLOSE. Labelled. Natural spoken language.","email_subject":"Personal email subject under 10 words.","email_body":"130-160 word email. Personal opener, opportunity, CTA. Signed by ${s.agentName}${s.agencyName?` from ${s.agencyName}`:""}."}`; 
@@ -1065,6 +1065,41 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       content.appendChild(annCard);
     }
 
+    // Free Valuation - CMA section
+    if(s.contactReason==="free_valuation"){
+      const isSpaV=s.language==="Spanish";
+      const cmaCard=el("div",{style:{...cardStyle,border:`1px solid rgba(42,184,212,0.3)`,background:"rgba(42,184,212,0.04)"}});
+      cmaCard.appendChild(el("h2",{style:{fontSize:"15px",fontWeight:"700",marginBottom:"4px",color:G.white}},isSpaV?"📊 Análisis Comparativo de Mercado (CMA)":"📊 Comparative Market Analysis (CMA)"));
+      cmaCard.appendChild(el("p",{style:{fontSize:"12px",color:G.muted,marginBottom:"16px",lineHeight:"1.6"}},isSpaV?"Añade hasta 3 propiedades similares vendidas recientemente. Luego añade la propiedad del cliente. La IA calculará una valoración basada en los comparables.":"Add up to 3 recently sold comparable properties. Then add the client's property. AI will calculate a valuation based on real market comparables."));
+      // 3 comparable properties
+      [0,1,2].forEach(i=>{
+        if(!s.cmaComps)s.cmaComps=[{addr:"",price:"",beds:"",baths:"",sqft:""},{addr:"",price:"",beds:"",baths:"",sqft:""},{addr:"",price:"",beds:"",baths:"",sqft:""}];
+        const compWrap=el("div",{style:{background:G.bg,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"14px",marginBottom:"10px"}});
+        compWrap.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",color:G.aqua,textTransform:"uppercase",marginBottom:"10px",fontFamily:"DM Mono,monospace"}},isSpaV?`Comparable ${i+1}`:`Comparable ${i+1}`));
+        const cg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"8px"}});
+        const addrW=el("div",{});addrW.appendChild(el("label",{style:labelStyle},isSpaV?"Dirección":"Address"));const addrI=el("input",{type:"text",placeholder:isSpaV?"Calle Principal 12":"123 Main St",style:inputStyle});addrI.value=s.cmaComps[i].addr||"";addrI.addEventListener("focus",()=>addrI.style.borderColor=G.aqua);addrI.addEventListener("blur",()=>addrI.style.borderColor=G.border2);addrI.addEventListener("input",e=>{s.cmaComps[i].addr=e.target.value;});addrW.appendChild(addrI);cg.appendChild(addrW);
+        const priceW=el("div",{});priceW.appendChild(el("label",{style:labelStyle},isSpaV?"Precio Vendido ($)":"Sold Price ($)"));const priceI=el("input",{type:"text",placeholder:"850,000",style:inputStyle});priceI.value=s.cmaComps[i].price||"";priceI.addEventListener("focus",()=>priceI.style.borderColor=G.aqua);priceI.addEventListener("blur",()=>priceI.style.borderColor=G.border2);priceI.addEventListener("input",e=>{s.cmaComps[i].price=e.target.value;});priceW.appendChild(priceI);cg.appendChild(priceW);
+        compWrap.appendChild(cg);
+        const cg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}});
+        [{key:"beds",label:isSpaV?"Hab.":"Beds",ph:"3"},{key:"baths",label:isSpaV?"Baños":"Baths",ph:"2"},{key:"sqft",label:"Sq Ft",ph:"1,800"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const inp=el("input",{type:"text",placeholder:ph,style:inputStyle});inp.value=s.cmaComps[i][key]||"";inp.addEventListener("focus",()=>inp.style.borderColor=G.aqua);inp.addEventListener("blur",()=>inp.style.borderColor=G.border2);inp.addEventListener("input",e=>{s.cmaComps[i][key]=e.target.value;});w.appendChild(inp);cg2.appendChild(w);});
+        compWrap.appendChild(cg2);
+        cmaCard.appendChild(compWrap);
+      });
+      // Subject property
+      const subjectWrap=el("div",{style:{background:"rgba(42,184,212,0.06)",border:`1px solid ${G.aquaBorder}`,borderRadius:"8px",padding:"14px"}});
+      subjectWrap.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",color:G.aqua,textTransform:"uppercase",marginBottom:"10px",fontFamily:"DM Mono,monospace"}},isSpaV?"🏠 Propiedad a Valorar":"🏠 Subject Property"));
+      const sg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"8px"}});
+      const sAddrW=el("div",{});sAddrW.appendChild(el("label",{style:labelStyle},isSpaV?"Dirección":"Address"));const sAddrI=el("input",{type:"text",placeholder:"42 Palm Drive",style:inputStyle});sAddrI.value=s.propAddress||"";sAddrI.addEventListener("focus",()=>sAddrI.style.borderColor=G.aqua);sAddrI.addEventListener("blur",()=>sAddrI.style.borderColor=G.border2);sAddrI.addEventListener("input",e=>{s.propAddress=e.target.value;});sAddrW.appendChild(sAddrI);sg.appendChild(sAddrW);
+      const sAskW=el("div",{});sAskW.appendChild(el("label",{style:labelStyle},isSpaV?"Precio Pedido ($)":"Asking Price ($)"));const sAskI=el("input",{type:"text",placeholder:"900,000",style:inputStyle});sAskI.value=s.propPrice||"";sAskI.addEventListener("focus",()=>sAskI.style.borderColor=G.aqua);sAskI.addEventListener("blur",()=>sAskI.style.borderColor=G.border2);sAskI.addEventListener("input",e=>{s.propPrice=e.target.value;});sAskW.appendChild(sAskI);sg.appendChild(sAskW);
+      subjectWrap.appendChild(sg);
+      const sg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginBottom:"8px"}});
+      [{key:"propBeds",label:isSpaV?"Hab.":"Beds",ph:"3"},{key:"propBaths",label:isSpaV?"Baños":"Baths",ph:"2"},{key:"propSqft",label:"Sq Ft",ph:"1,900"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const inp=el("input",{type:"text",placeholder:ph,style:inputStyle});inp.value=s[key]||"";inp.addEventListener("focus",()=>inp.style.borderColor=G.aqua);inp.addEventListener("blur",()=>inp.style.borderColor=G.border2);inp.addEventListener("input",e=>{s[key]=e.target.value;});w.appendChild(inp);sg2.appendChild(w);});
+      subjectWrap.appendChild(sg2);
+      const sCondW=el("div",{style:{marginBottom:"0"}});sCondW.appendChild(el("label",{style:labelStyle},isSpaV?"Estado":"Condition"));const sCondI=el("input",{type:"text",placeholder:isSpaV?"Buen Estado":"Good Condition",style:inputStyle});sCondI.value=s.propCondition||"";sCondI.addEventListener("focus",()=>sCondI.style.borderColor=G.aqua);sCondI.addEventListener("blur",()=>sCondI.style.borderColor=G.border2);sCondI.addEventListener("input",e=>{s.propCondition=e.target.value;});sCondW.appendChild(sCondI);subjectWrap.appendChild(sCondW);
+      cmaCard.appendChild(subjectWrap);
+      content.appendChild(cmaCard);
+    }
+
     const propCard=el("div",{style:cardStyle});
     propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
     propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,s.language==="Spanish"?"Calle Gran Vía 42, Madrid / 42 Palm Drive, Miami":"42 Palm Drive, Miami Beach, FL 33139"));
@@ -1087,43 +1122,20 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       });
       propCard.appendChild(pg2);
       const COND2=isSpaP?["Obra Nueva","Recién Reformado","Listo para Entrar","Buen Estado","Necesita Reforma"]:["Brand New","Newly Renovated","Move-in Ready","Good Condition","Needs TLC"];
-      propCard.appendChild(chips(isSpaP?"Estado":"Condition",null,COND2,s.propCondition,v=>{s.propCondition=v;renderApp2Content();},true));
-      const INT2=isSpaP?["Suelos de Madera","Techos Altos","Cocina Gourmet","Isla de Cocina","Oficina en Casa","Sala de Cine","Chimenea","Domótica","Bodega de Vinos","Amplios Ventanales"]:["Hardwood Floors","High Ceilings","Gourmet Kitchen","Kitchen Island","Home Office","Home Theater","Fireplace","Smart Home","Wine Cellar","Floor-to-Ceiling Windows"];
+      propCard.appendChild(el("div",{style:{marginTop:"14px"}}));propCard.appendChild(chips(isSpaP?"Estado":"Condition",null,COND2,s.propCondition,v=>{s.propCondition=v;renderApp2Content();},true));
+      const INT2=isSpaP?["Suelos de Madera","Techos Altos","Cocina Gourmet","Isla de Cocina","Despensa","Comedor Formal","Sala de Cine","Oficina en Casa","Armarios a Medida","Baño Principal de Lujo","Bañera Exenta","Ducha de Obra","Chimenea","Luz Natural Abundante","Domótica","Bodega de Vinos","Sala de Juegos","Amplios Ventanales"]:["Hardwood Floors","High Ceilings","Gourmet Kitchen","Kitchen Island","Pantry","Formal Dining","Home Theater","Home Office","Custom Closets","Luxury Master Bath","Freestanding Tub","Walk-in Shower","Fireplace","Natural Light","Smart Home","Wine Cellar","Game Room","Floor-to-Ceiling Windows"];
       propCard.appendChild(chips(isSpaP?"Características Interiores":"Interior Features",null,INT2,s.propInterior,v=>{s.propInterior=s.propInterior.includes(v)?s.propInterior.filter(x=>x!==v):[...s.propInterior,v];renderApp2Content();}));
-      const OUT2=isSpaP?["Piscina","Jacuzzi","Terraza Grande","Jardín Privado","Barbacoa","Muelle Privado","Acceso a Playa","Garaje 2+ Coches","Canchas de Pádel","Balcón","Vista Panorámica"]:["Swimming Pool","Hot Tub","Large Terrace","Private Garden","BBQ Area","Private Dock","Beach Access","2+ Car Garage","Padel Court","Balcony","Panoramic Views"];
+      const OUT2=isSpaP?["Piscina","Jacuzzi","Terraza Grande","Jardín Privado","Patio","Barbacoa","Comedor Exterior","Muelle Privado","Acceso a Playa","Garaje 2+ Coches","Canchas de Pádel","Canchas de Tenis","Balcón","Vista Panorámica"]:["Swimming Pool","Hot Tub","Large Terrace","Private Garden","Patio","BBQ Area","Outdoor Dining","Private Dock","Beach Access","2+ Car Garage","Padel Court","Tennis Court","Balcony","Panoramic Views"];
       propCard.appendChild(chips(isSpaP?"Características Exteriores":"Outdoor Features",null,OUT2,s.propOutdoor,v=>{s.propOutdoor=s.propOutdoor.includes(v)?s.propOutdoor.filter(x=>x!==v):[...s.propOutdoor,v];renderApp2Content();}));
-      const BLD2=isSpaP?["Portero 24h","Gimnasio","Spa","Piscina Comunitaria","Seguridad","Aparcamiento","Ascensor","Co-Working"]:["24h Concierge","Fitness Center","Spa","Community Pool","Security","Parking","Elevator","Co-Working Space"];
+      const BLD2=isSpaP?["Portero 24h","Gimnasio","Spa","Sauna","Sala Comunitaria","Zona Infantil","Piscina Comunitaria","Seguridad","Trastero","Aparcamiento","Ascensor","Recepción de Lujo","Servicio de Conserjería","Co-Working"]:["24h Concierge","Fitness Center","Spa","Sauna","Community Room","Kids Area","Community Pool","Security","Storage","Parking","Elevator","Luxury Lobby","Concierge Service","Co-Working Space"];
       propCard.appendChild(chips(isSpaP?"Servicios del Edificio":"Building Amenities",null,BLD2,s.propBuilding,v=>{s.propBuilding=s.propBuilding.includes(v)?s.propBuilding.filter(x=>x!==v):[...s.propBuilding,v];renderApp2Content();}));
     }
 
     propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,s.language==="Spanish"?"Vistas al mar, piscina privada, precio rebajado":"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
     content.appendChild(propCard);
 
-    if(isMatcher()){
-      const matchCard=el("div",{style:cardStyle});
-      matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.matcherTitle));
-      matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},t2form.matcherHint));
-      matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,s.language==="Spanish"?"4 habitaciones, piscina, buenos colegios, menos de $1.5M":"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
-      s.matcherProps.forEach((p,i)=>{
-        const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
-        pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
-        const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
-        pg2.appendChild(field(s.language==="Spanish"?"Dirección":"Address","text",p.address,v=>{s.matcherProps[i].address=v;},s.language==="Spanish"?"Calle Mayor 1, Miami":"123 Main St, Miami"));
-        pg2.appendChild(field(s.language==="Spanish"?"Precio ($)":"Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
-        pCard.appendChild(pg2);
-        pCard.appendChild(field(t2form.propType,"text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
-        pCard.appendChild(field(t2form.propHighlights,"text",p.highlights,v=>{s.matcherProps[i].highlights=v;},s.language==="Spanish"?"Vistas al mar, cocina reformada, zona escolar de élite":"Ocean view, renovated kitchen, top school district"));
-        matchCard.appendChild(pCard);
-      });
-      content.appendChild(matchCard);
-    }
 
-    if(isBuyer()&&!isMatcher()){
-      const buyCard=el("div",{style:cardStyle});
-      buyCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.buyerTitle));
-      buyCard.appendChild(chips(null,null,BUYER_CRITERIA,s.buyerCriteria,v=>{s.buyerCriteria=tog(s.buyerCriteria,v);renderApp2Content();}));
-      content.appendChild(buyCard);
-    }
+    
 
     if(isSeller()){
       const sellCard=el("div",{style:cardStyle});
