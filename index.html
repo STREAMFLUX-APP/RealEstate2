@@ -779,7 +779,7 @@ function renderApp2(){
       title:"🤝 Client Outreach Machine",back:"← Dashboard",newClient:"← New Client",
       langLabel:"Output Language",whoContact:"👤 Who Are You Contacting?",
       situationTitle:"✨ Personal Context",
-      situationHint:"Prior contact history, personal notes, anything about this client you want woven into every message. The AI uses this for hyper-personalised messages. The form below is backup.",
+      situationHint:"Prior contact history, personal notes, anything about this client you want woven into every message.",
       situationPlaceholder:"e.g. Sarah met me at the open house last Saturday. She loved the property but said $1.4M feels too high. She has two kids in school and her husband works from home so they need a home office. She seemed genuinely interested but nervous about the market.",
       situationLeave:"Leave blank to use the selections below.",
       generate:"✦ Generate Full Outreach Package",generating:"Generating...",
@@ -814,7 +814,7 @@ function renderApp2(){
       title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
       langLabel:"Idioma de Salida",whoContact:"👤 ¿A Quién Estás Contactando?",
       situationTitle:"✨ Contexto Personal",
-      situationHint:"Historial de contacto previo, notas personales, cualquier detalle sobre este cliente que quieras en cada mensaje. La IA usará esto para mensajes hiperpersonalizados.",
+      situationHint:"Historial de contacto previo, notas personales, cualquier detalle sobre este cliente que quieras en cada mensaje.",
       situationPlaceholder:"ej. Sarah me conoció en la jornada de puertas abiertas el sábado. Le encantó la propiedad pero dijo que 1,4M le parece caro. Tiene dos hijos en el colegio y su marido trabaja desde casa, así que necesitan una oficina en casa. Parecía genuinamente interesada pero nerviosa...",
       situationLeave:"Deja en blanco para usar las selecciones de abajo.",
       propTitle:"🏠 Propiedad que Ofreces",matcherTitle:"🏆 Comparador de Propiedades",
@@ -853,7 +853,7 @@ function renderApp2(){
       title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
       langLabel:"Idioma de Salida",whoContact:"👤 ¿A Quién Estás Contactando?",
       situationTitle:"✨ Contexto Personal",
-      situationHint:"Historial de contacto previo, notas personales, cualquier detalle sobre este cliente que quieras en cada mensaje. La IA usará esto para mensajes hiperpersonalizados.",
+      situationHint:"Historial de contacto previo, notas personales, cualquier detalle sobre este cliente que quieras en cada mensaje.",
       situationPlaceholder:"ej. Sarah me conoció en el open house el sábado. Le encantó la propiedad pero dijo que 1.4M le parece muy caro. Tiene dos hijos en la escuela y su esposo trabaja desde casa, así que necesitan una oficina. Parecía muy interesada pero nerviosa sobre el mercado...",
       situationLeave:"Deja en blanco para usar las selecciones de abajo.",
       propTitle:"🏠 Propiedad que Ofreces",matcherTitle:"🏆 Comparador de Propiedades",
@@ -1041,7 +1041,6 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     sitTa.value=s.customSituation||"";
     sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
     sitBox.appendChild(sitTa);
-    sitBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t2form.situationLeave));
     content.appendChild(sitBox);
 
     clientCard.appendChild(field(t2form.clientFirstName,"text",s.clientName,v=>s.clientName=v,s.language==="Spanish"?"María":"Sarah"));
