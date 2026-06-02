@@ -1052,7 +1052,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},`${t2.matchReady} ${s.clientName} ${t2.matchIn} ${s.language}.`));
       const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"20px",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.aquaBorder}`}});
       TABS.forEach(tab=>{
-        const btn=el("button",{style:{background:s.activeTab===tab.id?G.aqua:"#0d0d0d",color:s.activeTab===tab.id?"#060608":G.muted,border:s.activeTab===tab.id?`1px solid ${G.border2}`:"1px solid transparent",borderRadius:"8px",padding:"7px 12px",fontSize:"11px",fontWeight:s.activeTab===tab.id?"700":"500",fontFamily:"inherit",cursor:"pointer",transition:"all 0.15s",letterSpacing:"0.02em",whiteSpace:"nowrap"}},tab.label);
+        const btn=el("button",{style:{background:s.activeTab===tab.id?G.aquaDim:"transparent",color:s.activeTab===tab.id?G.aqua:G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:"transparent"}`,borderRadius:"8px",padding:"7px 12px",fontSize:"11px",fontWeight:s.activeTab===tab.id?"700":"500",fontFamily:"inherit",cursor:"pointer",transition:"all 0.15s",whiteSpace:"nowrap"}},tab.label);
         btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp2Content();});
         tabs.appendChild(btn);
       });
@@ -1170,7 +1170,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,s.language==="Spanish"?"4 habitaciones, piscina, buenos colegios, menos de $1.5M":"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
       s.matcherProps.forEach((p,i)=>{
         const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
-        pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.gold,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
+        pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
         const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
         pg2.appendChild(field(s.language==="Spanish"?"Dirección":"Address","text",p.address,v=>{s.matcherProps[i].address=v;},s.language==="Spanish"?"Calle Mayor 1, Miami":"123 Main St, Miami"));
         pg2.appendChild(field(s.language==="Spanish"?"Precio ($)":"Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
