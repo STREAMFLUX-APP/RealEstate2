@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- STREAMFLUX v3.7 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -888,7 +889,7 @@ function renderApp2(){
       aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
     }
   };
-  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition:"",propInterior:[],propOutdoor:[],propBuilding:[],cmaComps:[{addr:"",price:"",beds:"",baths:"",sqft:""},{addr:"",price:"",beds:"",baths:"",sqft:""},{addr:"",price:"",beds:"",baths:"",sqft:""}],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition:"",propYearBuilt:"",propFeatures:"",propInterior:[],propOutdoor:[],propBuilding:[],cmaComps:[{addr:"",price:"",beds:"",baths:"",sqft:"",condition:"",yearBuilt:"",features:""},{addr:"",price:"",beds:"",baths:"",sqft:"",condition:"",yearBuilt:"",features:""},{addr:"",price:"",beds:"",baths:"",sqft:"",condition:"",yearBuilt:"",features:""}],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
 
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -909,7 +910,7 @@ function renderApp2(){
     const CONTACT_REASONS=isSpa2?[{value:"new_listing",label:"Nueva Propiedad"},{value:"price_drop",label:"Reducción de Precio"},{value:"first_contact",label:"Primer Contacto"},{value:"reconnect",label:"Retomar Contacto"},{value:"open_house",label:"Invitación a Visita"},{value:"market_update",label:"Actualización del Mercado"},{value:"off_market",label:"Propiedad Exclusiva"},{value:"just_sold",label:"Recién Vendido"},{value:"referral_request",label:"Pedir Referidos"},{value:"anniversary",label:"Aniversario"},{value:"objection_handle",label:"Manejar Objeción"}]:[{value:"new_listing",label:"New Listing"},{value:"price_drop",label:"Price Reduction"},{value:"first_contact",label:"First Outreach"},{value:"reconnect",label:"Reconnecting"},{value:"open_house",label:"Open House"},{value:"market_update",label:"Market Update"},{value:"off_market",label:"Off-Market Deal"},{value:"just_sold",label:"Just Sold"},{value:"referral_request",label:"Referral Request"},{value:"anniversary",label:"Anniversary"},{value:"objection_handle",label:"Handle Objection"}];
     const URGENCY=isSpa2?[{value:"high",label:"Alta Urgencia"},{value:"medium",label:"Urgencia Media"},{value:"low",label:"Baja Urgencia"}]:[{value:"high",label:"High Urgency"},{value:"medium",label:"Medium Urgency"},{value:"low",label:"Low Urgency"}];
     const TONES=isSpa2?[{value:"warm",label:"Cálido y Personal"},{value:"professional",label:"Profesional"},{value:"urgent",label:"Urgente"},{value:"casual",label:"Casual"},{value:"luxury",label:"Lujo"}]:[{value:"warm",label:"Warm & Personal"},{value:"professional",label:"Professional"},{value:"urgent",label:"Urgent"},{value:"casual",label:"Casual"},{value:"luxury",label:"Luxury"}];
-    const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"}\n${s.contactReason==="free_valuation"&&s.cmaComps&&s.cmaComps.filter(c=>c.addr).length>0?("CMA COMPARABLES:\n"+s.cmaComps.filter(c=>c.addr).map((c,i)=>"Comp "+(i+1)+": "+c.addr+" | Sold $"+c.price+" | "+c.beds+"bed/"+c.baths+"bath | "+c.sqft+"sqft").join("\n")+"\nSUBJECT PROPERTY: "+s.propAddress+" | Asking $"+s.propPrice+" | "+s.propBeds+"bed/"+s.propBaths+"bath | "+s.propSqft+"sqft | Condition: "+s.propCondition+"\nINSTRUCTION: Calculate suggested price range from comparables and prepare valuation outreach."):("PROPERTY: "+(s.propAddress||"N/A")+" | $"+(s.propPrice||"N/A")+" | "+(s.propType||"")+" | Beds:"+(s.propBeds||"")+" | Baths:"+(s.propBaths||"")+" | Condition:"+(s.propCondition||"")+" | "+(s.propInterior&&s.propInterior.length?s.propInterior.join(","):"")+" | "+(s.propOutdoor&&s.propOutdoor.length?s.propOutdoor.join(","):"")+" | "+(s.propHighlights||""))}\n${isBuyer()?("BUYER TYPE: "+s.clientType):""}${isSeller()?("SELLER SITUATION: "+(s.sellerSituation&&s.sellerSituation.join(",")||"")):""}\n${s.customSituation?"AGENT CONTEXT: "+s.customSituation+"\n":""}AGENT: ${s.agentName}${s.agentPhone?"|"+s.agentPhone:""}${s.agencyName?"|"+s.agencyName:""}` 
+    const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"}\n${s.contactReason==="free_valuation"&&s.cmaComps&&s.cmaComps.filter(c=>c.addr).length>0?("CMA COMPARABLES:\n"+s.cmaComps.filter(c=>c.addr).map((c,i)=>"Comp "+(i+1)+": "+c.addr+" | Sold $"+c.price+" | "+c.beds+"bed/"+c.baths+"bath | "+c.sqft+"sqft"+(c.condition?" | Cond: "+c.condition:"")+(c.yearBuilt?" | Built: "+c.yearBuilt:"")+(c.features?" | "+c.features:"")).join("\n")+"\nSUBJECT PROPERTY: "+s.propAddress+" | Asking $"+s.propPrice+" | "+s.propBeds+"bed/"+s.propBaths+"bath | "+s.propSqft+"sqft | Condition: "+s.propCondition+"\nINSTRUCTION: Calculate suggested price range from comparables and prepare valuation outreach."):("PROPERTY: "+(s.propAddress||"N/A")+" | $"+(s.propPrice||"N/A")+" | "+(s.propType||"")+" | Beds:"+(s.propBeds||"")+" | Baths:"+(s.propBaths||"")+" | Condition:"+(s.propCondition||"")+" | "+(s.propInterior&&s.propInterior.length?s.propInterior.join(","):"")+" | "+(s.propOutdoor&&s.propOutdoor.length?s.propOutdoor.join(","):"")+" | "+(s.propHighlights||""))}\n${isBuyer()?("BUYER TYPE: "+s.clientType):""}${isSeller()?("SELLER SITUATION: "+(s.sellerSituation&&s.sellerSituation.join(",")||"")):""}\n${s.customSituation?"AGENT CONTEXT: "+s.customSituation+"\n":""}AGENT: ${s.agentName}${s.agentPhone?"|"+s.agentPhone:""}${s.agencyName?"|"+s.agencyName:""}` 
     try{
       s.loadingMsg=(T2[s.language]||T2.English).loading1;renderApp2Content();
       let p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp. Warm, personal, use ${s.clientName}'s first name. End with easy question.","sms":"SMS max 160 chars. Punchy and personal.","voice_script":"Call script: OPENING, REASON FOR CALL, VALUE PITCH, CLOSE. Labelled. Natural spoken language.","email_subject":"Personal email subject under 10 words.","email_body":"130-160 word email. Personal opener, opportunity, CTA. Signed by ${s.agentName}${s.agencyName?` from ${s.agencyName}`:""}."}`; 
@@ -1080,9 +1081,13 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
         const addrW=el("div",{});addrW.appendChild(el("label",{style:labelStyle},isSpaV?"Dirección":"Address"));const addrI=el("input",{type:"text",placeholder:isSpaV?"Calle Principal 12":"123 Main St",style:inputStyle});addrI.value=s.cmaComps[i].addr||"";addrI.addEventListener("focus",()=>addrI.style.borderColor=G.aqua);addrI.addEventListener("blur",()=>addrI.style.borderColor=G.border2);addrI.addEventListener("input",e=>{s.cmaComps[i].addr=e.target.value;});addrW.appendChild(addrI);cg.appendChild(addrW);
         const priceW=el("div",{});priceW.appendChild(el("label",{style:labelStyle},isSpaV?"Precio Vendido ($)":"Sold Price ($)"));const priceI=el("input",{type:"text",placeholder:"850,000",style:inputStyle});priceI.value=s.cmaComps[i].price||"";priceI.addEventListener("focus",()=>priceI.style.borderColor=G.aqua);priceI.addEventListener("blur",()=>priceI.style.borderColor=G.border2);priceI.addEventListener("input",e=>{s.cmaComps[i].price=e.target.value;});priceW.appendChild(priceI);cg.appendChild(priceW);
         compWrap.appendChild(cg);
-        const cg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}});
+        const cg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginBottom:"8px"}});
         [{key:"beds",label:isSpaV?"Hab.":"Beds",ph:"3"},{key:"baths",label:isSpaV?"Baños":"Baths",ph:"2"},{key:"sqft",label:"Sq Ft",ph:"1,800"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const inp=el("input",{type:"text",placeholder:ph,style:inputStyle});inp.value=s.cmaComps[i][key]||"";inp.addEventListener("focus",()=>inp.style.borderColor=G.aqua);inp.addEventListener("blur",()=>inp.style.borderColor=G.border2);inp.addEventListener("input",e=>{s.cmaComps[i][key]=e.target.value;});w.appendChild(inp);cg2.appendChild(w);});
         compWrap.appendChild(cg2);
+        const cg3=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"8px"}});
+        [{key:"condition",label:isSpaV?"Estado":"Condition",ph:isSpaV?"Buen Estado":"Good Condition"},{key:"yearBuilt",label:isSpaV?"Año Constr.":"Year Built",ph:"2015"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const inp=el("input",{type:"text",placeholder:ph,style:inputStyle});inp.value=s.cmaComps[i][key]||"";inp.addEventListener("focus",()=>inp.style.borderColor=G.aqua);inp.addEventListener("blur",()=>inp.style.borderColor=G.border2);inp.addEventListener("input",e=>{s.cmaComps[i][key]=e.target.value;});w.appendChild(inp);cg3.appendChild(w);});
+        compWrap.appendChild(cg3);
+        const featW=el("div",{style:{marginBottom:"0"}});featW.appendChild(el("label",{style:labelStyle},isSpaV?"Características Clave":"Key Features"));const featI=el("input",{type:"text",placeholder:isSpaV?"Piscina, reformada, vistas al mar...":"Pool, renovated, ocean views...",style:inputStyle});featI.value=s.cmaComps[i].features||"";featI.addEventListener("focus",()=>featI.style.borderColor=G.aqua);featI.addEventListener("blur",()=>featI.style.borderColor=G.border2);featI.addEventListener("input",e=>{s.cmaComps[i].features=e.target.value;});featW.appendChild(featI);compWrap.appendChild(featW);
         cmaCard.appendChild(compWrap);
       });
       // Subject property
@@ -1095,11 +1100,15 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       const sg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginBottom:"8px"}});
       [{key:"propBeds",label:isSpaV?"Hab.":"Beds",ph:"3"},{key:"propBaths",label:isSpaV?"Baños":"Baths",ph:"2"},{key:"propSqft",label:"Sq Ft",ph:"1,900"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const inp=el("input",{type:"text",placeholder:ph,style:inputStyle});inp.value=s[key]||"";inp.addEventListener("focus",()=>inp.style.borderColor=G.aqua);inp.addEventListener("blur",()=>inp.style.borderColor=G.border2);inp.addEventListener("input",e=>{s[key]=e.target.value;});w.appendChild(inp);sg2.appendChild(w);});
       subjectWrap.appendChild(sg2);
-      const sCondW=el("div",{style:{marginBottom:"0"}});sCondW.appendChild(el("label",{style:labelStyle},isSpaV?"Estado":"Condition"));const sCondI=el("input",{type:"text",placeholder:isSpaV?"Buen Estado":"Good Condition",style:inputStyle});sCondI.value=s.propCondition||"";sCondI.addEventListener("focus",()=>sCondI.style.borderColor=G.aqua);sCondI.addEventListener("blur",()=>sCondI.style.borderColor=G.border2);sCondI.addEventListener("input",e=>{s.propCondition=e.target.value;});sCondW.appendChild(sCondI);subjectWrap.appendChild(sCondW);
+      const sg3=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"8px"}});
+      [{key:"propCondition",label:isSpaV?"Estado":"Condition",ph:isSpaV?"Buen Estado":"Good Condition"},{key:"propYearBuilt",label:isSpaV?"Año Constr.":"Year Built",ph:"2010"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const inp=el("input",{type:"text",placeholder:ph,style:inputStyle});inp.value=s[key]||"";inp.addEventListener("focus",()=>inp.style.borderColor=G.aqua);inp.addEventListener("blur",()=>inp.style.borderColor=G.border2);inp.addEventListener("input",e=>{s[key]=e.target.value;});w.appendChild(inp);sg3.appendChild(w);});
+      subjectWrap.appendChild(sg3);
+      const sFeatW=el("div",{style:{marginBottom:"0"}});sFeatW.appendChild(el("label",{style:labelStyle},isSpaV?"Características Clave":"Key Features"));const sFeatI=el("input",{type:"text",placeholder:isSpaV?"Piscina, terraza, vistas al mar...":"Pool, terrace, ocean views...",style:inputStyle});sFeatI.value=s.propFeatures||"";sFeatI.addEventListener("focus",()=>sFeatI.style.borderColor=G.aqua);sFeatI.addEventListener("blur",()=>sFeatI.style.borderColor=G.border2);sFeatI.addEventListener("input",e=>{s.propFeatures=e.target.value;});sFeatW.appendChild(sFeatI);subjectWrap.appendChild(sFeatW);
       cmaCard.appendChild(subjectWrap);
       content.appendChild(cmaCard);
     }
 
+    if(s.contactReason!=="free_valuation"){
     const propCard=el("div",{style:cardStyle});
     propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
     propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,s.language==="Spanish"?"Calle Gran Vía 42, Madrid / 42 Palm Drive, Miami":"42 Palm Drive, Miami Beach, FL 33139"));
@@ -1123,16 +1132,77 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       propCard.appendChild(pg2);
       const COND2=isSpaP?["Obra Nueva","Recién Reformado","Listo para Entrar","Buen Estado","Necesita Reforma"]:["Brand New","Newly Renovated","Move-in Ready","Good Condition","Needs TLC"];
       propCard.appendChild(el("div",{style:{marginTop:"14px"}}));propCard.appendChild(chips(isSpaP?"Estado":"Condition",null,COND2,s.propCondition,v=>{s.propCondition=v;renderApp2Content();},true));
-      const INT2=isSpaP?["Suelos de Madera","Techos Altos","Cocina Gourmet","Isla de Cocina","Despensa","Comedor Formal","Sala de Cine","Oficina en Casa","Armarios a Medida","Baño Principal de Lujo","Bañera Exenta","Ducha de Obra","Chimenea","Luz Natural Abundante","Domótica","Bodega de Vinos","Sala de Juegos","Amplios Ventanales"]:["Hardwood Floors","High Ceilings","Gourmet Kitchen","Kitchen Island","Pantry","Formal Dining","Home Theater","Home Office","Custom Closets","Luxury Master Bath","Freestanding Tub","Walk-in Shower","Fireplace","Natural Light","Smart Home","Wine Cellar","Game Room","Floor-to-Ceiling Windows"];
+      const INT2=isSpaP?[
+    "Planta Abierta","Techos Altos","Doble Altura","Vigas Vistas","Suelos de Madera","Suelos de Mármol","Suelos de Porcelana","Suelos de Cemento Pulido","Suelos Radiantes",
+    "Cocina Moderna","Cocina de Chef","Cocina Gourmet","Encimera de Granito","Encimera de Cuarzo","Encimera de Mármol","Isla de Cocina","Despensa","Cocina Auxiliar","Electrodomésticos de Acero Inoxidable","Electrodomésticos de Alta Gama","Frigorífico de Vino","Cafetera Integrada",
+    "Suite Principal","Suite con Terraza","Vestidor","Vestidor Doble","Baños en Suite","Doble Lavabo","Bañera Exenta","Bañera de Hidromasaje","Ducha de Lluvia","Ducha a Ras de Suelo","Sauna","Baño de Vapor",
+    "Oficina en Casa","Sala de Cine","Sala de Juegos","Sala de Música","Biblioteca","Estudio Artístico","Sala de Fitness Interior","Sala Multiusos",
+    "Chimenea","Chimenea Doble","Bar Húmedo","Bodega Climatizada","Sala de Catas","Lavandería","Lavandería con Fregadero","Sótano Terminado","Ático Terminado",
+    "Casa Domótica","Sistema de Audio Multizona","Iluminación Inteligente","Persianas Motorizadas","Termostato Inteligente","Intercomunicador","Control por App","Cableado Cat6",
+    "Alarma de Seguridad","Cámaras de Vigilancia","Acceso por Huella","Caja Fuerte Integrada",
+    "Paneles Solares","Batería Solar","Generador","Aislamiento Premium","Ventanas de Triple Vidrio","Calefacción por Suelo Radiante","Aire Acondicionado por Zona","Recuperador de Calor",
+    "Accesibilidad para Silla de Ruedas","Ascensor Interior","Rampa de Acceso","Baño Adaptado"
+  ]:[
+    "Open Plan Living","High Ceilings","Double Height Ceilings","Exposed Beams","Hardwood Floors","Marble Floors","Porcelain Floors","Polished Concrete Floors","Radiant Floor Heating",
+    "Modern Kitchen","Chef's Kitchen","Gourmet Kitchen","Granite Countertops","Quartz Countertops","Marble Countertops","Kitchen Island","Butler's Pantry","Scullery / Second Kitchen","Stainless Steel Appliances","High-End Appliances","Wine Refrigerator","Built-in Coffee Machine",
+    "Master Suite","Suite with Terrace","Walk-in Wardrobe","His & Hers Wardrobes","En-suite Bathrooms","Double Vanity","Freestanding Soaking Tub","Jetted / Whirlpool Tub","Rainfall Shower","Frameless Glass Shower","Sauna","Steam Room",
+    "Home Office","Media Room / Cinema","Game Room","Music Room","Library / Study","Art Studio","Indoor Gym","Flex / Bonus Room",
+    "Fireplace","Double-Sided Fireplace","Wet Bar","Climate-Controlled Wine Cellar","Tasting Room","Laundry Room","Laundry Room with Sink","Finished Basement","Finished Attic / Loft",
+    "Smart Home System","Multi-Zone Audio","Smart Lighting","Motorized Blinds / Shades","Smart Thermostat","Video Intercom","App-Controlled Home","Cat6 / Fibre Wiring",
+    "Security Alarm System","Surveillance Cameras","Fingerprint / Keypad Entry","Built-in Safe",
+    "Solar Panels","Solar Battery Storage","Whole-Home Generator","Premium Insulation","Triple-Glazed Windows","Underfloor Heating","Multi-Zone A/C","Heat Recovery Ventilation",
+    "Wheelchair Accessible","Private Elevator","Access Ramp","Adapted Bathroom","Wide Doorways"
+  ];
       propCard.appendChild(chips(isSpaP?"Características Interiores":"Interior Features",null,INT2,s.propInterior,v=>{s.propInterior=s.propInterior.includes(v)?s.propInterior.filter(x=>x!==v):[...s.propInterior,v];renderApp2Content();}));
-      const OUT2=isSpaP?["Piscina","Jacuzzi","Terraza Grande","Jardín Privado","Patio","Barbacoa","Comedor Exterior","Muelle Privado","Acceso a Playa","Garaje 2+ Coches","Canchas de Pádel","Canchas de Tenis","Balcón","Vista Panorámica"]:["Swimming Pool","Hot Tub","Large Terrace","Private Garden","Patio","BBQ Area","Outdoor Dining","Private Dock","Beach Access","2+ Car Garage","Padel Court","Tennis Court","Balcony","Panoramic Views"];
+      const OUT2=isSpaP?[
+    "Piscina Privada","Piscina Climatizada","Piscina Infinita","Piscina Desbordante","Piscina con Cascada","Piscina Natural / Biológica","Jacuzzi / Spa Exterior","Ducha Exterior",
+    "Terraza en Azotea","Terraza con Vistas","Terraza Cubierta","Patio Trasero","Patio Delantero","Jardín Privado","Jardín Paisajístico","Jardín Zen","Jardín Tropical","Jardín de Invierno / Invernadero",
+    "Cocina Exterior Completa","Barbacoa Integrada","Horno de Leña","Hoguera / Chimenea Exterior","Barra de Bar Exterior","Comedor Exterior",
+    "Muelle Privado","Embarcadero","Rampa de Embarcaciones","Almacén para Botes","Acceso Privado a la Playa","Acceso Privado al Mar","Acceso Privado al Lago",
+    "Pista de Tenis","Pista de Pádel","Cancha de Baloncesto","Campo de Putting Golf","Pista de Petanca","Parque Infantil",
+    "Casa de Invitados","Casita de Piscina","Estudio Exterior","Garaje (1 Coche)","Garaje (2 Coches)","Garaje (3+ Coches)","Garaje para Barco / RV","Taller / Almacén",
+    "Cargador Eléctrico","Entrada con Verja","Verja Automática","Cámaras Exteriores","Iluminación Paisajística","Iluminación Solar","Camino de Entrada Pavimentado",
+    "Tejado Verde","Huerto / Jardín Ecológico","Pozo de Agua","Sistema de Riego Automatizado","Pista de Atletismo / Jogging"
+  ]:[
+    "Private Pool","Heated Pool","Infinity Pool","Overflow Pool","Pool with Waterfall","Natural / Bio Pool","Hot Tub / Outdoor Spa","Outdoor Shower",
+    "Rooftop Terrace","Terrace with Views","Covered Patio / Pergola","Rear Patio","Front Porch","Private Garden","Landscaped Yard","Zen Garden","Tropical Garden","Winter Garden / Greenhouse",
+    "Full Outdoor Kitchen","Built-in BBQ / Grill","Wood-Fired Pizza Oven","Fire Pit / Outdoor Fireplace","Outdoor Bar","Outdoor Dining Area",
+    "Private Boat Dock","Marina Slip","Boat Launch Ramp","Boat Storage","Private Beach Access","Private Ocean Access","Private Lake Access",
+    "Tennis Court","Padel Court","Basketball Court","Putting Green","Boules / Petanque Court","Playground / Play Area",
+    "Guest House / Casita","Pool House","Garden Studio / Office","Garage (1 Car)","Garage (2 Car)","Garage (3+ Car)","Boat / RV Garage","Workshop / Storage",
+    "EV Charging Station","Gated Entry","Automatic Gate","Outdoor Security Cameras","Landscape Lighting","Solar Lighting","Paved Driveway",
+    "Green Roof","Vegetable Garden / Orchard","Private Well","Automated Irrigation System","Running / Jogging Track"
+  ];
       propCard.appendChild(chips(isSpaP?"Características Exteriores":"Outdoor Features",null,OUT2,s.propOutdoor,v=>{s.propOutdoor=s.propOutdoor.includes(v)?s.propOutdoor.filter(x=>x!==v):[...s.propOutdoor,v];renderApp2Content();}));
-      const BLD2=isSpaP?["Portero 24h","Gimnasio","Spa","Sauna","Sala Comunitaria","Zona Infantil","Piscina Comunitaria","Seguridad","Trastero","Aparcamiento","Ascensor","Recepción de Lujo","Servicio de Conserjería","Co-Working"]:["24h Concierge","Fitness Center","Spa","Sauna","Community Room","Kids Area","Community Pool","Security","Storage","Parking","Elevator","Luxury Lobby","Concierge Service","Co-Working Space"];
+      const BLD2=isSpaP?[
+    "Servicio de Conserjería 24/7","Conserjería Digital","Portero","Portero Nocturno","Valet Parking","Seguridad 24/7","Vigilancia Privada","Control de Acceso","Acceso por Tarjeta / App",
+    "Piscina en Azotea","Piscina Cubierta","Piscina Exterior Comunitaria","Zona de Jacuzzi","Solarium","Playa Privada del Edificio",
+    "Gimnasio Completo","Sala de Yoga","Sala de Pilates","Sala de Boxeo","Pista de Squash","Spa Completo","Sauna Compartida","Sala de Masajes","Sala de Belleza",
+    "Coworking","Sala de Reuniones","Sala de Conferencias","Sala de Negocios","Biblioteca Comunitaria",
+    "Cine Comunitario","Sala de Fiestas","Salón Social","Terraza Comunitaria","Zona de Barbacoa Comunitaria","Área de Juegos Infantiles","Parque Canino",
+    "Admite Mascotas","Servicio de Cuidado de Mascotas","Servicio de Limpieza","Servicio de Lavandería","Almacenamiento Privado","Trastero",
+    "Cuota Comunidad Baja","Sin Cuota de Comunidad","Gastos Incluidos","Servicio de Mantenimiento Incluido",
+    "Parking Cubierto","Parking Doble","Parking para Visitantes","Cargadores Eléctricos en Parking",
+    "Certificación LEED","Edificio Eficiencia Energética A","Certificación BREEAM","Paneles Solares Comunitarios",
+    "Acceso para Discapacitados","Ascensor de Gran Capacidad","Servicio de Paquetería / Taquillas Inteligentes","Servicio de Bicicletas / Bicicletas Eléctricas"
+  ]:[
+    "24/7 Concierge Service","Digital Concierge","Doorman","Overnight Doorman","Valet Parking","24/7 Security","Private Security Guard","Access Control System","Key Fob / App Access",
+    "Rooftop Pool","Indoor Pool","Outdoor Community Pool","Jacuzzi / Hot Tub Area","Sundeck / Solarium","Private Beach Club",
+    "Full Fitness Center","Yoga Studio","Pilates Studio","Boxing Gym","Squash Court","Full-Service Spa","Shared Sauna","Massage Room","Beauty Salon",
+    "Co-working Space","Meeting Rooms","Conference Center","Business Center","Community Library",
+    "Community Cinema","Party / Event Room","Social Lounge","Community Rooftop Terrace","BBQ Area","Children's Play Area","Dog Park",
+    "Pet-Friendly","Pet Care Services","Housekeeping Service","Laundry Service","Private Storage Unit","Bike Storage",
+    "Low HOA Fees","No HOA","Utilities Included","Maintenance Service Included",
+    "Covered Parking","Double Parking","Visitor Parking","EV Charging in Parking",
+    "LEED Certified","Energy Class A Building","BREEAM Certified","Community Solar Panels",
+    "Disability Access","High-Capacity Elevator","Smart Package Lockers","Bike Share / E-Bike Program"
+  ];
       propCard.appendChild(chips(isSpaP?"Servicios del Edificio":"Building Amenities",null,BLD2,s.propBuilding,v=>{s.propBuilding=s.propBuilding.includes(v)?s.propBuilding.filter(x=>x!==v):[...s.propBuilding,v];renderApp2Content();}));
     }
 
     propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,s.language==="Spanish"?"Vistas al mar, piscina privada, precio rebajado":"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
     content.appendChild(propCard);
+    } // end if not free_valuation
 
 
     
