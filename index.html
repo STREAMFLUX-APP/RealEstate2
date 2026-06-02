@@ -16,8 +16,9 @@
   --r8:8px;--r10:10px;--r12:12px;--r14:14px;
 }
 html{scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--white);min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:var(--font);background:var(--bg);color:var(--white);min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;line-height:1.6;overflow-x:hidden}
 input,textarea,button,select{font-family:var(--font)}
+h1,h2,h3,h4,p,span,div{overflow:visible}
 ::placeholder{color:rgba(240,240,248,0.2)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg1)}
@@ -341,13 +342,13 @@ function renderDashboard(){
   // ── HERO WELCOME ──────────────────────────────────────
   const hero=el("div",{style:{marginBottom:"40px",paddingBottom:"36px",borderBottom:`1px solid ${G.border}`}});
   const firstName=user.name?user.name.split(" ")[0]:"there";
-  const greeting=el("h1",{style:{fontSize:"clamp(20px,3vw,28px)",fontWeight:"600",color:G.white,lineHeight:"1.2",letterSpacing:"-0.01em",marginBottom:"8px",fontFamily:"'DM Mono',monospace"}});
-  greeting.appendChild(document.createTextNode((state.lang==="Spanish"?"Bienvenido, ":"Good to see you, ")));
+  const greeting=el("h1",{style:{fontSize:"clamp(18px,2.5vw,24px)",fontWeight:"400",color:G.white,lineHeight:"1.5",letterSpacing:"0",marginBottom:"8px",fontFamily:"'Syne',sans-serif",overflow:"visible"}});
+  greeting.appendChild(document.createTextNode((state.lang==="Spanish"?"Bienvenido a tu sistema de IA, ":"Welcome to your AI marketing, outreach & newsletter system, ")));
   const nameSpan=el("span",{style:{color:G.aqua}},firstName);
   greeting.appendChild(nameSpan);
   greeting.appendChild(document.createTextNode("."));
   hero.appendChild(greeting);
-  hero.appendChild(el("p",{style:{color:G.muted,fontSize:"14px",lineHeight:"1.6",maxWidth:"500px"}},state.lang==="Spanish"?"Tu sistema de marketing, captación y newsletter con IA está listo.":"Your AI marketing, outreach & newsletter system is ready."));
+  hero.appendChild(el("p",{style:{color:G.muted,fontSize:"14px",lineHeight:"1.6",maxWidth:"500px"}},state.lang==="Spanish"?"Tu sistema con IA está listo.":"Your system is ready."));
   content.appendChild(hero);
 
   // ── STATS ROW ─────────────────────────────────────────
@@ -668,7 +669,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       const content=el("div",{style:{maxWidth:"720px",margin:"0 auto",padding:"0 0 80px"},class:"fade-in"});
       // White header
       const rHead=el("div",{style:{padding:"20px 16px 16px",marginBottom:"0"}});
-      rHead.appendChild(el("h2",{style:{fontSize:"20px",fontWeight:"800",color:G.white,marginBottom:"4px",letterSpacing:"-0.02em"}},s.language==="Spanish"?"Tu Paquete Está Listo":"Your Package is Ready"));
+      rHead.appendChild(el("h2",{style:{fontSize:"18px",fontWeight:"400",color:G.white,marginBottom:"4px",letterSpacing:"0",lineHeight:"1.5",overflow:"visible"}},s.language==="Spanish"?"Tu Paquete Está Listo":"Your Package is Ready"));
       rHead.appendChild(el("p",{style:{color:G.muted,fontSize:"13px"}},`Everything in ${s.language}. Tap Copy on any section to use it instantly.`));
       content.appendChild(rHead);
       // Tab bar in white section
