@@ -1418,45 +1418,61 @@ function renderApp3(){
 
     // Form
     const content=el("div",{style:{maxWidth:"640px",margin:"0 auto",padding:"28px 20px 80px"}});
-    content.appendChild(el("div",{style:{marginBottom:"20px"}},el("h2",{style:{fontSize:"19px",fontWeight:"700",color:G.white}},isSpa()?"Generador de Newsletter":"Newsletter Generator"),el("p",{style:{color:G.muted,fontSize:"13px",marginTop:"4px"}},isSpa()?"Newsletter mensual listo para enviar a toda tu base de datos de clientes.":"Monthly newsletter ready to send to your entire client database. Copy and paste into Gmail, Mailchimp, or any email tool.")));
-    // Lang
-    const lc=el("div",{style:{...cardStyle}});
-    lc.appendChild(el("label",{style:labelStyle},isSpa()?"Idioma":"Language"));
-    const ls=el("select",{style:{...inputStyle,cursor:"pointer"}});
-    [{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}].forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;ls.appendChild(o);});
-    ls.addEventListener("change",e=>{s.language=e.target.value;renderContent();});lc.appendChild(ls);content.appendChild(lc);
-    // Agent
-    const ac=el("div",{style:{...cardStyle}});
-    ac.appendChild(el("h3",{style:{fontSize:"13px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"14px"}},isSpa()?"TUS DATOS":"YOUR DETAILS"));
-    const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-    const n1=el("div",{style:{marginBottom:"0"}});n1.appendChild(el("label",{style:labelStyle},isSpa()?"Tu Nombre":"Your Name"));const ni=el("input",{type:"text",placeholder:isSpa()?"Carlos García":"James Rivera",style:inputStyle});ni.value=s.agentName;ni.addEventListener("input",e=>s.agentName=e.target.value);n1.appendChild(ni);ag.appendChild(n1);
-    const p1=el("div",{style:{marginBottom:"0"}});p1.appendChild(el("label",{style:labelStyle},isSpa()?"Tu Teléfono":"Your Phone"));const pi=el("input",{type:"text",placeholder:"+1 305 555 0199",style:inputStyle});pi.value=s.agentPhone;pi.addEventListener("input",e=>s.agentPhone=e.target.value);p1.appendChild(pi);ag.appendChild(p1);
-    ac.appendChild(ag);
-    const em=el("div",{style:{marginTop:"12px",marginBottom:"12px"}});em.appendChild(el("label",{style:labelStyle},isSpa()?"Tu Email":"Your Email"));const ei=el("input",{type:"text",placeholder:"james@agency.com",style:inputStyle});ei.value=s.agentEmail;ei.addEventListener("input",e=>s.agentEmail=e.target.value);em.appendChild(ei);ac.appendChild(em);
-    const cg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-    const c1=el("div",{});c1.appendChild(el("label",{style:labelStyle},isSpa()?"Ciudad":"City"));const ci=el("input",{type:"text",placeholder:"Miami, Los Angeles...",style:inputStyle});ci.value=s.city;ci.addEventListener("input",e=>s.city=e.target.value);c1.appendChild(ci);cg.appendChild(c1);
-    const c2=el("div",{});c2.appendChild(el("label",{style:labelStyle},isSpa()?"Barrio / Zona":"Neighbourhood"));const ni2=el("input",{type:"text",placeholder:"South Beach, Beverly Hills...",style:inputStyle});ni2.value=s.neighbourhood;ni2.addEventListener("input",e=>s.neighbourhood=e.target.value);c2.appendChild(ni2);cg.appendChild(c2);
-    ac.appendChild(cg);content.appendChild(ac);
-    // Featured listing
-    const fl=el("div",{style:{...cardStyle}});
-    fl.appendChild(el("h3",{style:{fontSize:"13px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"14px"}},isSpa()?"PROPIEDAD DESTACADA":"FEATURED LISTING"));
-    const fa=el("div",{style:{marginBottom:"12px"}});fa.appendChild(el("label",{style:labelStyle},isSpa()?"Dirección":"Address"));const fai=el("input",{type:"text",placeholder:"42 Palm Drive, Miami Beach",style:inputStyle});fai.value=s.featuredAddress;fai.addEventListener("input",e=>s.featuredAddress=e.target.value);fa.appendChild(fai);fl.appendChild(fa);
-    const fg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginBottom:"12px"}});
-    [["featuredPrice",isSpa()?"Precio ($)":"Price ($)","1,200,000"],["featuredBeds",isSpa()?"Hab.":"Beds","4"],["featuredBaths",isSpa()?"Baños":"Baths","3"]].forEach(([key,lbl,ph])=>{const d=el("div",{});d.appendChild(el("label",{style:labelStyle},lbl));const i=el("input",{type:"text",placeholder:ph,style:inputStyle});i.value=s[key]||"";i.addEventListener("input",e=>s[key]=e.target.value);d.appendChild(i);fg.appendChild(d);});fl.appendChild(fg);
-    const fh=el("div",{style:{marginBottom:"0"}});fh.appendChild(el("label",{style:labelStyle},isSpa()?"Punto Más Destacado":"Key Highlight"));const fhi=el("textarea",{placeholder:isSpa()?"ej. Vistas al mar, reformada en 2024, piscina privada...":"e.g. Ocean views, renovated 2024, private pool...",rows:2,style:{...inputStyle,resize:"vertical"}});fhi.value=s.featuredHighlight;fhi.addEventListener("input",e=>s.featuredHighlight=e.target.value);fh.appendChild(fhi);fl.appendChild(fh);content.appendChild(fl);
-    // Newsletter content
-    const nc=el("div",{style:{...cardStyle}});
-    nc.appendChild(el("h3",{style:{fontSize:"13px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"14px"}},isSpa()?"CONTENIDO (OPCIONAL — LA IA LO ESCRIBE SI LO DEJAS VACÍO)":"CONTENT (OPTIONAL — AI WRITES IT IF LEFT BLANK)"));
-    function optTA(key,lbl,ph,rows){const d=el("div",{style:{marginBottom:"12px"}});d.appendChild(el("label",{style:labelStyle},lbl));const t=el("textarea",{placeholder:ph,rows:rows||2,style:{...inputStyle,resize:"vertical"}});t.value=s[key]||"";t.addEventListener("input",e=>s[key]=e.target.value);d.appendChild(t);return d;}
-    nc.appendChild(optTA("marketUpdate",isSpa()?"Actualización del Mercado":"Market Update",isSpa()?"ej. Los precios subieron 3% en South Beach este mes...":"e.g. Prices up 3% this month, demand still strong in South Beach...",2));
-    nc.appendChild(optTA("personalNote",isSpa()?"Nota Personal":"Personal Note",isSpa()?"ej. Acabo de cerrar 3 ventas este mes — el mercado está muy activo...":"e.g. Thrilled to share we closed 3 deals this month — market is hot...",2));
-    nc.appendChild(optTA("homeownerTip",isSpa()?"Consejo para el Propietario":"Homeowner Tip",isSpa()?"ej. Con el verano llegando, es buen momento para revisar el aire acondicionado...":"e.g. With summer coming, great time to service your AC and check exterior paint...",2));
-    nc.appendChild(chips(isSpa()?"Tono":"Tone",null,TONES(),s.tone,v=>{s.tone=v;renderContent();},true));
-    content.appendChild(nc);
+    const isSpa2=s.language==="Spanish";
+
+    // SECTION 1: WHO & WHY
+    const sec1=el("div",{style:{...cardStyle}});
+    sec1.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.aqua,marginBottom:"14px",fontFamily:"DM Mono,monospace"}},"01 — "+(isSpa2?"QUIÉN Y POR QUÉ":"WHO & WHY")));
+    sec1.appendChild(el("label",{style:labelStyle},isSpa2?"Idioma":"Language"));
+    const ls2=el("select",{style:{...inputStyle,cursor:"pointer",marginBottom:"14px"}});
+    [{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}].forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;ls2.appendChild(o);});
+    ls2.addEventListener("change",e=>{s.language=e.target.value;renderApp2Content();});
+    sec1.appendChild(ls2);
+    const cnWrap=el("div",{style:{marginBottom:"14px"}});
+    cnWrap.appendChild(el("label",{style:labelStyle},isSpa2?"Nombre del Cliente":"Client First Name"));
+    const cnInp=el("input",{type:"text",placeholder:isSpa2?"María":"Sarah",style:inputStyle});
+    cnInp.value=s.clientName||"";cnInp.addEventListener("focus",()=>cnInp.style.borderColor=G.aqua);cnInp.addEventListener("blur",()=>cnInp.style.borderColor=G.border2);cnInp.addEventListener("input",e=>s.clientName=e.target.value);
+    cnWrap.appendChild(cnInp);sec1.appendChild(cnWrap);
+    const CLIENT_TYPES2=isSpa2?[{value:"active_buyer",label:"Comprador Activo",desc:"Buscando ahora"},{value:"passive_buyer",label:"Comprador Pasivo",desc:"Sin urgencia"},{value:"motivated_seller",label:"Vendedor Motivado",desc:"Quiere vender ya"},{value:"exploring_seller",label:"Vendedor Explorando",desc:"Considera vender"},{value:"investor",label:"Inversor",desc:"Busca ROI"},{value:"cold_lead",label:"Lead Frío",desc:"Sin contacto"},{value:"past_client",label:"Cliente Anterior",desc:"Ya trabajamos juntos"}]:[{value:"active_buyer",label:"Active Buyer",desc:"Looking now"},{value:"passive_buyer",label:"Passive Buyer",desc:"No urgency"},{value:"motivated_seller",label:"Motivated Seller",desc:"Wants to sell now"},{value:"exploring_seller",label:"Exploring Seller",desc:"Considering selling"},{value:"investor",label:"Investor",desc:"Seeking ROI"},{value:"cold_lead",label:"Cold Lead",desc:"Never contacted"},{value:"past_client",label:"Past Client",desc:"Previously worked together"}];
+    sec1.appendChild(chips(isSpa2?"Tipo de Cliente":"Client Type",null,CLIENT_TYPES2,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
+    const CONTACT_REASONS2=isSpa2?[{value:"new_listing",label:"Nueva Propiedad",desc:"Encaja con criterios"},{value:"price_drop",label:"Bajada de Precio",desc:"Propiedad que le gustó"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo"},{value:"open_house",label:"Invitación a Visita",desc:"Ver propiedad"},{value:"market_update",label:"Actualización Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar"},{value:"anniversary",label:"Aniversario",desc:"1 año+"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked"},{value:"first_contact",label:"First Outreach",desc:"Never contacted"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"After a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
+    sec1.appendChild(chips(isSpa2?"Motivo de Contacto":"Contact Reason",null,CONTACT_REASONS2,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
+    const URGENCY2=isSpa2?[{value:"high",label:"Alta",desc:"Actuar ahora"},{value:"medium",label:"Media",desc:"1-3 meses"},{value:"low",label:"Baja",desc:"Largo plazo"}]:[{value:"high",label:"High",desc:"Must act now"},{value:"medium",label:"Medium",desc:"1-3 months"},{value:"low",label:"Low",desc:"Long-term"}];
+    sec1.appendChild(chips(isSpa2?"Urgencia":"Urgency",null,URGENCY2,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
+    const TONES2=isSpa2?[{value:"warm",label:"Cálido",desc:"Amigable"},{value:"professional",label:"Profesional",desc:"Pulido"},{value:"urgent",label:"Urgente",desc:"Con urgencia"},{value:"casual",label:"Casual",desc:"Sin presión"},{value:"luxury",label:"Lujo",desc:"Premium"}]:[{value:"warm",label:"Warm",desc:"Friendly"},{value:"professional",label:"Professional",desc:"Polished"},{value:"urgent",label:"Urgent",desc:"Time-sensitive"},{value:"casual",label:"Casual",desc:"Low pressure"},{value:"luxury",label:"Luxury",desc:"Premium"}];
+    sec1.appendChild(chips(isSpa2?"Tono":"Tone",null,TONES2,s.tone,v=>{s.tone=v;renderApp2Content();},true));
+    if(s.contactReason==="objection_handle"){const OBJECTIONS2=isSpa2?[{value:"too_expensive",label:"Demasiado Caro"},{value:"not_interested",label:"No Me Interesa"},{value:"happy_where_i_am",label:"Estoy Bien Así"},{value:"already_have_agent",label:"Ya Tengo Agente"},{value:"market_too_slow",label:"Mercado Lento"},{value:"need_more_time",label:"Necesito Más Tiempo"},{value:"bad_timing",label:"Mal Momento"}]:[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];sec1.appendChild(chips(isSpa2?"¿Qué objeción?":"Which objection?",null,OBJECTIONS2,s.objection,v=>{s.objection=v;renderApp2Content();},true));}
+    if(s.contactReason==="anniversary"){const annW=el("div",{style:{marginBottom:"0"}});annW.appendChild(el("label",{style:labelStyle},isSpa2?"Años desde la compra":"Years since purchase"));const annI=el("input",{type:"number",placeholder:"1",style:inputStyle});annI.value=s.anniversaryYears||"1";annI.addEventListener("focus",()=>annI.style.borderColor=G.aqua);annI.addEventListener("blur",()=>annI.style.borderColor=G.border2);annI.addEventListener("input",e=>s.anniversaryYears=e.target.value);annW.appendChild(annI);sec1.appendChild(annW);}
+    content.appendChild(sec1);
+
+    // SECTION 2: THE PROPERTY
+    const sec2=el("div",{style:{...cardStyle}});
+    sec2.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.aqua,marginBottom:"14px",fontFamily:"DM Mono,monospace"}},"02 — "+(isSpa2?"LA PROPIEDAD":"THE PROPERTY")));
+    const pAddrW=el("div",{style:{marginBottom:"14px"}});pAddrW.appendChild(el("label",{style:labelStyle},isSpa2?"Dirección":"Address"));
+    const pAddrI=el("input",{type:"text",placeholder:"42 Palm Drive, Miami Beach, FL",style:inputStyle});pAddrI.value=s.propAddress||"";pAddrI.addEventListener("focus",()=>pAddrI.style.borderColor=G.aqua);pAddrI.addEventListener("blur",()=>pAddrI.style.borderColor=G.border2);pAddrI.addEventListener("input",e=>s.propAddress=e.target.value);pAddrW.appendChild(pAddrI);sec2.appendChild(pAddrW);
+    const pgrid=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"14px"}});
+    [{key:"propPrice",label:isSpa2?"Precio ($)":"Price ($)",ph:"1,200,000"},{key:"propType",label:isSpa2?"Tipo":"Type",ph:"4-bed villa with pool"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const i=el("input",{type:"text",placeholder:ph,style:inputStyle});i.value=s[key]||"";i.addEventListener("focus",()=>i.style.borderColor=G.aqua);i.addEventListener("blur",()=>i.style.borderColor=G.border2);i.addEventListener("input",e=>s[key]=e.target.value);w.appendChild(i);pgrid.appendChild(w);});
+    sec2.appendChild(pgrid);
+    const phW=el("div",{style:{marginBottom:["active_buyer","passive_buyer","investor"].includes(s.clientType)&&["new_listing","price_drop","off_market"].includes(s.contactReason)?"14px":"0"}});
+    phW.appendChild(el("label",{style:labelStyle},isSpa2?"Puntos Clave":"Key Highlights"));
+    const phTa=el("textarea",{placeholder:isSpa2?"ej. Vistas al mar, reformada en 2024, piscina privada...":"e.g. Ocean views, renovated 2024, private pool...",rows:2,style:{...inputStyle,resize:"vertical"}});
+    phTa.value=s.propHighlights||"";phTa.addEventListener("focus",()=>phTa.style.borderColor=G.aqua);phTa.addEventListener("blur",()=>phTa.style.borderColor=G.border2);phTa.addEventListener("input",e=>s.propHighlights=e.target.value);phW.appendChild(phTa);sec2.appendChild(phW);
+    if(["active_buyer","passive_buyer","investor"].includes(s.clientType)&&["new_listing","price_drop","off_market"].includes(s.contactReason)){const bcW=el("div",{style:{marginBottom:"0"}});bcW.appendChild(el("label",{style:labelStyle},isSpa2?"Criterios del Comprador":"Buyer Criteria"));const bcTa=el("textarea",{placeholder:isSpa2?"ej. 4 hab, piscina, menos de $1.5M":"e.g. 4 beds, pool, under $1.5M",rows:2,style:{...inputStyle,resize:"vertical"}});bcTa.value=s.buyerNeeds||"";bcTa.addEventListener("focus",()=>bcTa.style.borderColor=G.aqua);bcTa.addEventListener("blur",()=>bcTa.style.borderColor=G.border2);bcTa.addEventListener("input",e=>s.buyerNeeds=e.target.value);bcW.appendChild(bcTa);sec2.appendChild(bcW);}
+    content.appendChild(sec2);
+
+    // SECTION 3: PERSONAL CONTEXT
+    const sec3=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"12px",padding:"22px",marginBottom:"16px"}});
+    sec3.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.aqua,marginBottom:"6px",fontFamily:"DM Mono,monospace"}},"03 — "+(isSpa2?"CONTEXTO PERSONAL — OPCIONAL":"PERSONAL CONTEXT — OPTIONAL")));
+    sec3.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.7)",marginBottom:"10px",lineHeight:"1.6"}},isSpa2?"Añade cualquier detalle extra — historial con el cliente, conversaciones previas, notas personales. La IA lo usará para personalizar cada mensaje.":"Add any extra details — client history, previous conversations, personal notes, anything you want woven into every message."));
+    const ctxTa=el("textarea",{placeholder:isSpa2?"ej. María vio 3 propiedades el mes pasado pero se quedó en silencio. Su contrato termina en abril. Le preocupan los tipos de interés...":"e.g. Sarah viewed 3 properties last month but went quiet. Her lease ends in April. She mentioned she's worried about interest rates...",rows:4,style:{...inputStyle,resize:"vertical",borderColor:G.aquaBorder,background:G.bg}});
+    ctxTa.value=s.customSituation||"";ctxTa.addEventListener("focus",()=>ctxTa.style.borderColor=G.aqua);ctxTa.addEventListener("blur",()=>ctxTa.style.borderColor=G.aquaBorder);ctxTa.addEventListener("input",e=>s.customSituation=e.target.value);
+    sec3.appendChild(ctxTa);content.appendChild(sec3);
+
     if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginBottom:"14px"}},`⚠ ${s.error}`));
-    const canGo=s.agentName&&s.city;
-    const gb=el("button",{style:{...btnStyle(!canGo,"#22c55e"),width:"100%",fontSize:"15px"}},isSpa()?"✦ Generar Newsletter":"✦ Generate Newsletter");
-    if(canGo)gb.addEventListener("click",generate);content.appendChild(gb);
+    const canGo2=s.clientName&&s.clientType&&s.contactReason&&s.urgency&&s.tone;
+    const gb=el("button",{style:{...btnStyle(!canGo2),width:"100%",fontSize:"14px"}},isSpa2?"✦ Generar Paquete de Captación":"✦ Generate Outreach Package");
+    if(canGo2){gb.addEventListener("mouseenter",()=>gb.style.opacity="0.85");gb.addEventListener("mouseleave",()=>gb.style.opacity="1");gb.addEventListener("click",generate);}
+    content.appendChild(gb);
     wrap.appendChild(content);
   }
   renderContent();return wrap;
