@@ -888,7 +888,7 @@ function renderApp2(){
       aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
     }
   };
-  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition:"",propInterior:[],propOutdoor:[],propBuilding:[],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
 
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -938,7 +938,7 @@ function renderApp2(){
     const isSpa2=s.language==="Spanish";
     wrap.innerHTML="";
 const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 Comprador Activo",desc:"Buscando ahora, listo para comprar"},{value:"buyer_passive",label:"👀 Comprador Pasivo",desc:"Interesado pero sin urgencia"},{value:"seller_motivated",label:"⚡ Vendedor Motivado",desc:"Quiere vender rápido"},{value:"seller_exploring",label:"🤔 Vendedor Explorando",desc:"Considera vender"},{value:"investor",label:"💰 Inversor",desc:"Oportunidad de ROI"},{value:"cold_lead",label:"❄️ Lead Frío",desc:"Sin contacto previo"},{value:"past_client",label:"🤝 Cliente Anterior",desc:"Ya cerramos juntos"}]:[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
-  const CONTACT_REASONS=(s.language==="Spanish")?[{value:"new_listing",label:"Nueva Propiedad Disponible",desc:"Propiedad que encaja con sus criterios"},{value:"price_drop",label:"Reducción de Precio",desc:"Bajó el precio de una propiedad"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},{value:"open_house",label:"Invitación a Visita",desc:"Invitar a ver una propiedad"},{value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Propiedad Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar un trato"},{value:"anniversary",label:"Aniversario de Compra",desc:"1 año+ desde que compraron"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
+  const CONTACT_REASONS=(s.language==="Spanish")?[{value:"new_listing",label:"Nueva Propiedad Disponible",desc:"Propiedad que encaja con sus criterios"},{value:"price_drop",label:"Reducción de Precio",desc:"Bajó el precio de una propiedad"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},{value:"open_house",label:"Invitación a Visita",desc:"Invitar a ver una propiedad"},{value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Propiedad Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar un trato"},{value:"anniversary",label:"Aniversario de Compra",desc:"1 año+ desde que compraron"},{value:"free_valuation",label:"Valoración Gratuita",desc:"Oferta sin compromiso"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"free_valuation",label:"Free Valuation",desc:"No obligation offer"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
   const TONES=(s.language==="Spanish")?[{value:"warm",label:"Cálido y Personal",desc:"Amigable, relación primero"},{value:"professional",label:"Profesional",desc:"Pulido y creíble"},{value:"urgent",label:"Urgente y Directo",desc:"Con urgencia"},{value:"casual",label:"Casual y Relajado",desc:"Sin presión"},{value:"luxury",label:"Lujo y Prestigio",desc:"Premium y exclusivo"}]:[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
   const URGENCY=(s.language==="Spanish")?[{value:"high",label:"🔥 Alta Urgencia",desc:"Debe actuar ahora"},{value:"medium",label:"⏳ Urgencia Media",desc:"1-3 meses"},{value:"low",label:"🌱 Baja Urgencia",desc:"Construyendo relación"}]:[{value:"high",label:"🔥 High Urgency",desc:"Must act now"},{value:"medium",label:"⏳ Medium Urgency",desc:"1-3 months"},{value:"low",label:"🌱 Low Urgency",desc:"Building relationship"}];
   const OBJECTIONS=(s.language==="Spanish")?[{value:"too_expensive",label:"Demasiado Caro"},{value:"not_interested",label:"No Estoy Interesado"},{value:"happy_where_i_am",label:"Estoy Bien Donde Estoy"},{value:"already_have_agent",label:"Ya Tengo Agente"},{value:"market_too_slow",label:"El Mercado Está Lento"},{value:"need_more_time",label:"Necesito Más Tiempo"},{value:"bad_timing",label:"No Es Buen Momento"}]:[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
@@ -1071,51 +1071,33 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     pg.appendChild(field(t2form.propPrice,"text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
     pg.appendChild(field(t2form.propType,"text",s.propType,v=>s.propType=v,s.language==="Spanish"?"Villa de 4 habitaciones con piscina":"4-bed villa with pool"));
     propCard.appendChild(pg);
+
+    // Expanded fields for buyers/investors with listing-type reasons
+    const isBuyer2=["buyer_active","buyer_passive","investor","cold_lead"].includes(s.clientType);
+    const isListingReason2=["new_listing","price_drop","off_market","open_house"].includes(s.contactReason);
+    if(isBuyer2&&isListingReason2){
+      const isSpaP=s.language==="Spanish";
+      const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px",marginTop:"12px"}});
+      [{key:"propBeds",label:isSpaP?"Hab.":"Beds",ph:"4"},{key:"propBaths",label:isSpaP?"Baños":"Baths",ph:"3"},{key:"propSqft",label:"Sq Ft",ph:"2,400"}].forEach(({key,label,ph})=>{
+        const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));
+        const i=el("input",{type:"text",placeholder:ph,style:inputStyle});i.value=s[key]||"";
+        i.addEventListener("focus",()=>i.style.borderColor=G.aqua);i.addEventListener("blur",()=>i.style.borderColor=G.border2);
+        i.addEventListener("input",e=>{s[key]=e.target.value;});w.appendChild(i);pg2.appendChild(w);
+      });
+      propCard.appendChild(pg2);
+      const COND2=isSpaP?["Obra Nueva","Recién Reformado","Listo para Entrar","Buen Estado","Necesita Reforma"]:["Brand New","Newly Renovated","Move-in Ready","Good Condition","Needs TLC"];
+      propCard.appendChild(chips(isSpaP?"Estado":"Condition",null,COND2,s.propCondition,v=>{s.propCondition=v;renderApp2Content();},true));
+      const INT2=isSpaP?["Suelos de Madera","Techos Altos","Cocina Gourmet","Isla de Cocina","Oficina en Casa","Sala de Cine","Chimenea","Domótica","Bodega de Vinos","Amplios Ventanales"]:["Hardwood Floors","High Ceilings","Gourmet Kitchen","Kitchen Island","Home Office","Home Theater","Fireplace","Smart Home","Wine Cellar","Floor-to-Ceiling Windows"];
+      propCard.appendChild(chips(isSpaP?"Características Interiores":"Interior Features",null,INT2,s.propInterior,v=>{s.propInterior=s.propInterior.includes(v)?s.propInterior.filter(x=>x!==v):[...s.propInterior,v];renderApp2Content();}));
+      const OUT2=isSpaP?["Piscina","Jacuzzi","Terraza Grande","Jardín Privado","Barbacoa","Muelle Privado","Acceso a Playa","Garaje 2+ Coches","Canchas de Pádel","Balcón","Vista Panorámica"]:["Swimming Pool","Hot Tub","Large Terrace","Private Garden","BBQ Area","Private Dock","Beach Access","2+ Car Garage","Padel Court","Balcony","Panoramic Views"];
+      propCard.appendChild(chips(isSpaP?"Características Exteriores":"Outdoor Features",null,OUT2,s.propOutdoor,v=>{s.propOutdoor=s.propOutdoor.includes(v)?s.propOutdoor.filter(x=>x!==v):[...s.propOutdoor,v];renderApp2Content();}));
+      const BLD2=isSpaP?["Portero 24h","Gimnasio","Spa","Piscina Comunitaria","Seguridad","Aparcamiento","Ascensor","Co-Working"]:["24h Concierge","Fitness Center","Spa","Community Pool","Security","Parking","Elevator","Co-Working Space"];
+      propCard.appendChild(chips(isSpaP?"Servicios del Edificio":"Building Amenities",null,BLD2,s.propBuilding,v=>{s.propBuilding=s.propBuilding.includes(v)?s.propBuilding.filter(x=>x!==v):[...s.propBuilding,v];renderApp2Content();}));
+    }
+
     propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,s.language==="Spanish"?"Vistas al mar, piscina privada, precio rebajado":"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
     content.appendChild(propCard);
 
-    if(isMatcher()){
-      const matchCard=el("div",{style:cardStyle});
-      matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.matcherTitle));
-      matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},t2form.matcherHint));
-      matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,s.language==="Spanish"?"4 habitaciones, piscina, buenos colegios, menos de $1.5M":"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
-      s.matcherProps.forEach((p,i)=>{
-        const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
-        pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
-        const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
-        pg2.appendChild(field(s.language==="Spanish"?"Dirección":"Address","text",p.address,v=>{s.matcherProps[i].address=v;},s.language==="Spanish"?"Calle Mayor 1, Miami":"123 Main St, Miami"));
-        pg2.appendChild(field(s.language==="Spanish"?"Precio ($)":"Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
-        pCard.appendChild(pg2);
-        pCard.appendChild(field(t2form.propType,"text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
-        pCard.appendChild(field(t2form.propHighlights,"text",p.highlights,v=>{s.matcherProps[i].highlights=v;},s.language==="Spanish"?"Vistas al mar, cocina reformada, zona escolar de élite":"Ocean view, renovated kitchen, top school district"));
-        matchCard.appendChild(pCard);
-      });
-      content.appendChild(matchCard);
-    }
-
-    if(isBuyer()&&!isMatcher()){
-      const buyCard=el("div",{style:cardStyle});
-      buyCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.buyerTitle));
-      buyCard.appendChild(chips(null,null,BUYER_CRITERIA,s.buyerCriteria,v=>{s.buyerCriteria=tog(s.buyerCriteria,v);renderApp2Content();}));
-      content.appendChild(buyCard);
-    }
-
-    if(isSeller()){
-      const sellCard=el("div",{style:cardStyle});
-      sellCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.sellerTitle));
-      sellCard.appendChild(chips(null,null,SELLER_SITUATION,s.sellerSituation,v=>{s.sellerSituation=tog(s.sellerSituation,v);renderApp2Content();}));
-      content.appendChild(sellCard);
-    }
-
-
-
-    const agentCard=el("div",{style:cardStyle});
-    agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.agentTitle));
-    const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
-    ag.appendChild(field(t2form.agentName,"text",s.agentName,v=>s.agentName=v,s.language==="Spanish"?"Carlos García":"James Rivera"));
-    ag.appendChild(field(t2form.agentPhone,"text",s.agentPhone,v=>s.agentPhone=v,s.language==="Spanish"?"+34 600 000 000":"+1 305 555 0199"));
-    agentCard.appendChild(ag);
-    agentCard.appendChild(field(t2form.agencyName,"text",s.agencyName,v=>s.agencyName=v,s.language==="Spanish"?"García Inmobiliaria":"Rivera Real Estate Group"));
     content.appendChild(agentCard);
 
     if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"12px 16px",color:"#f87171",fontSize:"13px",marginBottom:"16px",fontFamily:"monospace"}},`⚠ ${s.error}`));
