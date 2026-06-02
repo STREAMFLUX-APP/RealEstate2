@@ -301,12 +301,10 @@ const SF={
 
 // DASHBOARD
 function renderDashboard(){
-  const user=state.user;
-  const g=GL[state.lang]||GL.English;
+  const user=state.user;const g=GL[state.lang]||GL.English;
   const hasApp1=user.plan==="marketing"||user.plan==="bundle";
   const hasApp2=user.plan==="outreach"||user.plan==="bundle";
-  const listings=SF.getListings();
-  const clients=SF.getClients();
+  const listings=SF.getListings();const clients=SF.getClients();
   const followUpsDue=clients.filter(c=>{if(!c.savedAt)return false;const d=Math.ceil((Date.now()-new Date(c.savedAt))/864e5);return d>=3&&d<=30;}).length;
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
   const nav=el("div",{style:{background:G.bg1,borderBottom:`1px solid ${G.border}`,padding:"0 32px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:"0",zIndex:"100"}});
@@ -323,8 +321,7 @@ function renderDashboard(){
   greeting.appendChild(document.createTextNode(state.lang==="Spanish"?"Bienvenido a tu sistema de IA, ":"Welcome to your AI marketing, outreach & newsletter system, "));
   greeting.appendChild(el("span",{style:{color:G.aqua}},firstName));
   greeting.appendChild(document.createTextNode("."));
-  hero.appendChild(greeting);
-  content.appendChild(hero);
+  hero.appendChild(greeting);content.appendChild(hero);
   const statsGrid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"1px",background:G.border,borderRadius:"12px",overflow:"hidden",marginBottom:"48px",border:`1px solid ${G.border}`}});
   [[String(listings.length),"Listings Generated","Total listing packages"],[String(clients.length),"Clients Outreached","Total outreach packages"],[String(followUpsDue),"Follow-Ups Due","Clients needing follow-up"],[String(listings.length+clients.length),"Total Packages","All AI packages generated"]].forEach(([num,label,sub])=>{const cell=el("div",{style:{background:G.bg1,padding:"24px 22px"}});cell.appendChild(el("div",{style:{fontSize:"32px",fontWeight:"800",color:G.aqua,fontFamily:"DM Mono,monospace",letterSpacing:"-0.04em",lineHeight:"1",marginBottom:"8px"}},num));cell.appendChild(el("div",{style:{fontSize:"12px",fontWeight:"700",color:G.white,marginBottom:"3px"}},label));cell.appendChild(el("div",{style:{fontSize:"11px",color:G.muted,lineHeight:"1.4"}},sub));statsGrid.appendChild(cell);});
   content.appendChild(statsGrid);
@@ -891,7 +888,7 @@ function renderApp2(){
       aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
     }
   };
-  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",anniversaryYears:"1",customSituation:"",propAddress:"",propPrice:"",propBeds:"",propBaths:"",propSqft:"",propCondition:"",propInterior:[],propOutdoor:[],propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
 
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -1023,118 +1020,123 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
 
     const content=el("div",{style:{maxWidth:"660px",margin:"0 auto",padding:"30px 18px 60px"}});
 
-    // Personal Context box - top, always visible
-    const ctxBox=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"12px",padding:"18px",marginBottom:"16px"}});
-    ctxBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.aqua,marginBottom:"5px",fontFamily:"DM Mono,monospace"}},(t2.situationTitle||"Personal Context")));
-    ctxBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.7)",marginBottom:"10px",lineHeight:"1.6"}},t2.situationHint||"Prior contact history, personal notes, anything about this client you want woven into every message."));
-    const ctxTa=el("textarea",{placeholder:t2.situationPlaceholder||"e.g. Sarah viewed 3 properties last month but went quiet. Her lease ends in April. She mentioned concerns about interest rates...",rows:3,style:{...inputStyle,resize:"vertical",borderColor:G.aquaBorder,background:G.bg}});
-    ctxTa.value=s.customSituation||"";
-    ctxTa.addEventListener("focus",()=>ctxTa.style.borderColor=G.aqua);
-    ctxTa.addEventListener("blur",()=>ctxTa.style.borderColor=G.aquaBorder);
-    ctxTa.addEventListener("input",e=>s.customSituation=e.target.value);
-    ctxBox.appendChild(ctxTa);
-    content.appendChild(ctxBox);
-
     // Language
     const langCard=el("div",{style:cardStyle});
-    langCard.appendChild(el("label",{style:labelStyle},t2.langLabel||"Output Language"));
+    langCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},`🌐 ${(T2[s.language]||T2.English).langLabel}`));
     const langSel=el("select",{style:{...inputStyle,cursor:"pointer"}});
-    [{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}].forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
-    langSel.addEventListener("focus",()=>langSel.style.borderColor=G.aqua);
-    langSel.addEventListener("blur",()=>langSel.style.borderColor=G.border2);
+    LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
     langSel.addEventListener("change",e=>{s.language=e.target.value;renderApp2Content();});
     langCard.appendChild(langSel);
     content.appendChild(langCard);
 
-    // Who are you contacting
-    const whoCard=el("div",{style:cardStyle});
-    const isSpa=s.language==="Spanish";
+    // Client info
+    const t2form=T2[s.language]||T2.English;
+    const clientCard=el("div",{style:cardStyle});
+    clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.whoContact));
+    // CUSTOM SITUATION BOX — App2
+    const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
+    sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
+    sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2form.situationHint));
+    const sitTa=el("textarea",{placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
+    sitTa.value=s.customSituation||"";
+    sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
+    sitBox.appendChild(sitTa);
+    sitBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t2form.situationLeave));
+    content.appendChild(sitBox);
 
-    // Client name
-    const cnW=el("div",{style:{marginBottom:"14px"}});
-    cnW.appendChild(el("label",{style:labelStyle},isSpa?"Nombre del Cliente":"Client First Name"));
-    const cnI=el("input",{type:"text",placeholder:isSpa?"María":"Sarah",style:inputStyle});
-    cnI.value=s.clientName||"";
-    cnI.addEventListener("focus",()=>cnI.style.borderColor=G.aqua);
-    cnI.addEventListener("blur",()=>cnI.style.borderColor=G.border2);
-    cnI.addEventListener("input",e=>s.clientName=e.target.value);
-    cnW.appendChild(cnI);whoCard.appendChild(cnW);
+    clientCard.appendChild(field(t2form.clientFirstName,"text",s.clientName,v=>s.clientName=v,s.language==="Spanish"?"María":"Sarah"));
+    clientCard.appendChild(chips(t2form.clientType,null,CLIENT_TYPES,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
+    clientCard.appendChild(chips(t2form.contactReason,null,CONTACT_REASONS,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
+    clientCard.appendChild(chips(t2form.urgencyLabel,null,URGENCY,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
+    clientCard.appendChild(chips(t2form.toneLabel,null,TONES,s.tone,v=>{s.tone=v;renderApp2Content();},true));
+    content.appendChild(clientCard);
 
-    // Client type
-    const CT=isSpa?[{value:"active_buyer",label:"Comprador Activo",desc:"Buscando ahora"},{value:"passive_buyer",label:"Comprador Pasivo",desc:"Sin urgencia"},{value:"motivated_seller",label:"Vendedor Motivado",desc:"Quiere vender ya"},{value:"exploring_seller",label:"Vendedor Explorando",desc:"Considera vender"},{value:"investor",label:"Inversor",desc:"Busca ROI"},{value:"cold_lead",label:"Lead Frío",desc:"Sin contacto"},{value:"past_client",label:"Cliente Anterior",desc:"Ya trabajamos juntos"}]:[{value:"active_buyer",label:"Active Buyer",desc:"Looking now"},{value:"passive_buyer",label:"Passive Buyer",desc:"No urgency"},{value:"motivated_seller",label:"Motivated Seller",desc:"Wants to sell now"},{value:"exploring_seller",label:"Exploring Seller",desc:"Considering selling"},{value:"investor",label:"Investor",desc:"Seeking ROI"},{value:"cold_lead",label:"Cold Lead",desc:"Never contacted"},{value:"past_client",label:"Past Client",desc:"Previously worked together"}];
-    whoCard.appendChild(chips(isSpa?"Tipo de Cliente":"Client Type",null,CT,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
-
-    // Contact reason - includes free valuation
-    const CR=isSpa?[{value:"new_listing",label:"Nueva Propiedad",desc:"Encaja con criterios"},{value:"price_drop",label:"Bajada de Precio",desc:"Propiedad que le gustó"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo"},{value:"open_house",label:"Invitación a Visita",desc:"Ver propiedad"},{value:"market_update",label:"Actualización Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar"},{value:"anniversary",label:"Aniversario",desc:"1 año+"},{value:"free_valuation",label:"Valoración Gratuita",desc:"Oferta sin compromiso"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked"},{value:"first_contact",label:"First Outreach",desc:"Never contacted"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"After a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+"},{value:"free_valuation",label:"Free Valuation",desc:"No obligation offer"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
-    whoCard.appendChild(chips(isSpa?"Motivo de Contacto":"Contact Reason",null,CR,s.contactReason,v=>{s.contactReason=v;renderApp2Content();},true));
-
-    const URG=isSpa?[{value:"high",label:"Alta",desc:"Actuar ahora"},{value:"medium",label:"Media",desc:"1-3 meses"},{value:"low",label:"Baja",desc:"Largo plazo"}]:[{value:"high",label:"High",desc:"Must act now"},{value:"medium",label:"Medium",desc:"1-3 months"},{value:"low",label:"Low",desc:"Long-term"}];
-    whoCard.appendChild(chips(isSpa?"Urgencia":"Urgency",null,URG,s.urgency,v=>{s.urgency=v;renderApp2Content();},true));
-
-    const TON=isSpa?[{value:"warm",label:"Cálido",desc:"Amigable"},{value:"professional",label:"Profesional",desc:"Pulido"},{value:"urgent",label:"Urgente",desc:"Con urgencia"},{value:"casual",label:"Casual",desc:"Sin presión"},{value:"luxury",label:"Lujo",desc:"Premium"}]:[{value:"warm",label:"Warm",desc:"Friendly"},{value:"professional",label:"Professional",desc:"Polished"},{value:"urgent",label:"Urgent",desc:"Time-sensitive"},{value:"casual",label:"Casual",desc:"Low pressure"},{value:"luxury",label:"Luxury",desc:"Premium"}];
-    whoCard.appendChild(chips(isSpa?"Tono":"Tone",null,TON,s.tone,v=>{s.tone=v;renderApp2Content();},true));
-
-    // Objection
     if(s.contactReason==="objection_handle"){
-      const OBJ=isSpa?[{value:"too_expensive",label:"Demasiado Caro"},{value:"not_interested",label:"No Me Interesa"},{value:"happy_where_i_am",label:"Estoy Bien Así"},{value:"already_have_agent",label:"Ya Tengo Agente"},{value:"market_too_slow",label:"Mercado Lento"},{value:"need_more_time",label:"Necesito Más Tiempo"},{value:"bad_timing",label:"Mal Momento"}]:[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
-      whoCard.appendChild(chips(isSpa?"¿Qué objeción?":"Which objection?",null,OBJ,s.objection,v=>{s.objection=v;renderApp2Content();},true));
+      const objCard=el("div",{style:cardStyle});
+      objCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.objTitle));
+      objCard.appendChild(chips(null,null,OBJECTIONS,s.objection,v=>{s.objection=v;renderApp2Content();},true));
+      content.appendChild(objCard);
     }
-    if(s.contactReason==="anniversary"){
-      const aW=el("div",{style:{marginBottom:"0"}});
-      aW.appendChild(el("label",{style:labelStyle},isSpa?"Años desde la compra":"Years since purchase"));
-      const aI=el("input",{type:"number",placeholder:"1",style:inputStyle});
-      aI.value=s.anniversaryYears||"1";
-      aI.addEventListener("focus",()=>aI.style.borderColor=G.aqua);aI.addEventListener("blur",()=>aI.style.borderColor=G.border2);
-      aI.addEventListener("input",e=>s.anniversaryYears=e.target.value);
-      aW.appendChild(aI);whoCard.appendChild(aW);
-    }
-    content.appendChild(whoCard);
 
-    // Property section - expanded for buyers/investors with listing reasons, simple for sellers
-    const isBuyer=["active_buyer","passive_buyer","investor"].includes(s.clientType);
-    const isSeller=["motivated_seller","exploring_seller"].includes(s.clientType);
-    const isListingReason=["new_listing","price_drop","off_market","open_house"].includes(s.contactReason);
+    if(s.contactReason==="anniversary"){
+      const annCard=el("div",{style:cardStyle});
+      annCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},t2form.annTitle));
+      annCard.appendChild(field(t2form.annLabel,"number",s.anniversaryYears,v=>s.anniversaryYears=v,"1"));
+      content.appendChild(annCard);
+    }
 
     const propCard=el("div",{style:cardStyle});
-    propCard.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.aqua,marginBottom:"14px",fontFamily:"DM Mono,monospace"}},isSpa?"LA PROPIEDAD":"THE PROPERTY"));
-
-    // Address always shown
-    const pAW=el("div",{style:{marginBottom:"14px"}});
-    pAW.appendChild(el("label",{style:labelStyle},isSpa?"Dirección":"Address"));
-    const pAI=el("input",{type:"text",placeholder:"42 Palm Drive, Miami Beach, FL",style:inputStyle});
-    pAI.value=s.propAddress||"";pAI.addEventListener("focus",()=>pAI.style.borderColor=G.aqua);pAI.addEventListener("blur",()=>pAI.style.borderColor=G.border2);pAI.addEventListener("input",e=>s.propAddress=e.target.value);pAW.appendChild(pAI);propCard.appendChild(pAW);
-
-    const pg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"14px"}});
-    [{key:"propPrice",label:isSpa?"Precio ($)":"Price ($)",ph:"1,200,000"},{key:"propType",label:isSpa?"Tipo":"Type",ph:isSpa?"Villa de 4 hab con piscina":"4-bed villa with pool"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const i=el("input",{type:"text",placeholder:ph,style:inputStyle});i.value=s[key]||"";i.addEventListener("focus",()=>i.style.borderColor=G.aqua);i.addEventListener("blur",()=>i.style.borderColor=G.border2);i.addEventListener("input",e=>s[key]=e.target.value);w.appendChild(i);pg.appendChild(w);});
+    propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
+    propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,s.language==="Spanish"?"Calle Gran Vía 42, Madrid / 42 Palm Drive, Miami":"42 Palm Drive, Miami Beach, FL 33139"));
+    const pg=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+    pg.appendChild(field(t2form.propPrice,"text",s.propPrice,v=>s.propPrice=v,"1,100,000"));
+    pg.appendChild(field(t2form.propType,"text",s.propType,v=>s.propType=v,s.language==="Spanish"?"Villa de 4 habitaciones con piscina":"4-bed villa with pool"));
     propCard.appendChild(pg);
-
-    // Expanded fields for buyers with listing reasons
-    if(isBuyer&&isListingReason){
-      const bg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px",marginBottom:"14px"}});
-      [{key:"propBeds",label:isSpa?"Hab.":"Beds",ph:"4"},{key:"propBaths",label:isSpa?"Baños":"Baths",ph:"3"},{key:"propSqft",label:"Sq Ft",ph:"2,400"}].forEach(({key,label,ph})=>{const w=el("div",{});w.appendChild(el("label",{style:labelStyle},label));const i=el("input",{type:"text",placeholder:ph,style:inputStyle});i.value=s[key]||"";i.addEventListener("focus",()=>i.style.borderColor=G.aqua);i.addEventListener("blur",()=>i.style.borderColor=G.border2);i.addEventListener("input",e=>s[key]=e.target.value);w.appendChild(i);bg2.appendChild(w);});
-      propCard.appendChild(bg2);
-      const COND=isSpa?["Obra Nueva","Recién Reformado","Listo para Entrar","Buen Estado","Necesita Reforma"]:["Brand New","Newly Renovated","Move-in Ready","Good Condition","Needs TLC"];
-      propCard.appendChild(chips(isSpa?"Estado":"Condition",null,COND,s.propCondition,v=>{s.propCondition=v;renderApp2Content();},true));
-      const INT=isSpa?["Suelos de Madera","Techos Altos","Cocina Gourmet","Isla de Cocina","Oficina en Casa","Sala de Cine","Chimenea","Domótica","Bodega de Vinos","Amplios Ventanales"]:["Hardwood Floors","High Ceilings","Gourmet Kitchen","Kitchen Island","Home Office","Home Theater","Fireplace","Smart Home","Wine Cellar","Floor-to-Ceiling Windows"];
-      propCard.appendChild(chips(isSpa?"Características Interiores":"Interior Features",null,INT,s.propInterior,v=>{s.propInterior=s.propInterior.includes(v)?s.propInterior.filter(x=>x!==v):[...s.propInterior,v];renderApp2Content();}));
-      const OUT=isSpa?["Piscina","Jacuzzi","Terraza Grande","Jardín Privado","Barbacoa","Muelle Privado","Acceso a Playa","Garaje 2+ Coches","Canchas de Pádel","Balcón","Vista Panorámica"]:["Swimming Pool","Hot Tub","Large Terrace","Private Garden","BBQ Area","Private Dock","Beach Access","2+ Car Garage","Padel Court","Balcony","Panoramic Views"];
-      propCard.appendChild(chips(isSpa?"Características Exteriores":"Outdoor Features",null,OUT,s.propOutdoor,v=>{s.propOutdoor=s.propOutdoor.includes(v)?s.propOutdoor.filter(x=>x!==v):[...s.propOutdoor,v];renderApp2Content();}));
-    }
-
-    // Key highlights always shown
-    const phW=el("div",{style:{marginBottom:"0"}});
-    phW.appendChild(el("label",{style:labelStyle},isSpa?"Puntos Clave":"Key Highlights"));
-    const phTa=el("textarea",{placeholder:isSpa?"ej. Vistas al mar, reformada en 2024, piscina privada...":"e.g. Ocean views, renovated 2024, private pool, motivated seller...",rows:2,style:{...inputStyle,resize:"vertical"}});
-    phTa.value=s.propHighlights||"";phTa.addEventListener("focus",()=>phTa.style.borderColor=G.aqua);phTa.addEventListener("blur",()=>phTa.style.borderColor=G.border2);phTa.addEventListener("input",e=>s.propHighlights=e.target.value);phW.appendChild(phTa);propCard.appendChild(phW);
+    propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,s.language==="Spanish"?"Vistas al mar, piscina privada, precio rebajado":"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
     content.appendChild(propCard);
 
-    if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"10px 14px",color:"#f87171",fontSize:"13px",marginBottom:"14px"}},`⚠ ${s.error}`));
+    if(isMatcher()){
+      const matchCard=el("div",{style:cardStyle});
+      matchCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.matcherTitle));
+      matchCard.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",marginBottom:"16px"}},t2form.matcherHint));
+      matchCard.appendChild(textarea(t2form.buyerNeeds,s.buyerNeeds,v=>s.buyerNeeds=v,s.language==="Spanish"?"4 habitaciones, piscina, buenos colegios, menos de $1.5M":"4 beds, pool, good schools, under $1.5M, prefers South Beach",2));
+      s.matcherProps.forEach((p,i)=>{
+        const pCard=el("div",{style:{background:"#0d0d0d",border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px",marginBottom:"12px"}});
+        pCard.appendChild(el("p",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:"12px"}},`${t2form.optionLabel} ${i+1}`));
+        const pg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
+        pg2.appendChild(field(s.language==="Spanish"?"Dirección":"Address","text",p.address,v=>{s.matcherProps[i].address=v;},s.language==="Spanish"?"Calle Mayor 1, Miami":"123 Main St, Miami"));
+        pg2.appendChild(field(s.language==="Spanish"?"Precio ($)":"Price ($)","text",p.price,v=>{s.matcherProps[i].price=v;},"1,200,000"));
+        pCard.appendChild(pg2);
+        pCard.appendChild(field(t2form.propType,"text",p.type,v=>{s.matcherProps[i].type=v;},"4-bed house with pool"));
+        pCard.appendChild(field(t2form.propHighlights,"text",p.highlights,v=>{s.matcherProps[i].highlights=v;},s.language==="Spanish"?"Vistas al mar, cocina reformada, zona escolar de élite":"Ocean view, renovated kitchen, top school district"));
+        matchCard.appendChild(pCard);
+      });
+      content.appendChild(matchCard);
+    }
 
-    const canGo=s.clientName&&s.clientType&&s.contactReason&&s.urgency&&s.tone;
-    const gb=el("button",{style:{...btnStyle(!canGo),width:"100%",fontSize:"14px"}},isSpa?"✦ Generar Paquete de Captación":"✦ Generate Outreach Package");
-    if(canGo){gb.addEventListener("mouseenter",()=>gb.style.opacity="0.85");gb.addEventListener("mouseleave",()=>gb.style.opacity="1");gb.addEventListener("click",generate);}
-    content.appendChild(gb);
-    wrap.appendChild(content);
+    if(isBuyer()&&!isMatcher()){
+      const buyCard=el("div",{style:cardStyle});
+      buyCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.buyerTitle));
+      buyCard.appendChild(chips(null,null,BUYER_CRITERIA,s.buyerCriteria,v=>{s.buyerCriteria=tog(s.buyerCriteria,v);renderApp2Content();}));
+      content.appendChild(buyCard);
+    }
+
+    if(isSeller()){
+      const sellCard=el("div",{style:cardStyle});
+      sellCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.sellerTitle));
+      sellCard.appendChild(chips(null,null,SELLER_SITUATION,s.sellerSituation,v=>{s.sellerSituation=tog(s.sellerSituation,v);renderApp2Content();}));
+      content.appendChild(sellCard);
+    }
+
+    const ctxCard=el("div",{style:cardStyle});
+    ctxCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.contextTitle));
+    ctxCard.appendChild(textarea(t2form.priorLabel,s.priorContact,v=>s.priorContact=v,t2form.priorPlaceholder,2,t2form.priorHint));
+    ctxCard.appendChild(textarea(t2form.noteLabel,s.personalNote,v=>s.personalNote=v,t2form.notePlaceholder,2,t2form.noteHint));
+    content.appendChild(ctxCard);
+
+    const agentCard=el("div",{style:cardStyle});
+    agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.agentTitle));
+    const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
+    ag.appendChild(field(t2form.agentName,"text",s.agentName,v=>s.agentName=v,s.language==="Spanish"?"Carlos García":"James Rivera"));
+    ag.appendChild(field(t2form.agentPhone,"text",s.agentPhone,v=>s.agentPhone=v,s.language==="Spanish"?"+34 600 000 000":"+1 305 555 0199"));
+    agentCard.appendChild(ag);
+    agentCard.appendChild(field(t2form.agencyName,"text",s.agencyName,v=>s.agencyName=v,s.language==="Spanish"?"García Inmobiliaria":"Rivera Real Estate Group"));
+    content.appendChild(agentCard);
+
+    if(s.error)content.appendChild(el("div",{style:{background:"#1a0808",border:"1px solid #3a1010",borderRadius:"8px",padding:"12px 16px",color:"#f87171",fontSize:"13px",marginBottom:"16px",fontFamily:"monospace"}},`⚠ ${s.error}`));
+
+    if(s.loading){
+      const lc=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"18px 22px",marginBottom:"16px",textAlign:"center"}});
+      lc.appendChild(el("p",{style:{color:G.aqua,fontSize:"14px",margin:"0",fontWeight:"600"}},s.loadingMsg));
+      lc.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",margin:"6px 0 0"}},s.language==="Spanish"?"Generando en español. Por favor espera...":"Generating. Please wait..."));
+      content.appendChild(lc);
+    }
+
+    const genBtn=el("button",{style:{...btnStyle(!canGenerate()||s.loading),width:"100%",fontSize:"15px",background:canGenerate()&&!s.loading?G.aqua:"#1a1a1a",color:canGenerate()&&!s.loading?"#060608":G.muted}},s.loading?t2form.generating:t2form.generate);
+    genBtn.addEventListener("click",()=>{if(canGenerate()&&!s.loading)generate();});
+    content.appendChild(genBtn);
+    if(!canGenerate())content.appendChild(el("p",{style:{color:G.muted,fontSize:"12px",marginTop:"8px",textAlign:"center"}},(T2[s.language]||T2.English).fillRequired));
+
     wrap.appendChild(content);
   }
 
