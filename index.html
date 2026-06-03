@@ -1126,9 +1126,15 @@ function renderApp2(){
     const CONTACT_REASONS=isSpa2?[{value:"new_listing",label:"Nueva Propiedad"},{value:"price_drop",label:"Reducción de Precio"},{value:"first_contact",label:"Primer Contacto"},{value:"reconnect",label:"Retomar Contacto"},{value:"open_house",label:"Invitación a Visita"},{value:"market_update",label:"Actualización del Mercado"},{value:"off_market",label:"Propiedad Exclusiva"},{value:"just_sold",label:"Recién Vendido"},{value:"referral_request",label:"Pedir Referidos"},{value:"anniversary",label:"Aniversario"},{value:"objection_handle",label:"Manejar Objeción"}]:[{value:"new_listing",label:"New Listing"},{value:"price_drop",label:"Price Reduction"},{value:"first_contact",label:"First Outreach"},{value:"reconnect",label:"Reconnecting"},{value:"open_house",label:"Open House"},{value:"market_update",label:"Market Update"},{value:"off_market",label:"Off-Market Deal"},{value:"just_sold",label:"Just Sold"},{value:"referral_request",label:"Referral Request"},{value:"anniversary",label:"Anniversary"},{value:"objection_handle",label:"Handle Objection"}];
     const URGENCY=isSpa2?[{value:"high",label:"Alta Urgencia"},{value:"medium",label:"Urgencia Media"},{value:"low",label:"Baja Urgencia"}]:[{value:"high",label:"High Urgency"},{value:"medium",label:"Medium Urgency"},{value:"low",label:"Low Urgency"}];
     const TONES=isSpa2?[{value:"warm",label:"Cálido y Personal"},{value:"professional",label:"Profesional"},{value:"urgent",label:"Urgente"},{value:"casual",label:"Casual"},{value:"luxury",label:"Lujo"}]:[{value:"warm",label:"Warm & Personal"},{value:"professional",label:"Professional"},{value:"urgent",label:"Urgent"},{value:"casual",label:"Casual"},{value:"luxury",label:"Luxury"}];
-    const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\n${s.customSituation?"AGENT OWN WORDS - USE ABOVE ALL ELSE: "+s.customSituation+"\\n":""}AGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
+    const isCMA2=s.contactReason==="free_valuation";
+    const cmaCtx=isCMA2?`\nSUBJECT PROPERTY: ${s.cmaSubject.address} | Est. Value: $${s.cmaSubject.price} | ${s.cmaSubject.beds}bed/${s.cmaSubject.baths}bath | ${s.cmaSubject.sqft}sqft | Condition: ${s.cmaSubject.condition} | Features: ${s.cmaSubject.features}\nCOMPARABLE 1: ${s.cmaComps[0].address} | Sold: $${s.cmaComps[0].salePrice} on ${s.cmaComps[0].saleDate} | ${s.cmaComps[0].beds}bed/${s.cmaComps[0].baths}bath | ${s.cmaComps[0].sqft}sqft | ${s.cmaComps[0].condition} | ${s.cmaComps[0].notes}\nCOMPARABLE 2: ${s.cmaComps[1].address} | Sold: $${s.cmaComps[1].salePrice} on ${s.cmaComps[1].saleDate} | ${s.cmaComps[1].beds}bed/${s.cmaComps[1].baths}bath | ${s.cmaComps[1].sqft}sqft | ${s.cmaComps[1].condition} | ${s.cmaComps[1].notes}\nCOMPARABLE 3: ${s.cmaComps[2].address} | Sold: $${s.cmaComps[2].salePrice} on ${s.cmaComps[2].saleDate} | ${s.cmaComps[2].beds}bed/${s.cmaComps[2].baths}bath | ${s.cmaComps[2].sqft}sqft | ${s.cmaComps[2].condition} | ${s.cmaComps[2].notes}`:""
+    const ctx=`CLIENT: ${s.clientName} | TYPE: ${CLIENT_TYPES.find(t=>t.value===s.clientType)?.label||s.clientType} | REASON: ${CONTACT_REASONS.find(r=>r.value===s.contactReason)?.label||s.contactReason} | URGENCY: ${URGENCY.find(u=>u.value===s.urgency)?.label||"not specified"} | TONE: ${TONES.find(t=>t.value===s.tone)?.label||s.tone}\nPRIOR: ${s.priorContact||"none"} | NOTE: ${s.personalNote||"none"}${cmaCtx}\nPROPERTY: ${s.propAddress||"N/A"} | $${s.propPrice||"N/A"} | ${s.propType||""} | ${s.propHighlights||""}\n${isBuyer()?`BUYER CRITERIA: ${s.buyerCriteria.join(",")||"not specified"}`:""}${isSeller()?`SELLER SITUATION: ${s.sellerSituation.join(",")||"not specified"}`:""}\n${s.customSituation?"AGENT OWN WORDS - USE ABOVE ALL ELSE: "+s.customSituation+"\\n":""}AGENT: ${s.agentName}${s.agentPhone?`|${s.agentPhone}`:""}${s.agencyName?`|${s.agencyName}`:""}`;
     try{
       s.loadingMsg=(T2[s.language]||T2.English).loading1;renderApp2Content();
+      if(isCMA2)p1=`${ctx}${langInstr}
+
+This is a Free Valuation / CMA outreach. Return ONLY JSON:
+{"whatsapp":"60-80 word WhatsApp. Warm, mention you've done a full market analysis on their home at ${s.cmaSubject.address||"their address"}. End with easy question to book a call.","sms":"SMS max 160 chars. Mention free valuation ready.","voice_script":"Call script: OPENING, MENTION CMA READY, VALUE PITCH (you know what similar homes sold for), CLOSE with viewing booking. Labelled.","email_subject":"Email subject mentioning free valuation under 10 words.","email_body":"140-160 word email. Lead with the free valuation offer, share key insight from the comparable analysis (without giving away all numbers), invite them to a no-obligation meeting. Signed by ${s.agentName}${s.agencyName?" from "+s.agencyName:""}."}`;
       let p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp. Warm, personal, use ${s.clientName}'s first name. End with easy question.","sms":"SMS max 160 chars. Punchy and personal.","voice_script":"Call script: OPENING, REASON FOR CALL, VALUE PITCH, CLOSE. Labelled. Natural spoken language.","email_subject":"Personal email subject under 10 words.","email_body":"130-160 word email. Personal opener, opportunity, CTA. Signed by ${s.agentName}${s.agencyName?` from ${s.agencyName}`:""}."}`; 
       if(s.contactReason==="objection_handle")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word WhatsApp objection response. Acknowledge, reframe, keep door open.","sms":"SMS objection response max 160 chars.","voice_script":"Objection handling script: OPENING, REFRAME, QUESTION, CLOSE. Labelled.","email_subject":"Non-salesy subject under 9 words.","email_body":"130-150 word email handling objection. Signed by ${s.agentName}."}`;
       if(s.contactReason==="referral_request")p1=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"whatsapp":"60-80 word referral request WhatsApp. Warm, celebrate success, ask naturally.","sms":"Referral SMS max 160 chars.","voice_script":"Referral call: OPENING, CELEBRATION, ASK, CLOSE. Labelled.","email_subject":"Referral subject under 9 words.","email_body":"120-140 word referral email. Signed by ${s.agentName}."}`;
@@ -1136,6 +1142,10 @@ function renderApp2(){
       const part1=await safeClaude(p1,SYSTEM,1500);
 
       s.loadingMsg=(T2[s.language]||T2.English).loading2;renderApp2Content();
+      if(isCMA2)p2=`${ctx}${langInstr}
+
+Return ONLY JSON for a FREE VALUATION outreach:
+{"formal_letter":"Formal CMA presentation letter 280-320 words. Reference the subject property at ${s.cmaSubject.address||"their address"}, mention you have analysed the market and comparable recent sales, give a suggested price range based on the comps, invite them to a no-obligation consultation. Professional and credible. Sign: Warm regards,\n${s.agentName}${s.agencyName?"\n"+s.agencyName:""}${s.agentPhone?"\n"+s.agentPhone:""}","followup_1":"Follow-up Day 3. 50-60 words. Reference the valuation — did they have a chance to review?","followup_2":"Follow-up Week 1. 50-60 words. New angle — market is moving, timing matters.","followup_3":"Follow-up Week 2. 40-50 words. Soft check-in.","followup_4":"Follow-up Month 1. 40-50 words. Final touch — offer is still open."}`;
       let p2=`${ctx}${langInstr}\n\nReturn ONLY JSON:\n{"formal_letter":"Full formal letter 260-300 words. Start: [Date]\\n\\n${s.clientName}\\n[Address]\\n\\nDear ${s.clientName},\\n\\n4 paragraphs. Sign: Warm regards,\\n${s.agentName}${s.agencyName?`\\n${s.agencyName}`:""}${s.agentPhone?`\\n${s.agentPhone}`:""}","followup_1":"Follow-up Day 3. 50-60 words. Different angle.","followup_2":"Follow-up Week 1. 50-60 words. New info or urgency.","followup_3":"Follow-up Week 2. 40-50 words. Casual check-in.","followup_4":"Follow-up Month 1. 40-50 words. Final warm touch."}`;
       if(isMatcher()&&s.matcherProps.some(p=>p.address))p2=`${ctx}\nPROPERTY OPTIONS:\n${s.matcherProps.map((p,i)=>`Option ${i+1}: ${p.address} | $${p.price} | ${p.type} | ${p.highlights}`).join("\n")}\nBUYER NEEDS: ${s.buyerNeeds}${langInstr}\n\nReturn ONLY JSON:\n{"best_match_analysis":"2-3 sentence analysis of which property best matches and why.","formal_letter":"Full formal letter 260-300 words recommending best-match property. Sign: Warm regards,\\n${s.agentName}.","followup_1":"Follow-up Day 3 about the recommendation.","followup_2":"Follow-up Week 1 with urgency.","followup_3":"Follow-up Week 2 casual.","followup_4":"Follow-up Month 1 final."}`;
       const part2=await safeClaude(p2,SYSTEM,1600);
@@ -1284,6 +1294,60 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     const isSpaP=s.language==="Spanish";
     const isBuyer2=["buyer_active","buyer_passive","investor"].includes(s.clientType);
     const isListingReason2=["new_listing","price_drop","off_market","open_house"].includes(s.contactReason);
+    const isCMA=s.contactReason==="free_valuation";
+
+    // ── CMA FORM (Free Valuation) ──────────────────────────────────────────
+    if(isCMA){
+      const cmaCard=el("div",{style:cardStyle});
+      cmaCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"4px",color:G.white}},isSpaP?"🏡 Análisis Comparativo de Mercado (CMA)":"🏡 Comparative Market Analysis (CMA)"));
+      cmaCard.appendChild(el("p",{style:{fontSize:"12px",color:G.muted,marginBottom:"18px"}},isSpaP?"Introduce la propiedad del cliente y hasta 3 comparables recientes. La IA generará un análisis completo de valoración.":"Enter the client's property and up to 3 recent comparable sales. The AI will generate a full valuation package."));
+
+      // Subject property
+      const subjLabel=el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:G.aqua,marginBottom:"10px",marginTop:"4px"}},isSpaP?"🏠 Propiedad del Cliente (Sujeto)":"🏠 Subject Property (Client's Home)");
+      cmaCard.appendChild(subjLabel);
+      cmaCard.appendChild(field(isSpaP?"Dirección":"Address","text",s.cmaSubject.address,v=>{s.cmaSubject.address=v;},"123 Main St, Miami FL"));
+      const sg1=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}});
+      [{k:"beds",l:isSpaP?"Hab.":"Beds",p:"3"},{k:"baths",l:isSpaP?"Baños":"Baths",p:"2"},{k:"sqft",l:"Sq Ft",p:"1,800"}].forEach(({k,l,p})=>{
+        const w=el("div",{});w.appendChild(el("label",{style:labelStyle},l));
+        const i=el("input",{type:"text",placeholder:p,style:inputStyle});i.value=s.cmaSubject[k]||"";
+        i.addEventListener("input",e=>s.cmaSubject[k]=e.target.value);w.appendChild(i);sg1.appendChild(w);
+      });
+      cmaCard.appendChild(sg1);
+      const sg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginTop:"10px"}});
+      const pw=el("div",{});pw.appendChild(el("label",{style:labelStyle},isSpaP?"Precio Estimado ($)":"Estimated Value ($)"));
+      const pi=el("input",{type:"text",placeholder:"450,000",style:inputStyle});pi.value=s.cmaSubject.price||"";pi.addEventListener("input",e=>s.cmaSubject.price=e.target.value);pw.appendChild(pi);sg2.appendChild(pw);
+      const cw=el("div",{});cw.appendChild(el("label",{style:labelStyle},isSpaP?"Estado":"Condition"));
+      const ci=el("input",{type:"text",placeholder:isSpaP?"Buen estado, cocina reformada":"Good condition, updated kitchen",style:inputStyle});ci.value=s.cmaSubject.condition||"";ci.addEventListener("input",e=>s.cmaSubject.condition=e.target.value);cw.appendChild(ci);sg2.appendChild(cw);
+      cmaCard.appendChild(sg2);
+      const fw=el("div",{style:{marginTop:"10px",marginBottom:"16px"}});fw.appendChild(el("label",{style:labelStyle},isSpaP?"Características Clave":"Key Features"));
+      const fi=el("input",{type:"text",placeholder:isSpaP?"Piscina, jardín, garaje doble":"Pool, garden, double garage",style:inputStyle});fi.value=s.cmaSubject.features||"";fi.addEventListener("input",e=>s.cmaSubject.features=e.target.value);fw.appendChild(fi);cmaCard.appendChild(fw);
+
+      // 3 Comparables
+      s.cmaComps.forEach((comp,i)=>{
+        cmaCard.appendChild(el("div",{style:{height:"1px",background:G.border,margin:"8px 0 16px"}}));
+        cmaCard.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:G.aqua,marginBottom:"10px"}},isSpaP?`📊 Comparable ${i+1}`:`📊 Comparable ${i+1}`));
+        cmaCard.appendChild(field(isSpaP?"Dirección":"Address","text",comp.address,v=>{s.cmaComps[i].address=v;},isSpaP?`Calle Ejemplo ${i+1}, Miami`:`${100+i*10} Nearby St, Miami`));
+        const cg1=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}});
+        [{k:"salePrice",l:isSpaP?"Precio Venta ($)":"Sale Price ($)",p:"430,000"},{k:"saleDate",l:isSpaP?"Fecha Venta":"Sale Date",p:"Jan 2025"},{k:"sqft",l:"Sq Ft",p:"1,750"}].forEach(({k,l,p})=>{
+          const w=el("div",{});w.appendChild(el("label",{style:labelStyle},l));
+          const inp=el("input",{type:"text",placeholder:p,style:inputStyle});inp.value=comp[k]||"";
+          inp.addEventListener("input",e=>s.cmaComps[i][k]=e.target.value);w.appendChild(inp);cg1.appendChild(w);
+        });
+        cmaCard.appendChild(cg1);
+        const cg2=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginTop:"10px"}});
+        [{k:"beds",l:isSpaP?"Hab.":"Beds",p:"3"},{k:"baths",l:isSpaP?"Baños":"Baths",p:"2"},{k:"condition",l:isSpaP?"Estado":"Condition",p:"Good"}].forEach(({k,l,p})=>{
+          const w=el("div",{});w.appendChild(el("label",{style:labelStyle},l));
+          const inp=el("input",{type:"text",placeholder:p,style:inputStyle});inp.value=comp[k]||"";
+          inp.addEventListener("input",e=>s.cmaComps[i][k]=e.target.value);w.appendChild(inp);cg2.appendChild(w);
+        });
+        cmaCard.appendChild(cg2);
+        const nw=el("div",{style:{marginTop:"10px"}});nw.appendChild(el("label",{style:labelStyle},isSpaP?"Diferencias Clave":"Key Differences"));
+        const ni=el("input",{type:"text",placeholder:isSpaP?"Sin piscina, sin reformar":"No pool, original kitchen",style:inputStyle});ni.value=comp.notes||"";ni.addEventListener("input",e=>s.cmaComps[i].notes=e.target.value);nw.appendChild(ni);cmaCard.appendChild(nw);
+      });
+      content.appendChild(cmaCard);
+    }
+
+    // ── REGULAR PROPERTY CARD (all other reasons) ──────────────────────────
     const propCard=el("div",{style:cardStyle});
     propCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.propTitle));
     propCard.appendChild(field(t2form.propAddress,"text",s.propAddress,v=>s.propAddress=v,isSpaP?"Calle Gran Vía 42, Madrid":"42 Palm Drive, Miami Beach, FL 33139"));
@@ -1371,7 +1435,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       propCard.appendChild(chips(isSpaP?"Servicios del Edificio":"Building Amenities",null,BLD2,s.propBuilding,v=>{s.propBuilding=tog2(s.propBuilding,v);renderApp2Content();}));
     }
     propCard.appendChild(textarea(t2form.propHighlights,s.propHighlights,v=>s.propHighlights=v,isSpaP?"Vistas al mar, piscina privada, precio rebajado":"Ocean views, private pool, just reduced by $50K",2,t2form.propHighlightsHint));
-    content.appendChild(propCard);
+    if(!isCMA)content.appendChild(propCard);
 
 
 
