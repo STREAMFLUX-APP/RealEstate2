@@ -308,7 +308,7 @@ function renderDashboard(){
   const listings=SF.getListings();const clients=SF.getClients();
   const followUpsDue=clients.filter(c=>{if(!c.savedAt)return false;const d=Math.ceil((Date.now()-new Date(c.savedAt))/864e5);return d>=3&&d<=30;}).length;
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
-  const nav=el("div",{style:{background:G.bg1,borderBottom:`1px solid ${G.border}`,padding:"0 32px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:"0",zIndex:"1000",background:G.bg1}});
+  const nav=el("div",{style:{background:G.bg1,borderBottom:`1px solid ${G.border}`,padding:"0 32px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:"0",zIndex:"9999",isolation:"isolate"}});
   nav.appendChild(el("div",{style:{fontSize:"17px",fontWeight:"800",letterSpacing:"5px",color:G.white}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
   const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
 
@@ -319,7 +319,7 @@ function renderDashboard(){
   const content=el("div",{style:{maxWidth:"980px",margin:"0 auto",padding:"72px 28px 100px"}});
   const hero=el("div",{style:{marginBottom:"40px",paddingBottom:"36px",borderBottom:`1px solid ${G.border}`}});
   const firstName=user.name?user.name.split(" ")[0]:"there";
-  const greeting=el("h1",{style:{fontSize:"clamp(18px,2.5vw,24px)",fontWeight:"400",color:G.white,lineHeight:"1.5",marginBottom:"0",overflow:"visible"}});
+  const greeting=el("h1",{style:{fontSize:"clamp(18px,2.5vw,24px)",fontWeight:"400",color:G.white,lineHeight:"1.5",marginBottom:"0"}});
   greeting.appendChild(document.createTextNode(state.lang==="Spanish"?"Bienvenido a tu sistema de IA, ":"Welcome to your AI marketing, outreach & newsletter system, "));
   greeting.appendChild(el("span",{style:{color:G.aqua}},firstName));
   greeting.appendChild(document.createTextNode("."));
