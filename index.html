@@ -995,8 +995,8 @@ function renderApp2(){
     English:{
       title:"🤝 Client Outreach Machine",back:"← Dashboard",newClient:"← New Client",
       langLabel:"Output Language",whoContact:"👤 Who Are You Contacting?",
-      situationTitle:"✨ Describe the Situation in Your Own Words",
-      situationHint:"Write exactly what happened — the objection they raised, what they said, how you know them, what they want. The AI uses this for hyper-personalised messages. The form below is backup.",
+      situationTitle:"✨ Personal Context",
+      situationHint:"Prior contact history, personal notes, anything about this client you want woven into every message. The AI uses this for hyper-personalised messages. The form below is backup.",
       situationPlaceholder:"e.g. Sarah met me at the open house last Saturday. She loved the property but said $1.4M feels too high. She has two kids in school and her husband works from home so they need a home office. She seemed genuinely interested but nervous about the market.",
       situationLeave:"Leave blank to use the selections below.",
       generate:"✦ Generate Full Outreach Package",generating:"Generating...",
@@ -1030,8 +1030,8 @@ function renderApp2(){
     Spanish:{
       title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
       langLabel:"Idioma de Salida",whoContact:"👤 ¿A Quién Estás Contactando?",
-      situationTitle:"✨ Describe la Situación con Tus Propias Palabras",
-      situationHint:"Escribe exactamente qué pasó — la objeción que plantearon, qué dijeron, cómo los conoces, qué quieren. La IA usará esto para mensajes hiperpersonalizados.",
+      situationTitle:"✨ Contexto Personal",
+      situationHint:"Historial de contacto previo, notas personales, cualquier detalle sobre este cliente que quieras en cada mensaje. La IA usará esto para mensajes hiperpersonalizados.",
       situationPlaceholder:"ej. Sarah me conoció en la jornada de puertas abiertas el sábado. Le encantó la propiedad pero dijo que 1,4M le parece caro. Tiene dos hijos en el colegio y su marido trabaja desde casa, así que necesitan una oficina en casa. Parecía genuinamente interesada pero nerviosa...",
       situationLeave:"Deja en blanco para usar las selecciones de abajo.",
       propTitle:"🏠 Propiedad que Ofreces",matcherTitle:"🏆 Comparador de Propiedades",
@@ -1069,8 +1069,8 @@ function renderApp2(){
     "UNUSED":{
       title:"🤝 Máquina de Captación de Clientes",back:"← Panel Principal",newClient:"← Nuevo Cliente",
       langLabel:"Idioma de Salida",whoContact:"👤 ¿A Quién Estás Contactando?",
-      situationTitle:"✨ Describe la Situación con Tus Propias Palabras",
-      situationHint:"Escribe exactamente qué pasó — la objeción que plantearon, qué dijeron, cómo los conoces, qué quieren. La IA usará esto para mensajes hiperpersonalizados.",
+      situationTitle:"✨ Contexto Personal",
+      situationHint:"Historial de contacto previo, notas personales, cualquier detalle sobre este cliente que quieras en cada mensaje. La IA usará esto para mensajes hiperpersonalizados.",
       situationPlaceholder:"ej. Sarah me conoció en el open house el sábado. Le encantó la propiedad pero dijo que 1.4M le parece muy caro. Tiene dos hijos en la escuela y su esposo trabaja desde casa, así que necesitan una oficina. Parecía muy interesada pero nerviosa sobre el mercado...",
       situationLeave:"Deja en blanco para usar las selecciones de abajo.",
       propTitle:"🏠 Propiedad que Ofreces",matcherTitle:"🏆 Comparador de Propiedades",
@@ -1105,7 +1105,7 @@ function renderApp2(){
       aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
     }
   };
-  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition2:"",propInterior:[],propOutdoor:[],propBuilding:[],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
+  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition2:"",propInterior:[],propOutdoor:[],propBuilding:[],cmaSubject:{address:"",price:"",beds:"",baths:"",sqft:"",condition:"",features:""},cmaComps:[{address:"",salePrice:"",saleDate:"",beds:"",baths:"",sqft:"",condition:"",notes:""},{address:"",salePrice:"",saleDate:"",beds:"",baths:"",sqft:"",condition:"",notes:""},{address:"",salePrice:"",saleDate:"",beds:"",baths:"",sqft:"",condition:"",notes:""}],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages"};
 
 
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -1260,15 +1260,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     const t2form=T2[s.language]||T2.English;
     const clientCard=el("div",{style:cardStyle});
     clientCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.whoContact));
-    // CUSTOM SITUATION BOX — App2
-    const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
-    sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
-    sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t2form.situationHint));
-    const sitTa=el("textarea",{placeholder:t2form.situationPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
-    sitTa.value=s.customSituation||"";
-    sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
-    sitBox.appendChild(sitTa);
-    content.appendChild(sitBox);
+
 
     clientCard.appendChild(field(t2form.clientFirstName,"text",s.clientName,v=>s.clientName=v,s.language==="Spanish"?"María":"Sarah"));
     clientCard.appendChild(chips(t2form.clientType,null,CLIENT_TYPES,s.clientType,v=>{s.clientType=v;renderApp2Content();},true));
@@ -1455,6 +1447,14 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
 
 
 
+    // CUSTOM SITUATION BOX — App2
+    const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
+    sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
+    const sitTa=el("textarea",{placeholder:s.language==="Spanish"?"ej. Sarah es clienta desde hace 2 años, tiene presupuesto ajustado, dos hijos en el colegio. Muy interesada pero indecisa. La conozco bien.":"e.g. Sarah has been a lead for 2 months — very interested but hesitant. Two kids, tight timeline, husband needs convincing. Met twice. Responds well to WhatsApp.",rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
+    sitTa.value=s.customSituation||"";
+    sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
+    sitBox.appendChild(sitTa);
+    content.appendChild(sitBox);
     const agentCard=el("div",{style:cardStyle});
     agentCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t2form.agentTitle));
     const ag=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}});
