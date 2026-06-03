@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1248,7 +1249,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     const content=el("div",{style:{maxWidth:"660px",margin:"0 auto",padding:"30px 18px 60px"}});
 
     // Language
-    const langCard=el("div",{style:cardStyle});
+    const langCard=el("div",{style:{...cardStyle,marginBottom:"8px"}});
     langCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},`🌐 ${(T2[s.language]||T2.English).langLabel}`));
     const langSel=el("select",{style:{...inputStyle,cursor:"pointer"}});
     LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
@@ -1450,6 +1451,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     // CUSTOM SITUATION BOX — App2
     const sitBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"16px"}});
     sitBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t2form.situationTitle));
+    sitBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.75)",marginBottom:"10px",lineHeight:"1.6"}},s.language==="Spanish"?"Historial de contacto previo, notas personales — cualquier detalle que quieras incluir en cada mensaje.":"Prior contact history, personal notes — anything about this client you want woven into every message."));
     const sitTa=el("textarea",{placeholder:s.language==="Spanish"?"ej. Sarah es clienta desde hace 2 años, tiene presupuesto ajustado, dos hijos en el colegio. Muy interesada pero indecisa. La conozco bien.":"e.g. Sarah has been a lead for 2 months — very interested but hesitant. Two kids, tight timeline, husband needs convincing. Met twice. Responds well to WhatsApp.",rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
     sitTa.value=s.customSituation||"";
     sitTa.addEventListener("input",e=>s.customSituation=e.target.value);
