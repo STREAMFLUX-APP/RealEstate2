@@ -433,6 +433,22 @@ function renderDashboard(){
     appGrid.appendChild(c);
   }
 
+  // App 03 Newsletter card
+  {
+    const c=el("div",{style:{background:G.card,border:`1px solid ${G.aquaBorder}`,borderRadius:"14px",overflow:"hidden"}});
+    c.appendChild(el("div",{style:{background:"#111",padding:"20px 22px 16px",borderBottom:`1px solid ${G.border}`}},
+      el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"App 03"),
+      el("div",{style:{fontSize:"17px",fontWeight:"700",color:G.white,marginBottom:"3px"}},state.lang==="Spanish"?(g.app3title||"Generador de Newsletter"):(g.app3title||"Newsletter Generator")),
+      el("div",{style:{fontSize:"12px",color:G.muted}},state.lang==="Spanish"?(g.app3sub||"Newsletter mensual listo para enviar."):(g.app3sub||"Monthly client newsletter, ready to send."))
+    ));
+    const body3=el("div",{style:{padding:"16px 22px"}});
+    const btn3=el("button",{style:{...btnStyle(false),width:"100%"}},state.lang==="Spanish"?"📰 Nuevo Newsletter →":"📰 New Newsletter →");
+    btn3.addEventListener("click",()=>setState({screen:"app3"}));
+    body3.appendChild(btn3);
+    c.appendChild(body3);
+    appGrid.appendChild(c);
+  }
+
   content.appendChild(appGrid);
 
   // Plan bar
@@ -780,7 +796,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
     "Disability Access","High-Capacity Elevator","Smart Package Lockers","Bike Share / E-Bike Program"
   ];
   const TONES=(s.language==="Spanish")?[{value:"luxury",label:"Lujo y Prestigio",desc:"Premium y aspiracional"},{value:"friendly",label:"Cálido y Cercano",desc:"Accesible y hogareño"},{value:"investment",label:"Enfoque Inversor",desc:"ROI, números, oportunidad"},{value:"lifestyle",label:"Estilo de Vida",desc:"Energético y aspiracional"},{value:"urgent",label:"Urgencia y FOMO",desc:"Actúa ya, tiempo limitado"}]:[{value:"luxury",label:"Luxury & Prestige",desc:"High-end, aspirational"},{value:"friendly",label:"Warm & Friendly",desc:"Approachable, homey"},{value:"investment",label:"Investment Focus",desc:"ROI, numbers, opportunity"},{value:"lifestyle",label:"Lifestyle & Vibe",desc:"Energetic, aspirational"},{value:"urgent",label:"Urgency & FOMO",desc:"Act now, limited time"}];
-  const TABS=(s.language==="Spanish")?[{id:"listing",label:"🏠 Propiedad"},{id:"social",label:"📱 Redes Sociales"},{id:"ads",label:"🎯 Anuncios y SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Vecinos"},{id:"schedule",label:"📅 Calendario"},{id:"renovation",label:"🔨 Renovaciones"},{id:"flyer",label:"🖨️ Flyer"}]:[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"},{id:"renovation",label:"🔨 Renovations"},{id:"flyer",label:"🖨️ Flyer"}];
+  const TABS=(s.language==="Spanish")?[{id:"listing",label:"🏠 Propiedad"},{id:"social",label:"📱 Redes Sociales"},{id:"ads",label:"🎯 Anuncios y SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Vecinos"},{id:"schedule",label:"📅 Calendario"},{id:"renovation",label:"🔨 Renovaciones"}]:[{id:"listing",label:"🏠 Listing"},{id:"social",label:"📱 Social"},{id:"ads",label:"🎯 Ads & SMS"},{id:"tiktok",label:"🎬 TikTok"},{id:"neighbours",label:"✉️ Neighbours"},{id:"schedule",label:"📅 Schedule"},{id:"renovation",label:"🔨 Renovations"}];
 
     // Nav
     const nav=el("div",{style:{background:G.bg1,borderBottom:`1px solid ${G.border}`,padding:"0 22px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"56px",position:"sticky",top:"0",zIndex:"100"}});
@@ -803,7 +819,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       const resultInner=el("div",{style:{padding:"0 16px"}});
       const tabs=el("div",{style:{display:"flex",gap:"4px",marginBottom:"20px",flexWrap:"wrap",background:G.bg1,padding:"4px",borderRadius:"10px",border:`1px solid ${G.aquaBorder}`}});
       TABS.forEach(tab=>{
-        const btn=el("button",{style:{background:s.activeTab===tab.id?G.gold:"#0d0d0d",color:s.activeTab===tab.id?"#060608":G.muted,border:`1px solid ${s.activeTab===tab.id?G.gold:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:s.activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
+        const btn=el("button",{style:{background:s.activeTab===tab.id?G.aquaDim:"#0d0d0d",color:s.activeTab===tab.id?G.aqua:G.muted,border:`1px solid ${s.activeTab===tab.id?G.aqua:G.border}`,borderRadius:"8px",padding:"7px 12px",fontSize:"12px",fontWeight:s.activeTab===tab.id?"700":"400",fontFamily:"inherit",cursor:"pointer"}},tab.label);
         btn.addEventListener("click",()=>{s.activeTab=tab.id;renderApp1Content();});
         tabs.appendChild(btn);
       });
@@ -817,7 +833,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
         content.appendChild(el("p",{style:{color:G.muted,fontSize:"13px",margin:"0 0 18px"}},"Your day-by-day action plan. Follow this to maximise every listing."));
         s.result.schedule.forEach(day=>{
           const dayCard=el("div",{style:{background:G.bg1,border:`1px solid ${G.border2}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"8px"}});
-          dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.gold}},day.day)));
+          dayCard.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},el("span",{style:{fontSize:"20px"}},day.icon),el("span",{style:{fontSize:"14px",fontWeight:"700",color:G.aqua}},day.day)));
           if(day.tasks)day.tasks.forEach(t=>{const row=el("div",{style:{display:"flex",gap:"8px",marginBottom:"6px"}});row.appendChild(el("span",{style:{color:G.aqua,fontWeight:"700",flexShrink:"0"}},"→"));row.appendChild(el("span",{style:{fontSize:"14px",color:"#ccc",lineHeight:"1.6"}},t));dayCard.appendChild(row);});
           content.appendChild(dayCard);
         });
@@ -837,7 +853,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
             ));
             const pColor=G.aqua;
             rrow.appendChild(el("div",{style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:"4px",flexShrink:"0"}},
-              el("div",{style:{fontSize:"12px",fontWeight:"700",color:"#22c55e"}},`+ ${r.roi||""}`),
+              el("div",{style:{fontSize:"12px",fontWeight:"700",color:G.aqua}},`+ ${r.roi||""}`),
               el("span",{style:{fontSize:"10px",fontWeight:"700",color:"#060608",background:"#ffffff",border:`1px solid rgba(42,184,212,0.4)`,borderRadius:"100px",padding:"2px 10px"}},r.priority||"")
             ));
             rc.appendChild(rrow);
@@ -1050,7 +1066,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       const loadCard=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"16px 20px",marginBottom:"16px"}});
       loadCard.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"8px"}},el("p",{style:{color:G.aqua,fontSize:"13px",margin:"0",fontWeight:"600"}},s.loadingMsg),el("span",{style:{color:G.muted,fontSize:"12px"}},`${s.loadingPct}%`)));
       const bar=el("div",{style:{width:"100%",height:"4px",background:G.border,borderRadius:"2px"}});
-      bar.appendChild(el("div",{style:{width:`${s.loadingPct}%`,height:"100%",background:G.gold,borderRadius:"2px",transition:"width 0.5s ease"}}));
+      bar.appendChild(el("div",{style:{width:`${s.loadingPct}%`,height:"100%",background:G.aqua,borderRadius:"2px",transition:"width 0.5s ease"}}));
       loadCard.appendChild(bar);
       content.appendChild(loadCard);
     }
