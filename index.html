@@ -28,7 +28,10 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--aqua)!im
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 @keyframes progressBar{from{width:0}to{width:100%}}
 .fade-in{animation:fadeIn 0.3s ease forwards}
-input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.2)!important;opacity:1 !important;} input,textarea{caret-color:#2AB8D4;}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.22)!important;opacity:1 !important;}
+input::-webkit-input-placeholder,textarea::-webkit-input-placeholder{color:rgba(255,255,255,0.22)!important;}
+input::-moz-placeholder,textarea::-moz-placeholder{color:rgba(255,255,255,0.22)!important;}
+input,textarea{caret-color:#2AB8D4;}
 </style>
 </head>
 <body>
