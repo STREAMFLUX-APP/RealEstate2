@@ -28,7 +28,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--aqua)!im
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 @keyframes progressBar{from{width:0}to{width:100%}}
 .fade-in{animation:fadeIn 0.3s ease forwards}
-input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.22)!important;opacity:1;}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.18)!important;opacity:1 !important;}
 </style>
 </head>
 <body>
@@ -137,7 +137,7 @@ function chips(label,hint,options,selected,onToggle,single){
   const wrap=el("div",{style:{marginBottom:"20px"}});
   if(label)wrap.appendChild(el("label",{style:labelStyle},label));
   if(hint)wrap.appendChild(el("p",{style:{fontSize:"12px",color:"#444",margin:"0 0 7px",fontStyle:"italic"}},hint));
-  const grid=el("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}});
+  const grid=el("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",marginTop:"10px"}});
   options.forEach(opt=>{
     const val=typeof opt==="string"?opt:opt.value;
     const lbl=typeof opt==="string"?opt:opt.label;
@@ -1242,20 +1242,20 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       card.appendChild(chips(s.language==="Spanish"?"Servicios del Edificio":"Building Amenities",null,BUILDING,s.building,v=>{s.building=tog(s.building,v);renderApp1Content();}));
 
       // Extra features free text
-      const extraBox=el("div",{style:{marginTop:"16px"}});
-      extraBox.appendChild(el("label",{style:{...labelStyle,color:G.aqua}},s.language==="Spanish"?"✨ Características Adicionales":"✨ Additional Features"));
-      extraBox.appendChild(el("p",{style:{fontSize:"11px",color:G.muted,marginBottom:"8px"}},s.language==="Spanish"?"Añade cualquier característica especial que no aparezca arriba. Separa con comas.":"Add any special features not listed above. Separate with commas."));
-      const extraTa=el("textarea",{placeholder:s.language==="Spanish"?"ej. Suelo de roble centenario, chimenea doble cara, vista al Empire State...":"e.g. 100-year-old oak floors, double-sided fireplace, direct Empire State view...",rows:3,style:{...inputStyle,resize:"vertical"}});
-      extraTa.value=s.building_extra||"";
-      extraTa.addEventListener("input",e=>{s.building_extra=e.target.value;});
-      extraBox.appendChild(extraTa);
-      card.appendChild(extraBox);
-    }
+          }
 
     if(s.step===5&&s.mode!=="sold"&&s.mode!=="open_house"){
       card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.standout));
       card.appendChild(textarea(s.language==="Spanish"?"La Característica Más Especial":"The #1 Unique Feature",s.uniqueFeature,v=>s.uniqueFeature=v,s.language==="Spanish"?"ej. Un muelle privado de 12 metros con acceso directo al océano y vistas al atardecer":"e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views",3,s.language==="Spanish"?"Sé específico y descriptivo":"Be vivid and specific"));
-      card.appendChild(textarea(s.language==="Spanish"?"Notas Adicionales":"Additional Notes",s.agentNote,v=>s.agentNote=v,s.language==="Spanish"?"ej. Completamente reformada en 2024. Vendedor motivado.":"e.g. Fully renovated 2024. Motivated seller.",2));
+      // EXTRA DETAILS BOX on Step 5
+      const extraBox5=el("div",{style:{background:"rgba(42,184,212,0.06)",border:"1px solid rgba(42,184,212,0.25)",borderRadius:"10px",padding:"16px",marginTop:"4px"}});
+      extraBox5.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},s.language==="Spanish"?"✨ Detalles Adicionales (Opcional)":"✨ Extra Details (Optional)"));
+      extraBox5.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.6)",marginBottom:"10px",lineHeight:"1.6"}},s.language==="Spanish"?"Cualquier detalle extra — historia única, detalles especiales. La IA lo incorporará en todo el contenido.":"Anything else to weave into every piece of content — unique story, special details."));
+      const extraTa5=el("textarea",{placeholder:s.language==="Spanish"?"ej. Casa construida por el propietario en 1987, nunca ha salido al mercado antes...":"e.g. Home custom built in 1987, never been on the market before. Owner is relocating abroad...",rows:3,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.2)"}});
+      extraTa5.value=s.agentNote||"";
+      extraTa5.addEventListener("input",e=>s.agentNote=e.target.value);
+      extraBox5.appendChild(extraTa5);
+      card.appendChild(extraBox5);
     }
 
     if((s.step===totalSteps())||(s.step===4&&s.mode==="sold")||(s.step===5&&s.mode==="open_house")){
@@ -1278,16 +1278,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
     }
 
 
-      // EXTRA DETAILS BOX - before generate
-      const extraBox=el("div",{style:{background:"rgba(42,184,212,0.06)",border:"1px solid rgba(42,184,212,0.25)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
-      extraBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"✨ "+ (s.language==="Spanish"?"Detalles Adicionales (Opcional)":"Extra Details (Optional)")));
-      extraBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.65)",marginBottom:"10px",lineHeight:"1.6"}},s.language==="Spanish"?"Cualquier detalle extra que quieras añadir. La IA lo incorporará en todo el contenido.":"Anything else you want woven into every piece of content — unique story, seller motivation, special details."));
-      const extraTa=el("textarea",{placeholder:s.language==="Spanish"?"ej. Los propietarios necesitan vender en 60 días. Esta propiedad tiene una historia especial — fue construida por el arquitecto...":"e.g. Owners need to close within 60 days. The home was custom built in 1987 and has never been on the market before...",rows:3,style:{...inputStyle,resize:"vertical"}});
-      extraTa.value=s.agentNote||"";
-      extraTa.addEventListener("input",e=>s.agentNote=e.target.value);
-      extraBox.appendChild(extraTa);
-      content.appendChild(extraBox);
-    const btnRow=el("div",{style:{display:"flex",justifyContent:"space-between"}});
+          const btnRow=el("div",{style:{display:"flex",justifyContent:"space-between"}});
     const backB=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 22px",fontSize:"14px",fontFamily:"inherit",cursor:"pointer"}},t.back2);
     backB.addEventListener("click",()=>{s.error="";if(s.step>1)s.step--;else setState({screen:"dashboard"});renderApp1Content();});
     btnRow.appendChild(backB);
