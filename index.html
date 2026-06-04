@@ -314,6 +314,11 @@ function renderDashboard(){
 
   if(user.subscribed){const sb=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 14px",display:"flex",alignItems:"center",gap:"6px"}});sb.appendChild(el("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:G.aqua}}));sb.appendChild(el("span",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua}},"Active"));navRight.appendChild(sb);}
   if(!user.subscribed){const subB=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"6px 16px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",transition:"opacity 0.15s"}},state.lang==="Spanish"?"Suscribirse →":"Subscribe Now →");subB.addEventListener("mouseenter",()=>subB.style.opacity="0.85");subB.addEventListener("mouseleave",()=>subB.style.opacity="1");subB.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));navRight.appendChild(subB);}
+  // ⚠️ TEST ONLY — remove before launch
+  const testBrokerBtn=el("button",{style:{background:"rgba(255,200,0,0.15)",color:"#ffc800",border:"1px solid rgba(255,200,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Broker View");
+  testBrokerBtn.addEventListener("click",()=>{const testUser={...state.user,role:"broker",agencyName:"Test Agency",plan:"starter",seatLimit:10};setState({screen:"dashboard",user:testUser});});
+  navRight.appendChild(testBrokerBtn);
+  // ⚠️ END TEST
   [["Admin",()=>setState({screen:"admin"})],[g.signOut||"Sign Out",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});}]].forEach(([label,fn])=>{const b=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}},label);b.addEventListener("mouseenter",()=>{b.style.borderColor=G.border2;b.style.color=G.white;});b.addEventListener("mouseleave",()=>{b.style.borderColor=G.border;b.style.color=G.muted;});b.addEventListener("click",fn);navRight.appendChild(b);});
   nav.appendChild(navRight);wrap.appendChild(nav);
   const content=el("div",{class:"sf-content",style:{maxWidth:"980px",margin:"0 auto",padding:"40px 28px 100px"}});
@@ -358,6 +363,244 @@ function renderDashboard(){
   content.appendChild(toolsGrid);
   if(!user.subscribed){const planBar=el("div",{style:{marginTop:"2px",background:G.bg1,border:`1px solid ${G.border}`,borderRadius:"0 0 14px 14px",padding:"16px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"16px",flexWrap:"wrap"}});planBar.appendChild(el("p",{style:{fontSize:"13px",color:G.muted,margin:"0"}},user.trialActive?`Trial active — ${user.daysLeft} days remaining.`:"Your trial has ended."));const ub=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"10px 20px",fontSize:"12px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",transition:"opacity 0.15s",flexShrink:"0"}},"Subscribe Now →");ub.addEventListener("mouseenter",()=>ub.style.opacity="0.85");ub.addEventListener("mouseleave",()=>ub.style.opacity="1");ub.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));planBar.appendChild(ub);content.appendChild(planBar);}
   wrap.appendChild(content);return wrap;
+}
+
+function renderSetPassword(){
+  let password="",confirm="",loading=false,done=false,error="";
+  const token=state.resetToken||"";
+  const email=state.resetEmail||"";
+
+  const wrap=el("div",{style:{minHeight:"100vh",background:G.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px"}});
+
+  // Logo
+  const logo=el("div",{style:{fontSize:"20px",fontWeight:"800",letterSpacing:"5px",color:G.white,marginBottom:"40px"}},
+    "STREAM",el("span",{style:{color:G.aqua}},"FLUX")
+  );
+  wrap.appendChild(logo);
+
+  const card=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"16px",padding:"40px 36px",width:"100%",maxWidth:"420px"}});
+
+  const title=el("h1",{style:{fontSize:"22px",fontWeight:"700",color:G.white,marginBottom:"8px",textAlign:"center"}},"Set Your Password");
+  const sub=el("p",{style:{fontSize:"14px",color:G.muted,marginBottom:"32px",textAlign:"center",lineHeight:"1.6"}},
+    email ? `Setting password for ${email}` : "Create a secure password for your Streamflux account."
+  );
+  card.appendChild(title);
+  card.appendChild(sub);
+
+  const msgDiv=el("div",{style:{background:"rgba(255,80,80,0.08)",border:"1px solid rgba(255,80,80,0.25)",borderRadius:"8px",padding:"10px 14px",color:"#ff6b6b",fontSize:"13px",marginBottom:"16px",display:"none"}});
+  card.appendChild(msgDiv);
+
+  const successDiv=el("div",{style:{background:"rgba(42,184,212,0.08)",border:`1px solid ${G.aquaBorder}`,borderRadius:"8px",padding:"16px",color:G.aqua,fontSize:"13px",marginBottom:"16px",display:"none",textAlign:"center",lineHeight:"1.7"}});
+  card.appendChild(successDiv);
+
+  // Password field
+  const pw1wrap=el("div",{style:{marginBottom:"16px"}});
+  pw1wrap.appendChild(el("label",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"New Password"));
+  const pw1=el("input",{type:"password",placeholder:"Minimum 8 characters",style:{width:"100%",background:G.bg2,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"12px 14px",fontSize:"14px",color:G.white,fontFamily:"inherit",outline:"none"}});
+  pw1.addEventListener("input",e=>password=e.target.value);
+  pw1wrap.appendChild(pw1);
+  card.appendChild(pw1wrap);
+
+  // Confirm password field
+  const pw2wrap=el("div",{style:{marginBottom:"24px"}});
+  pw2wrap.appendChild(el("label",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Confirm Password"));
+  const pw2=el("input",{type:"password",placeholder:"Repeat your password",style:{width:"100%",background:G.bg2,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"12px 14px",fontSize:"14px",color:G.white,fontFamily:"inherit",outline:"none"}});
+  pw2.addEventListener("input",e=>confirm=e.target.value);
+  pw2wrap.appendChild(pw2);
+  card.appendChild(pw2wrap);
+
+  // Submit button
+  const submitBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"14px",fontSize:"14px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",width:"100%",transition:"opacity 0.15s"}},"Set Password");
+  submitBtn.addEventListener("mouseenter",()=>submitBtn.style.opacity="0.85");
+  submitBtn.addEventListener("mouseleave",()=>submitBtn.style.opacity="1");
+  submitBtn.addEventListener("click",async()=>{
+    if(password.length<8){msgDiv.textContent="Password must be at least 8 characters.";msgDiv.style.display="block";return;}
+    if(password!==confirm){msgDiv.textContent="Passwords do not match.";msgDiv.style.display="block";return;}
+    msgDiv.style.display="none";
+    submitBtn.textContent="Setting password...";
+    submitBtn.style.opacity="0.6";
+    submitBtn.disabled=true;
+    try{
+      const res=await fetch("/api/set-password",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token,email,password})
+      });
+      const data=await res.json();
+      if(data.error){
+        msgDiv.textContent=data.error;
+        msgDiv.style.display="block";
+        submitBtn.textContent="Set Password";
+        submitBtn.style.opacity="1";
+        submitBtn.disabled=false;
+      } else {
+        successDiv.innerHTML="✅ Password set successfully!<br><br>You can now log in with your email and new password.";
+        successDiv.style.display="block";
+        submitBtn.style.display="none";
+        pw1wrap.style.display="none";
+        pw2wrap.style.display="none";
+        setTimeout(()=>{
+          window.history.replaceState({},"",window.location.pathname);
+          setState({screen:"login",resetToken:null,resetEmail:null});
+        },2500);
+      }
+    }catch(e){
+      msgDiv.textContent="Something went wrong. Please try again.";
+      msgDiv.style.display="block";
+      submitBtn.textContent="Set Password";
+      submitBtn.style.opacity="1";
+      submitBtn.disabled=false;
+    }
+  });
+  card.appendChild(submitBtn);
+
+  // Back to login link
+  const backLink=el("div",{style:{textAlign:"center",marginTop:"20px"}});
+  const back=el("span",{style:{fontSize:"13px",color:G.muted,cursor:"pointer",textDecoration:"underline"}},"Back to login");
+  back.addEventListener("click",()=>{window.history.replaceState({},"",window.location.pathname);setState({screen:"login"});});
+  backLink.appendChild(back);
+  card.appendChild(backLink);
+
+  wrap.appendChild(card);
+
+  // Footer
+  wrap.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(255,255,255,0.2)",marginTop:"32px",textAlign:"center"}},"Streamflux AI LTD — Registered in England and Wales"));
+
+  return wrap;
+}
+
+
+function renderBrokerDashboard(){
+  const user=state.user;const g=GL[state.lang]||GL.English;
+  const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
+
+  // NAV
+  const nav=el("div",{id:"sf-nav",style:{background:"#0c0c10",borderBottom:`1px solid ${G.border}`,padding:"0 32px",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:"0",zIndex:"9999"}});
+  nav.appendChild(el("div",{style:{fontSize:"17px",fontWeight:"800",letterSpacing:"5px",color:G.white}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
+  const navRight=el("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+  const planBadge=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 14px",fontSize:"11px",fontWeight:"700",color:G.aqua}},(user.plan||"Starter").toUpperCase());
+  navRight.appendChild(planBadge);
+  const portalBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"Manage Billing");
+  portalBtn.addEventListener("click",()=>window.open("https://billing.stripe.com/p/login","_blank"));
+  navRight.appendChild(portalBtn);
+  const signOutBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"}},"Sign Out");
+  signOutBtn.addEventListener("click",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});});
+  navRight.appendChild(signOutBtn);
+  nav.appendChild(navRight);
+  wrap.appendChild(nav);
+
+  const content=el("div",{class:"sf-content",style:{maxWidth:"980px",margin:"0 auto",padding:"40px 28px 100px"}});
+
+  // HERO GREETING
+  const hero=el("div",{style:{marginBottom:"40px",paddingBottom:"36px",borderBottom:`1px solid ${G.border}`}});
+  const agName=user.agencyName||user.name||"your agency";
+  hero.appendChild(el("h1",{style:{fontSize:"clamp(18px,2.5vw,26px)",fontWeight:"700",color:G.white,marginBottom:"6px"}},`Welcome, ${user.name||"Broker"}`));
+  hero.appendChild(el("p",{style:{fontSize:"14px",color:G.muted}},`${agName} · ${(user.plan||"Starter")} Plan`));
+  content.appendChild(hero);
+
+  // SEATS STATS
+  const agents=JSON.parse(localStorage.getItem(`sf_agents_${user.email}`)||"[]");
+  const seatLimit=user.seatLimit||(user.plan==="pro"?25:user.plan==="elite"?50:user.plan==="enterprise"?9999:10);
+  const seatsUsed=agents.length;
+  const seatsLeft=seatLimit===9999?"\u221e":(seatLimit-seatsUsed);
+
+  const statsRow=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1px",background:G.border,borderRadius:"12px",overflow:"hidden",marginBottom:"40px",border:"1px solid rgba(255,255,255,0.25)"}});
+  [
+    [String(seatsUsed),"Agents Active","Agents currently on your team"],
+    [String(seatLimit===9999?"\u221e":seatLimit),"Total Seats","Included in your plan"],
+    [String(seatsLeft),"Seats Available","You can still add"]
+  ].forEach(([num,label,sub])=>{
+    const cell=el("div",{style:{background:G.bg1,padding:"24px 20px"}});
+    cell.appendChild(el("div",{style:{fontSize:"28px",fontWeight:"800",color:G.aqua,fontFamily:"DM Mono,monospace",marginBottom:"4px"}},num));
+    cell.appendChild(el("div",{style:{fontSize:"12px",fontWeight:"700",color:G.white,marginBottom:"2px"}},label));
+    cell.appendChild(el("div",{style:{fontSize:"11px",color:G.muted}},sub));
+    statsRow.appendChild(cell);
+  });
+  content.appendChild(statsRow);
+
+  // TEAM MANAGEMENT
+  const teamLabel=el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.2em",textTransform:"uppercase",color:G.white,marginBottom:"16px",display:"flex",alignItems:"center",gap:"12px"}},
+    "YOUR TEAM",el("div",{style:{flex:"1",height:"1px",background:G.border}})
+  );
+  content.appendChild(teamLabel);
+
+  const teamCard=el("div",{style:{background:G.card,border:"1px solid rgba(255,255,255,0.25)",borderRadius:"14px",overflow:"hidden",marginBottom:"32px"}});
+
+  // Add agent form
+  const addSection=el("div",{style:{padding:"24px 28px",borderBottom:`1px solid ${G.border}`}});
+  addSection.appendChild(el("div",{style:{fontSize:"13px",fontWeight:"700",color:G.white,marginBottom:"14px"}},"Add a New Agent"));
+  const addGrid=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:"10px",alignItems:"end"}});
+
+  let newAgentName="",newAgentEmail="";
+  const nameInp=el("div",{});
+  nameInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Full Name"));
+  const nameField=el("input",{type:"text",placeholder:"Sarah Johnson",style:{width:"100%",background:G.bg2,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:G.white,fontFamily:"inherit",outline:"none"}});
+  nameField.addEventListener("input",e=>newAgentName=e.target.value);
+  nameInp.appendChild(nameField);
+  addGrid.appendChild(nameInp);
+
+  const emailInp=el("div",{});
+  emailInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Email Address"));
+  const emailField=el("input",{type:"email",placeholder:"sarah@agency.com",style:{width:"100%",background:G.bg2,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:G.white,fontFamily:"inherit",outline:"none"}});
+  emailField.addEventListener("input",e=>newAgentEmail=e.target.value);
+  emailInp.appendChild(emailField);
+  addGrid.appendChild(emailInp);
+
+  const addBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"10px 20px",fontSize:"13px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}},"+ Add Agent");
+  addBtn.addEventListener("click",async()=>{
+    if(!newAgentName||!newAgentEmail){alert("Please enter both name and email.");return;}
+    if(seatsUsed>=seatLimit&&seatLimit!==9999){alert(`You have reached your seat limit (${seatLimit} agents). Please upgrade your plan.`);return;}
+    // Check duplicate
+    if(agents.find(a=>a.email===newAgentEmail)){alert("An agent with this email already exists.");return;}
+    const newAgent={name:newAgentName,email:newAgentEmail,addedAt:new Date().toISOString(),status:"pending"};
+    agents.push(newAgent);
+    localStorage.setItem(`sf_agents_${user.email}`,JSON.stringify(agents));
+    // Call backend to create agent account
+    try{
+      await fetch("/api/agents",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brokerEmail:user.email,agentName:newAgentName,agentEmail:newAgentEmail,plan:user.plan})});
+    }catch(e){console.log("Backend not connected yet");}
+    nameField.value="";emailField.value="";newAgentName="";newAgentEmail="";
+    setState({screen:"dashboard"});
+  });
+  addGrid.appendChild(addBtn);
+  addSection.appendChild(addGrid);
+  teamCard.appendChild(addSection);
+
+  // Agents list
+  const listSection=el("div",{style:{padding:"8px 0"}});
+  if(agents.length===0){
+    const empty=el("div",{style:{padding:"32px 28px",textAlign:"center",color:G.muted,fontSize:"13px"}});
+    empty.appendChild(el("div",{style:{fontSize:"28px",marginBottom:"8px"}},"👥"));
+    empty.appendChild(el("div",{},"No agents yet. Add your first agent above."));
+    listSection.appendChild(empty);
+  } else {
+    agents.forEach((agent,i)=>{
+      const row=el("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 28px",borderBottom:i<agents.length-1?`1px solid ${G.border}`:"none"}});
+      const info=el("div",{});
+      info.appendChild(el("div",{style:{fontSize:"13px",fontWeight:"700",color:G.white,marginBottom:"2px"}},agent.name));
+      info.appendChild(el("div",{style:{fontSize:"12px",color:G.muted}},agent.email));
+      row.appendChild(info);
+      const right=el("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      const statusBadge=el("div",{style:{background:agent.status==="active"?G.aquaDim:"rgba(255,255,255,0.05)",border:`1px solid ${agent.status==="active"?G.aquaBorder:G.border}`,borderRadius:"100px",padding:"3px 10px",fontSize:"10px",fontWeight:"700",color:agent.status==="active"?G.aqua:G.muted}},(agent.status==="active"?"ACTIVE":"PENDING").toUpperCase());
+      right.appendChild(statusBadge);
+      const removeBtn=el("button",{style:{background:"transparent",color:"rgba(255,80,80,0.7)",border:"1px solid rgba(255,80,80,0.2)",borderRadius:"6px",padding:"4px 10px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},"Remove");
+      removeBtn.addEventListener("click",async()=>{
+        if(!confirm(`Remove ${agent.name} from your team?`))return;
+        agents.splice(i,1);
+        localStorage.setItem(`sf_agents_${user.email}`,JSON.stringify(agents));
+        try{await fetch("/api/agents",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({brokerEmail:user.email,agentEmail:agent.email})});}catch(e){}
+        setState({screen:"dashboard"});
+      });
+      right.appendChild(removeBtn);
+      row.appendChild(right);
+      listSection.appendChild(row);
+    });
+  }
+  teamCard.appendChild(listSection);
+  content.appendChild(teamCard);
+
+  wrap.appendChild(content);
+  return wrap;
 }
 
 function renderAdmin(){
@@ -1727,7 +1970,8 @@ function render(){
   const root=document.getElementById("root");
   root.innerHTML="";
   if(state.screen==="login")root.appendChild(renderLogin());
-  else if(state.screen==="dashboard")root.appendChild(renderDashboard());
+  else if(state.screen==="set-password")root.appendChild(renderSetPassword());
+  else if(state.screen==="dashboard"){if(state.user&&state.user.role==="broker")root.appendChild(renderBrokerDashboard());else root.appendChild(renderDashboard());}else if(false&&false){}//placeholder
   else if(state.screen==="admin")root.appendChild(renderAdmin());
   else if(state.screen==="app1")root.appendChild(renderApp1());
   else if(state.screen==="app2")root.appendChild(renderApp2());
@@ -1744,6 +1988,12 @@ try{
   if(oldL.length>0&&!("result" in oldL[0])){localStorage.removeItem("sf_listings");}
   if(oldC.length>0&&!("result" in oldC[0])){localStorage.removeItem("sf_clients");}
 }catch(e){}
+// CHECK URL TOKEN FOR SET-PASSWORD
+const _urlP=new URLSearchParams(window.location.search);
+const _token=_urlP.get("token");
+const _email=_urlP.get("email");
+if(_token){state.screen="set-password";state.resetToken=_token;state.resetEmail=_email||"";render();}
+else{
 // CHECK SESSION ON LOAD
 const saved=sessionStorage.getItem("sf_user");
 if(saved){
@@ -1752,7 +2002,7 @@ if(saved){
     if(res.success){state.screen="dashboard";state.user=res.user;render();}
     else{sessionStorage.removeItem("sf_user");render();}
   }).catch(()=>render());
-}else{render();}
+}else{render();}}
 </script>
 </body>
 </html>
