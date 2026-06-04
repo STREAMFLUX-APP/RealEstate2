@@ -541,14 +541,14 @@ async function renderBrokerDashboard(){
   let newAgentName="",newAgentEmail="";
   const nameInp=el("div",{});
   nameInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Full Name"));
-  const nameField=el("input",{type:"text",placeholder:"Sarah Johnson",style:{width:"100%",background:G.bg2,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:G.white,fontFamily:"inherit",outline:"none"}});
+  const nameField=el("input",{type:"text",placeholder:"Sarah Johnson",style:{width:"100%",background:"#1a1a1a",border:"1px solid #333",borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:"#ffffff",fontFamily:"inherit",outline:"none",WebkitTextFillColor:"#ffffff"}});
   nameField.addEventListener("input",e=>newAgentName=e.target.value);
   nameInp.appendChild(nameField);
   addGrid.appendChild(nameInp);
 
   const emailInp=el("div",{});
   emailInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Email Address"));
-  const emailField=el("input",{type:"email",placeholder:"sarah@agency.com",style:{width:"100%",background:G.bg2,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:G.white,fontFamily:"inherit",outline:"none"}});
+  const emailField=el("input",{type:"email",placeholder:"sarah@agency.com",style:{width:"100%",background:"#1a1a1a",border:"1px solid #333",borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:"#ffffff",fontFamily:"inherit",outline:"none",WebkitTextFillColor:"#ffffff"}});
   emailField.addEventListener("input",e=>newAgentEmail=e.target.value);
   emailInp.appendChild(emailField);
   addGrid.appendChild(emailInp);
