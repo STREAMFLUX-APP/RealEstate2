@@ -321,17 +321,7 @@ function renderDashboard(){
 
   if(user.subscribed){const sb=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 14px",display:"flex",alignItems:"center",gap:"6px"}});sb.appendChild(el("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:G.aqua}}));sb.appendChild(el("span",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua}},"Active"));navRight.appendChild(sb);}
   if(!user.subscribed){const subB=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"6px 16px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",transition:"opacity 0.15s"}},state.lang==="Spanish"?"Suscribirse →":"Subscribe Now →");subB.addEventListener("mouseenter",()=>subB.style.opacity="0.85");subB.addEventListener("mouseleave",()=>subB.style.opacity="1");subB.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));navRight.appendChild(subB);}
-  // ⚠️ TEST ONLY — remove before launch
-  const testBrokerBtn=el("button",{style:{background:"rgba(255,200,0,0.15)",color:"#ffc800",border:"1px solid rgba(255,200,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Broker");
-  testBrokerBtn.addEventListener("click",()=>{const testUser={...state.user,role:"broker",agencyName:"Test Agency",plan:"starter",seatLimit:10};state.user=testUser;state.screen="dashboard";render();});
-  navRight.appendChild(testBrokerBtn);
-  const testTrialBtn=el("button",{style:{background:"rgba(255,100,0,0.15)",color:"#ff6400",border:"1px solid rgba(255,100,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Trial End");
-  testTrialBtn.addEventListener("click",()=>{setState({screen:"trial-expired"});});
-  navRight.appendChild(testTrialBtn);
-  const testSeatBtn=el("button",{style:{background:"rgba(255,0,200,0.15)",color:"#ff00c8",border:"1px solid rgba(255,0,200,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Seat Limit");
-  testSeatBtn.addEventListener("click",()=>{setState({screen:"seat-limit",user:{...state.user,role:"broker",plan:"starter",seatLimit:10,agencyName:"Test Agency"}});});
-  navRight.appendChild(testSeatBtn);
-  // ⚠️ END TEST
+
   [["Admin",()=>setState({screen:"admin"})],[g.signOut||"Sign Out",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});}]].forEach(([label,fn])=>{const b=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}},label);b.addEventListener("mouseenter",()=>{b.style.borderColor=G.border2;b.style.color=G.white;});b.addEventListener("mouseleave",()=>{b.style.borderColor=G.border;b.style.color=G.muted;});b.addEventListener("click",fn);navRight.appendChild(b);});
   nav.appendChild(navRight);wrap.appendChild(nav);
   const content=el("div",{class:"sf-content",style:{maxWidth:"980px",margin:"0 auto",padding:"40px 28px 100px"}});
