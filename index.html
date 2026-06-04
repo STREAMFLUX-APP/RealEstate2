@@ -1190,16 +1190,6 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
 
     if(s.step===2){
       card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.propBasics));
-      // CUSTOM CONTEXT BOX
-      const ctxBox=el("div",{style:{background:"rgba(42,184,212,0.08)",border:"1.5px solid rgba(42,184,212,0.4)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
-      ctxBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"#2AB8D4",marginBottom:"6px"}},t.customBoxTitle));
-      ctxBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.85)",marginBottom:"10px",lineHeight:"1.6"}},t.customBoxHint));
-      const ctxTa=el("textarea",{placeholder:t.customBoxPlaceholder,rows:4,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.4)",background:"#0d0d0d"}});
-      ctxTa.value=s.customContext||"";
-      ctxTa.addEventListener("input",e=>s.customContext=e.target.value);
-      ctxBox.appendChild(ctxTa);
-      ctxBox.appendChild(el("p",{style:{fontSize:"11px",color:"rgba(42,184,212,0.5)",marginTop:"6px"}},t.customBoxLeave));
-      card.appendChild(ctxBox);
       card.appendChild(chips(s.language==="Spanish"?"Tipo de Propiedad":"Property Type",null,PROP_TYPES,s.propType,v=>{s.propType=v;renderApp1Content();},true));
       card.appendChild(field(s.language==="Spanish"?"Dirección Completa":"Full Address","text",s.address,v=>s.address=v,"123 Ocean Drive, Miami Beach, FL 33139"));
       if(s.mode==="price_reduction"){
@@ -1287,6 +1277,16 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
       content.appendChild(loadCard);
     }
 
+
+      // EXTRA DETAILS BOX - before generate
+      const extraBox=el("div",{style:{background:"rgba(42,184,212,0.06)",border:"1px solid rgba(42,184,212,0.25)",borderRadius:"10px",padding:"16px",marginBottom:"20px"}});
+      extraBox.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},"✨ "+ (s.language==="Spanish"?"Detalles Adicionales (Opcional)":"Extra Details (Optional)")));
+      extraBox.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.65)",marginBottom:"10px",lineHeight:"1.6"}},s.language==="Spanish"?"Cualquier detalle extra que quieras añadir. La IA lo incorporará en todo el contenido.":"Anything else you want woven into every piece of content — unique story, seller motivation, special details."));
+      const extraTa=el("textarea",{placeholder:s.language==="Spanish"?"ej. Los propietarios necesitan vender en 60 días. Esta propiedad tiene una historia especial — fue construida por el arquitecto...":"e.g. Owners need to close within 60 days. The home was custom built in 1987 and has never been on the market before...",rows:3,style:{...inputStyle,resize:"vertical"}});
+      extraTa.value=s.agentNote||"";
+      extraTa.addEventListener("input",e=>s.agentNote=e.target.value);
+      extraBox.appendChild(extraTa);
+      content.appendChild(extraBox);
     const btnRow=el("div",{style:{display:"flex",justifyContent:"space-between"}});
     const backB=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 22px",fontSize:"14px",fontFamily:"inherit",cursor:"pointer"}},t.back2);
     backB.addEventListener("click",()=>{s.error="";if(s.step>1)s.step--;else setState({screen:"dashboard"});renderApp1Content();});
