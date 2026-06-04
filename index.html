@@ -303,6 +303,11 @@ const SF={
 
 function renderDashboard(){
   const user=state.user;const g=GL[state.lang]||GL.English;
+  // Trial expired check
+  if(!user.subscribed&&!user.trialActive){
+    setTimeout(()=>setState({screen:"trial-expired"}),0);
+    return el("div",{});
+  }
   const agencyPlans=["starter","pro","elite","enterprise"];
   const hasApp1=user.plan==="marketing"||user.plan==="bundle"||agencyPlans.includes(user.plan);
   const hasApp2=user.plan==="outreach"||user.plan==="bundle"||agencyPlans.includes(user.plan);
@@ -317,9 +322,15 @@ function renderDashboard(){
   if(user.subscribed){const sb=el("div",{style:{background:G.aquaDim,border:`1px solid ${G.aquaBorder}`,borderRadius:"100px",padding:"4px 14px",display:"flex",alignItems:"center",gap:"6px"}});sb.appendChild(el("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:G.aqua}}));sb.appendChild(el("span",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua}},"Active"));navRight.appendChild(sb);}
   if(!user.subscribed){const subB=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"6px 16px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",transition:"opacity 0.15s"}},state.lang==="Spanish"?"Suscribirse →":"Subscribe Now →");subB.addEventListener("mouseenter",()=>subB.style.opacity="0.85");subB.addEventListener("mouseleave",()=>subB.style.opacity="1");subB.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));navRight.appendChild(subB);}
   // ⚠️ TEST ONLY — remove before launch
-  const testBrokerBtn=el("button",{style:{background:"rgba(255,200,0,0.15)",color:"#ffc800",border:"1px solid rgba(255,200,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Broker View");
+  const testBrokerBtn=el("button",{style:{background:"rgba(255,200,0,0.15)",color:"#ffc800",border:"1px solid rgba(255,200,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Broker");
   testBrokerBtn.addEventListener("click",()=>{const testUser={...state.user,role:"broker",agencyName:"Test Agency",plan:"starter",seatLimit:10};state.user=testUser;state.screen="dashboard";render();});
   navRight.appendChild(testBrokerBtn);
+  const testTrialBtn=el("button",{style:{background:"rgba(255,100,0,0.15)",color:"#ff6400",border:"1px solid rgba(255,100,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Trial End");
+  testTrialBtn.addEventListener("click",()=>{setState({screen:"trial-expired"});});
+  navRight.appendChild(testTrialBtn);
+  const testSeatBtn=el("button",{style:{background:"rgba(255,0,200,0.15)",color:"#ff00c8",border:"1px solid rgba(255,0,200,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Seat Limit");
+  testSeatBtn.addEventListener("click",()=>{setState({screen:"seat-limit",user:{...state.user,role:"broker",plan:"starter",seatLimit:10,agencyName:"Test Agency"}});});
+  navRight.appendChild(testSeatBtn);
   // ⚠️ END TEST
   [["Admin",()=>setState({screen:"admin"})],[g.signOut||"Sign Out",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});}]].forEach(([label,fn])=>{const b=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}},label);b.addEventListener("mouseenter",()=>{b.style.borderColor=G.border2;b.style.color=G.white;});b.addEventListener("mouseleave",()=>{b.style.borderColor=G.border;b.style.color=G.muted;});b.addEventListener("click",fn);navRight.appendChild(b);});
   nav.appendChild(navRight);wrap.appendChild(nav);
@@ -366,6 +377,68 @@ function renderDashboard(){
   if(!user.subscribed){const planBar=el("div",{style:{marginTop:"2px",background:G.bg1,border:`1px solid ${G.border}`,borderRadius:"0 0 14px 14px",padding:"16px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"16px",flexWrap:"wrap"}});planBar.appendChild(el("p",{style:{fontSize:"13px",color:G.muted,margin:"0"}},user.trialActive?`Trial active — ${user.daysLeft} days remaining.`:"Your trial has ended."));const ub=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"10px 20px",fontSize:"12px",fontWeight:"800",cursor:"pointer",fontFamily:"inherit",transition:"opacity 0.15s",flexShrink:"0"}},"Subscribe Now →");ub.addEventListener("mouseenter",()=>ub.style.opacity="0.85");ub.addEventListener("mouseleave",()=>ub.style.opacity="1");ub.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));planBar.appendChild(ub);content.appendChild(planBar);}
   wrap.appendChild(content);return wrap;
 }
+
+function renderTrialExpired(){
+  const wrap=el("div",{style:{minHeight:"100vh",background:G.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",textAlign:"center"}});
+  wrap.appendChild(el("div",{style:{fontSize:"20px",fontWeight:"800",letterSpacing:"5px",color:G.white,marginBottom:"48px"}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
+  const card=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"16px",padding:"48px 40px",maxWidth:"460px",width:"100%"}});
+  card.appendChild(el("div",{style:{fontSize:"40px",marginBottom:"16px"}},"⏰"));
+  card.appendChild(el("h1",{style:{fontSize:"24px",fontWeight:"700",color:G.white,marginBottom:"12px",lineHeight:"1.3"}},"Your free trial has ended"));
+  card.appendChild(el("p",{style:{fontSize:"14px",color:G.muted,lineHeight:"1.7",marginBottom:"32px"}},"Your 14-day free trial has expired. Subscribe now to keep your team generating marketing, outreach and newsletters in minutes."));
+  const plansGrid=el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"28px"}});
+  [["Starter","$399/mo","Up to 10 agents"],["Pro","$599/mo","Up to 25 agents"],["Elite","$899/mo","Up to 50 agents"],["Enterprise","$1,299/mo","Unlimited agents"]].forEach(([name,price,desc])=>{
+    const p=el("div",{style:{background:G.bg,border:`1px solid ${G.border}`,borderRadius:"10px",padding:"14px 12px",textAlign:"left",cursor:"pointer",transition:"border-color 0.15s"}});
+    p.addEventListener("mouseenter",()=>p.style.borderColor=G.aqua);
+    p.addEventListener("mouseleave",()=>p.style.borderColor=G.border);
+    p.appendChild(el("div",{style:{fontSize:"11px",fontWeight:"700",color:G.aqua,marginBottom:"4px"}},name.toUpperCase()));
+    p.appendChild(el("div",{style:{fontSize:"18px",fontWeight:"800",color:G.white,fontFamily:"DM Mono,monospace",marginBottom:"2px"}},price));
+    p.appendChild(el("div",{style:{fontSize:"11px",color:G.muted}},desc));
+    p.addEventListener("click",()=>window.location.href="#pricing");
+    plansGrid.appendChild(p);
+  });
+  card.appendChild(plansGrid);
+  const subBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"14px",fontSize:"14px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",width:"100%",marginBottom:"14px",transition:"opacity 0.15s"}},"Subscribe Now →");
+  subBtn.addEventListener("mouseenter",()=>subBtn.style.opacity="0.85");
+  subBtn.addEventListener("mouseleave",()=>subBtn.style.opacity="1");
+  subBtn.addEventListener("click",()=>window.open("https://streamflux.app/#pricing","_blank"));
+  card.appendChild(subBtn);
+  const signOut=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"10px",fontSize:"13px",cursor:"pointer",fontFamily:"inherit",width:"100%"}},"Sign Out");
+  signOut.addEventListener("click",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});});
+  card.appendChild(signOut);
+  wrap.appendChild(card);
+  wrap.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(255,255,255,0.15)",marginTop:"28px"}},"Questions? Contact francisco@streamflux.app"));
+  return wrap;
+}
+
+function renderSeatLimit(){
+  const user=state.user;
+  const planUpgrades={starter:{next:"Pro",price:"$599/mo",seats:25},pro:{next:"Elite",price:"$899/mo",seats:50},elite:{next:"Enterprise",price:"$1,299/mo",seats:"Unlimited"},enterprise:null};
+  const upgrade=planUpgrades[user.plan]||null;
+  const wrap=el("div",{style:{minHeight:"100vh",background:G.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",textAlign:"center"}});
+  wrap.appendChild(el("div",{style:{fontSize:"20px",fontWeight:"800",letterSpacing:"5px",color:G.white,marginBottom:"48px"}},"STREAM",el("span",{style:{color:G.aqua}},"FLUX")));
+  const card=el("div",{style:{background:G.card,border:`1px solid ${G.border}`,borderRadius:"16px",padding:"48px 40px",maxWidth:"460px",width:"100%"}});
+  card.appendChild(el("div",{style:{fontSize:"40px",marginBottom:"16px"}},"👥"));
+  card.appendChild(el("h1",{style:{fontSize:"22px",fontWeight:"700",color:G.white,marginBottom:"12px",lineHeight:"1.3"}},"You've reached your seat limit"));
+  const seatMsg=el("p",{style:{fontSize:"14px",color:G.muted,lineHeight:"1.7",marginBottom:"28px"}});seatMsg.textContent=`Your ${(user.plan||"current").charAt(0).toUpperCase()+(user.plan||"current").slice(1)} plan allows up to ${user.seatLimit} agents. Upgrade your plan to add more agents to your team.`;card.appendChild(seatMsg);
+  if(upgrade){
+    const upgradeCard=el("div",{style:{background:G.bg,border:`1px solid ${G.aqua}`,borderRadius:"12px",padding:"20px",marginBottom:"20px",textAlign:"left"}});
+    upgradeCard.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"2px",color:G.aqua,marginBottom:"6px"}},`UPGRADE TO ${upgrade.next.toUpperCase()}`));
+    upgradeCard.appendChild(el("div",{style:{fontSize:"24px",fontWeight:"800",color:G.white,fontFamily:"DM Mono,monospace",marginBottom:"4px"}},upgrade.price));
+    upgradeCard.appendChild(el("div",{style:{fontSize:"13px",color:G.muted}},`Up to ${upgrade.seats} agents`));
+    card.appendChild(upgradeCard);
+    const upgradeBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"14px",fontSize:"14px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",width:"100%",marginBottom:"12px",transition:"opacity 0.15s"}},`Upgrade to ${upgrade.next} →`);
+    upgradeBtn.addEventListener("mouseenter",()=>upgradeBtn.style.opacity="0.85");
+    upgradeBtn.addEventListener("mouseleave",()=>upgradeBtn.style.opacity="1");
+    upgradeBtn.addEventListener("click",()=>window.open("https://streamflux.app/#pricing","_blank"));
+    card.appendChild(upgradeBtn);
+  }
+  const backBtn=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"10px",fontSize:"13px",cursor:"pointer",fontFamily:"inherit",width:"100%"}},"← Back to Dashboard");
+  backBtn.addEventListener("click",()=>setState({screen:"dashboard"}));
+  card.appendChild(backBtn);
+  wrap.appendChild(card);
+  return wrap;
+}
+
 
 function renderSetPassword(){
   let password="",confirm="",loading=false,done=false,error="";
@@ -474,6 +547,11 @@ function renderSetPassword(){
 
 async function renderBrokerDashboard(){
   const user=state.user;const g=GL[state.lang]||GL.English;
+  // Trial expired check
+  if(!user.subscribed&&!user.trialActive){
+    setTimeout(()=>setState({screen:"trial-expired"}),0);
+    return el("div",{});
+  }
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
   // NAV
@@ -556,7 +634,7 @@ async function renderBrokerDashboard(){
   const addBtn=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"10px 20px",fontSize:"13px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}},"+ Add Agent");
   addBtn.addEventListener("click",async()=>{
     if(!newAgentName||!newAgentEmail){alert("Please enter both name and email.");return;}
-    if(seatsUsed>=seatLimit&&seatLimit!==9999){alert(`You have reached your seat limit (${seatLimit} agents). Please upgrade your plan.`);return;}
+    if(seatsUsed>=seatLimit&&seatLimit!==9999){setState({screen:"seat-limit",user:{...state.user}});return;}
     // Check duplicate
     if(agents.find(a=>a.email===newAgentEmail)){alert("An agent with this email already exists.");return;}
     const newAgent={name:newAgentName,email:newAgentEmail,addedAt:new Date().toISOString(),status:"pending"};
@@ -1978,8 +2056,9 @@ function render(){
   root.innerHTML="";
   if(state.screen==="login")root.appendChild(renderLogin());
   else if(state.screen==="set-password")root.appendChild(renderSetPassword());
-  else if(state.screen==="dashboard"){if(state.user&&state.user.role==="broker"){renderBrokerDashboard().then(brokerEl=>{root.innerHTML="";if(brokerEl)root.appendChild(brokerEl);});}else root.appendChild(renderDashboard());}else if(state.screen==="app3")root.appendChild(renderApp3());
-  else if(state.screen==="app1_results"||state.screen==="app2_results")root.appendChild(renderSavedResults());
+  else if(state.screen==="trial-expired")root.appendChild(renderTrialExpired());
+  else if(state.screen==="seat-limit")root.appendChild(renderSeatLimit());
+  else if(state.screen==="dashboard"){if(state.user&&state.user.role==="broker"){renderBrokerDashboard().then(brokerEl=>{root.innerHTML="";if(brokerEl)root.appendChild(brokerEl);});}else root.appendChild(renderDashboard());}
   else if(state.screen==="admin")root.appendChild(renderAdmin());
   else if(state.screen==="app1")root.appendChild(renderApp1());
   else if(state.screen==="app2")root.appendChild(renderApp2());
