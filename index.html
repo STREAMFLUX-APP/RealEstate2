@@ -11,7 +11,7 @@
   --bg:#060608;--bg1:#0c0c10;--bg2:#111118;
   --border:#1e1e28;--border2:#252530;
   --aqua:#2AB8D4;--gold:#C9963A;--green:#22c55e;--red:#ef4444;
-  --white:#f0f0f8;--muted:rgba(240,240,248,0.45);
+  --white:#ffffff;--muted:rgba(240,240,248,0.45);
   --font:'Syne',sans-serif;--mono:'DM Mono',monospace;
   --r8:8px;--r10:10px;--r12:12px;--r14:14px;
 }
@@ -28,12 +28,13 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--aqua)!im
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 @keyframes progressBar{from{width:0}to{width:100%}}
 .fade-in{animation:fadeIn 0.3s ease forwards}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.22)!important;opacity:1;}
 </style>
 </head>
 <body>
 <div id="root"><div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080808"><div style="font-size:28px;font-weight:700;letter-spacing:3px;color:#fff;margin-bottom:12px">STREAM<span style="color:#2AB8D4">FLUX</span></div><div style="color:rgba(255,255,255,0.4);font-size:13px">Loading...</div></div></div>
 <script>
-const G={bg:"#060608",card:"#111",border:"#222",aqua:"#2AB8D4",aquaDim:"rgba(42,184,212,0.1)",aquaBorder:"rgba(42,184,212,0.25)",gold:"#D4A843",white:"#fff",muted:"rgba(255,255,255,0.5)",green:"#3d9e5c",red:"#ef4444"};
+const G={bg:"#060608",card:"#111",border:"#222",aqua:"#2AB8D4",aquaDim:"rgba(42,184,212,0.1)",aquaBorder:"rgba(42,184,212,0.25)",gold:"#D4A843",white:"#ffffff",muted:"rgba(255,255,255,0.5)",green:"#3d9e5c",red:"#ef4444"};
 
 const apiAuth=async(body)=>{try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}catch(e){return{error:e.message};}};
 const apiAdmin=async(body)=>{
@@ -92,7 +93,7 @@ const setState=(updates)=>{state={...state,...updates};render();};
 const btnStyle=(disabled,color)=>({background:disabled?"#1a1a1a":color||G.aqua,color:disabled?G.muted:"#060608",border:"none",borderRadius:"8px",padding:"13px 24px",fontSize:"14px",fontWeight:"700",cursor:disabled?"not-allowed":"pointer",fontFamily:"inherit",width:"auto",display:"inline-block"});
 const inputStyle={width:"100%",background:G.bg,border:`1px solid ${G.border2}`,borderRadius:"8px",color:G.white,fontSize:"14px",padding:"11px 14px",outline:"none",fontFamily:"inherit",boxSizing:"border-box",transition:"border-color 0.2s",WebkitTextFillColor:G.white};
 const cardStyle={background:G.bg1,border:`1px solid ${G.border2}`,borderRadius:"12px",padding:"22px",marginBottom:"16px",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.025),0 1px 3px rgba(0,0,0,0.3)"};
-const labelStyle={display:"block",fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",color:"rgba(240,240,248,0.8)",textTransform:"uppercase",marginBottom:"5px"};
+const labelStyle={display:"block",fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",color:"#ffffff",textTransform:"uppercase",marginBottom:"5px"};
 
 // HELPERS
 function el(tag,attrs,...children){
@@ -608,14 +609,14 @@ async function renderBrokerDashboard(){
 
   let newAgentName="",newAgentEmail="";
   const nameInp=el("div",{});
-  nameInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Full Name"));
+  nameInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.white,display:"block",marginBottom:"6px"}},"Full Name"));
   const nameField=el("input",{type:"text",placeholder:"Sarah Johnson",style:{width:"100%",background:"#1a1a1a",border:"1px solid #333",borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:"#ffffff",fontFamily:"inherit",outline:"none",WebkitTextFillColor:"#ffffff"}});
   nameField.addEventListener("input",e=>newAgentName=e.target.value);
   nameInp.appendChild(nameField);
   addGrid.appendChild(nameInp);
 
   const emailInp=el("div",{});
-  emailInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.muted,display:"block",marginBottom:"6px"}},"Email Address"));
+  emailInp.appendChild(el("label",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:G.white,display:"block",marginBottom:"6px"}},"Email Address"));
   const emailField=el("input",{type:"email",placeholder:"sarah@agency.com",style:{width:"100%",background:"#1a1a1a",border:"1px solid #333",borderRadius:"8px",padding:"10px 12px",fontSize:"13px",color:"#ffffff",fontFamily:"inherit",outline:"none",WebkitTextFillColor:"#ffffff"}});
   emailField.addEventListener("input",e=>newAgentEmail=e.target.value);
   emailInp.appendChild(emailField);
