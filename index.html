@@ -18,7 +18,10 @@
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--white);min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;line-height:1.6}
 input,textarea,button,select{font-family:var(--font)}
-::placeholder{color:rgba(240,240,248,0.2)}
+input,textarea{color:rgba(255,255,255,0.55)!important}
+::placeholder{color:rgba(255,255,255,0.55)!important;opacity:1!important}
+::-webkit-input-placeholder{color:rgba(255,255,255,0.55)!important}
+::-moz-placeholder{color:rgba(255,255,255,0.55)!important}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg1)}
 ::-webkit-scrollbar-thumb{background:#2e2e3a;border-radius:2px}
@@ -28,9 +31,6 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--aqua)!im
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 @keyframes progressBar{from{width:0}to{width:100%}}
 .fade-in{animation:fadeIn 0.3s ease forwards}
-input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.22)!important;opacity:1 !important;}
-input::-webkit-input-placeholder,textarea::-webkit-input-placeholder{color:rgba(255,255,255,0.22)!important;}
-input::-moz-placeholder,textarea::-moz-placeholder{color:rgba(255,255,255,0.22)!important;}
 input,textarea{caret-color:#2AB8D4;}
 </style>
 </head>
