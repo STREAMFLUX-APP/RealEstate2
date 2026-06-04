@@ -28,7 +28,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--aqua)!im
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 @keyframes progressBar{from{width:0}to{width:100%}}
 .fade-in{animation:fadeIn 0.3s ease forwards}
-input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.18)!important;opacity:1 !important;}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.2)!important;opacity:1 !important;} input,textarea{caret-color:#2AB8D4;}
 </style>
 </head>
 <body>
@@ -1247,15 +1247,7 @@ const MODES=(s.language==="Spanish")?[{value:"new_listing",label:"🏠 Nueva Pro
     if(s.step===5&&s.mode!=="sold"&&s.mode!=="open_house"){
       card.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"16px",color:G.white}},t.standout));
       card.appendChild(textarea(s.language==="Spanish"?"La Característica Más Especial":"The #1 Unique Feature",s.uniqueFeature,v=>s.uniqueFeature=v,s.language==="Spanish"?"ej. Un muelle privado de 12 metros con acceso directo al océano y vistas al atardecer":"e.g. A 40-foot private boat dock with direct ocean access and unobstructed sunset views",3,s.language==="Spanish"?"Sé específico y descriptivo":"Be vivid and specific"));
-      // EXTRA DETAILS BOX on Step 5
-      const extraBox5=el("div",{style:{background:"rgba(42,184,212,0.06)",border:"1px solid rgba(42,184,212,0.25)",borderRadius:"10px",padding:"16px",marginTop:"4px"}});
-      extraBox5.appendChild(el("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:G.aqua,marginBottom:"6px"}},s.language==="Spanish"?"✨ Detalles Adicionales (Opcional)":"✨ Extra Details (Optional)"));
-      extraBox5.appendChild(el("p",{style:{fontSize:"12px",color:"rgba(42,184,212,0.6)",marginBottom:"10px",lineHeight:"1.6"}},s.language==="Spanish"?"Cualquier detalle extra — historia única, detalles especiales. La IA lo incorporará en todo el contenido.":"Anything else to weave into every piece of content — unique story, special details."));
-      const extraTa5=el("textarea",{placeholder:s.language==="Spanish"?"ej. Casa construida por el propietario en 1987, nunca ha salido al mercado antes...":"e.g. Home custom built in 1987, never been on the market before. Owner is relocating abroad...",rows:3,style:{...inputStyle,resize:"vertical",borderColor:"rgba(42,184,212,0.2)"}});
-      extraTa5.value=s.agentNote||"";
-      extraTa5.addEventListener("input",e=>s.agentNote=e.target.value);
-      extraBox5.appendChild(extraTa5);
-      card.appendChild(extraBox5);
+      card.appendChild(textarea(s.language==="Spanish"?"Notas Adicionales":"Additional Notes",s.agentNote,v=>s.agentNote=v,s.language==="Spanish"?"ej. Historia única, motivación del vendedor, detalles especiales...":"e.g. Unique story, special details, anything else to weave into every piece of content...",3));
     }
 
     if((s.step===totalSteps())||(s.step===4&&s.mode==="sold")||(s.step===5&&s.mode==="open_house")){
