@@ -85,7 +85,7 @@ const apiClaude=async(prompt,system,maxTokens=1000)=>{
 function safeGet(obj,key,fallback){return(obj&&obj[key]!==undefined&&obj[key]!==null)?obj[key]:fallback;}
 
 // STATE
-let state={screen:"login",user:null,lang:"English",prefill1:null,prefill2:null};
+let state={screen:"login",user:null,lang:"English",prefill1:null,prefill2:null,resetToken:null,resetEmail:null};
 const setState=(updates)=>{state={...state,...updates};render();};
 
 // STYLES
@@ -303,8 +303,10 @@ const SF={
 
 function renderDashboard(){
   const user=state.user;const g=GL[state.lang]||GL.English;
-  const hasApp1=user.plan==="marketing"||user.plan==="bundle";
-  const hasApp2=user.plan==="outreach"||user.plan==="bundle";
+  const agencyPlans=["starter","pro","elite","enterprise"];
+  const hasApp1=user.plan==="marketing"||user.plan==="bundle"||agencyPlans.includes(user.plan);
+  const hasApp2=user.plan==="outreach"||user.plan==="bundle"||agencyPlans.includes(user.plan);
+  const hasApp3=agencyPlans.includes(user.plan)||user.plan==="bundle";
   const listings=SF.getListings();const clients=SF.getClients();
   const followUpsDue=clients.filter(c=>{if(!c.savedAt)return false;const d=Math.ceil((Date.now()-new Date(c.savedAt))/864e5);return d>=3&&d<=30;}).length;
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -316,7 +318,7 @@ function renderDashboard(){
   if(!user.subscribed){const subB=el("button",{style:{background:G.aqua,color:"#060608",border:"none",borderRadius:"8px",padding:"6px 16px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",transition:"opacity 0.15s"}},state.lang==="Spanish"?"Suscribirse →":"Subscribe Now →");subB.addEventListener("mouseenter",()=>subB.style.opacity="0.85");subB.addEventListener("mouseleave",()=>subB.style.opacity="1");subB.addEventListener("click",()=>window.open("https://buy.stripe.com/5kQdR93uUbHp7Kc4sjds403","_blank"));navRight.appendChild(subB);}
   // ⚠️ TEST ONLY — remove before launch
   const testBrokerBtn=el("button",{style:{background:"rgba(255,200,0,0.15)",color:"#ffc800",border:"1px solid rgba(255,200,0,0.3)",borderRadius:"8px",padding:"6px 12px",fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}},"🧪 Broker View");
-  testBrokerBtn.addEventListener("click",()=>{const testUser={...state.user,role:"broker",agencyName:"Test Agency",plan:"starter",seatLimit:10};setState({screen:"dashboard",user:testUser});});
+  testBrokerBtn.addEventListener("click",()=>{const testUser={...state.user,role:"broker",agencyName:"Test Agency",plan:"starter",seatLimit:10};state.user=testUser;state.screen="dashboard";render();});
   navRight.appendChild(testBrokerBtn);
   // ⚠️ END TEST
   [["Admin",()=>setState({screen:"admin"})],[g.signOut||"Sign Out",()=>{sessionStorage.removeItem("sf_user");setState({screen:"login",user:null});}]].forEach(([label,fn])=>{const b=el("button",{style:{background:"transparent",color:G.muted,border:`1px solid ${G.border}`,borderRadius:"8px",padding:"6px 14px",fontSize:"11px",cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}},label);b.addEventListener("mouseenter",()=>{b.style.borderColor=G.border2;b.style.color=G.white;});b.addEventListener("mouseleave",()=>{b.style.borderColor=G.border;b.style.color=G.muted;});b.addEventListener("click",fn);navRight.appendChild(b);});
@@ -470,7 +472,7 @@ function renderSetPassword(){
 }
 
 
-function renderBrokerDashboard(){
+async function renderBrokerDashboard(){
   const user=state.user;const g=GL[state.lang]||GL.English;
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
 
@@ -499,7 +501,12 @@ function renderBrokerDashboard(){
   content.appendChild(hero);
 
   // SEATS STATS
-  const agents=JSON.parse(localStorage.getItem(`sf_agents_${user.email}`)||"[]");
+  let agents=[];
+  try{
+    const agentsRes=await fetch("/api/agents?brokerEmail="+encodeURIComponent(user.email));
+    if(agentsRes.ok){const d=await agentsRes.json();if(d.agents)agents=d.agents;}
+    else{agents=JSON.parse(localStorage.getItem(`sf_agents_${user.email}`)||"[]");}
+  }catch(e){agents=JSON.parse(localStorage.getItem(`sf_agents_${user.email}`)||"[]");}
   const seatLimit=user.seatLimit||(user.plan==="pro"?25:user.plan==="elite"?50:user.plan==="enterprise"?9999:10);
   const seatsUsed=agents.length;
   const seatsLeft=seatLimit===9999?"\u221e":(seatLimit-seatsUsed);
@@ -1971,7 +1978,8 @@ function render(){
   root.innerHTML="";
   if(state.screen==="login")root.appendChild(renderLogin());
   else if(state.screen==="set-password")root.appendChild(renderSetPassword());
-  else if(state.screen==="dashboard"){if(state.user&&state.user.role==="broker")root.appendChild(renderBrokerDashboard());else root.appendChild(renderDashboard());}else if(false&&false){}//placeholder
+  else if(state.screen==="dashboard"){if(state.user&&state.user.role==="broker"){renderBrokerDashboard().then(brokerEl=>{root.innerHTML="";if(brokerEl)root.appendChild(brokerEl);});}else root.appendChild(renderDashboard());}else if(state.screen==="app3")root.appendChild(renderApp3());
+  else if(state.screen==="app1_results"||state.screen==="app2_results")root.appendChild(renderSavedResults());
   else if(state.screen==="admin")root.appendChild(renderAdmin());
   else if(state.screen==="app1")root.appendChild(renderApp1());
   else if(state.screen==="app2")root.appendChild(renderApp2());
