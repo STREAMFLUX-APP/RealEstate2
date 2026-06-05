@@ -1473,7 +1473,100 @@ Return ONLY JSON for a FREE VALUATION outreach:
     const isSpa2=s.language==="Spanish";
     wrap.innerHTML="";
 const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 Comprador Activo",desc:"Buscando ahora, listo para comprar"},{value:"buyer_passive",label:"👀 Comprador Pasivo",desc:"Interesado pero sin urgencia"},{value:"seller_motivated",label:"⚡ Vendedor Motivado",desc:"Quiere vender rápido"},{value:"seller_exploring",label:"🤔 Vendedor Explorando",desc:"Considera vender"},{value:"investor",label:"💰 Inversor",desc:"Oportunidad de ROI"},{value:"cold_lead",label:"❄️ Lead Frío",desc:"Sin contacto previo"},{value:"past_client",label:"🤝 Cliente Anterior",desc:"Ya cerramos juntos"}]:[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
-  const CONTACT_REASONS=(s.language==="Spanish")?[{value:"new_listing",label:"Nueva Propiedad Disponible",desc:"Propiedad que encaja con sus criterios"},{value:"price_drop",label:"Reducción de Precio",desc:"Bajó el precio de una propiedad"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},{value:"open_house",label:"Invitación a Visita",desc:"Invitar a ver una propiedad"},{value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Propiedad Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar un trato"},{value:"anniversary",label:"Aniversario de Compra",desc:"1 año+ desde que compraron"},{value:"free_valuation",label:"Valoración Gratuita",desc:"Oferta sin compromiso"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"free_valuation",label:"Free Valuation Offer",desc:"No obligation appraisal"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
+  // Contact reasons filtered by client type
+  const ALL_REASONS_BUYER=s.language==="Spanish"?[
+    {value:"new_listing",label:"Nueva Propiedad Disponible",desc:"Encaja con sus criterios"},
+    {value:"price_drop",label:"Reducción de Precio",desc:"Bajó el precio de una propiedad"},
+    {value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},
+    {value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},
+    {value:"open_house",label:"Invitación a Visita",desc:"Invitar a ver una propiedad"},
+    {value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},
+    {value:"off_market",label:"Propiedad Exclusiva",desc:"Fuera del mercado"},
+    {value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},
+    {value:"viewing_followup",label:"Seguimiento de Visita",desc:"Tras mostrar una propiedad"},
+    {value:"financing_update",label:"Actualización Financiación",desc:"Los tipos han cambiado"},
+    {value:"offer_strategy",label:"Estrategia de Oferta",desc:"Listo para hacer oferta"},
+    {value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}
+  ]:[
+    {value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},
+    {value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},
+    {value:"first_contact",label:"First Outreach",desc:"Never contacted before"},
+    {value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},
+    {value:"open_house",label:"Open House Invite",desc:"Invite to view"},
+    {value:"market_update",label:"Market Update",desc:"Relevant market news"},
+    {value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},
+    {value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},
+    {value:"viewing_followup",label:"Viewing Follow-Up",desc:"After showing a property"},
+    {value:"financing_update",label:"Financing Update",desc:"Rates changed, time to act"},
+    {value:"offer_strategy",label:"Offer Strategy",desc:"Ready to make an offer"},
+    {value:"objection_handle",label:"Handle Objection",desc:"They said no"}
+  ];
+  const ALL_REASONS_SELLER=s.language==="Spanish"?[
+    {value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},
+    {value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},
+    {value:"free_valuation",label:"Valoración Gratuita",desc:"Oferta sin compromiso"},
+    {value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},
+    {value:"just_sold",label:"Vendido en su Zona",desc:"Genera credibilidad"},
+    {value:"price_discussion",label:"Discusión de Precio",desc:"Ajustar expectativas"},
+    {value:"expired_listing",label:"Propiedad Caducada",desc:"No se vendió antes"},
+    {value:"buyer_match",label:"Comprador Encontrado",desc:"Tengo un comprador interesado"},
+    {value:"timeline_checkin",label:"Check-In de Plazos",desc:"¿Ha cambiado su plazo?"},
+    {value:"neighbour_sale",label:"Venta en su Calle",desc:"Se vendió una propiedad cerca"},
+    {value:"prelisting_prep",label:"Preparación Pre-Venta",desc:"Ayudar antes de salir al mercado"},
+    {value:"fsbo_outreach",label:"Contacto FSBO",desc:"Vende sin agente"},
+    {value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}
+  ]:[
+    {value:"first_contact",label:"First Outreach",desc:"Never contacted before"},
+    {value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},
+    {value:"free_valuation",label:"Free Valuation Offer",desc:"No obligation appraisal"},
+    {value:"market_update",label:"Market Update",desc:"Relevant market news"},
+    {value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},
+    {value:"price_discussion",label:"Price Reduction Discussion",desc:"Help adjust expectations"},
+    {value:"expired_listing",label:"Expired Listing",desc:"Their property didn't sell"},
+    {value:"buyer_match",label:"Buyer Match Found",desc:"I have an interested buyer"},
+    {value:"timeline_checkin",label:"Timeline Check-In",desc:"Has their timeline changed?"},
+    {value:"neighbour_sale",label:"Neighbourhood Sale Alert",desc:"Property sold near them"},
+    {value:"prelisting_prep",label:"Pre-Listing Preparation",desc:"Help them prepare to list"},
+    {value:"fsbo_outreach",label:"FSBO Outreach",desc:"Selling without an agent"},
+    {value:"objection_handle",label:"Handle Objection",desc:"They said no"}
+  ];
+  const ALL_REASONS_COLD=s.language==="Spanish"?[
+    {value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},
+    {value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},
+    {value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},
+    {value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},
+    {value:"free_valuation",label:"Valoración Gratuita",desc:"Oferta sin compromiso"},
+    {value:"re_engagement",label:"Reactivación",desc:"Último intento de reconectar"},
+    {value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}
+  ]:[
+    {value:"first_contact",label:"First Outreach",desc:"Never contacted before"},
+    {value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},
+    {value:"market_update",label:"Market Update",desc:"Relevant market news"},
+    {value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},
+    {value:"free_valuation",label:"Free Valuation Offer",desc:"No obligation appraisal"},
+    {value:"re_engagement",label:"Re-Engagement",desc:"Last attempt to reconnect"},
+    {value:"objection_handle",label:"Handle Objection",desc:"They said no"}
+  ];
+  const ALL_REASONS_PAST=s.language==="Spanish"?[
+    {value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},
+    {value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar un trato"},
+    {value:"anniversary",label:"Aniversario de Compra",desc:"1 año+ desde que compraron"},
+    {value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},
+    {value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},
+    {value:"market_value_update",label:"Valor Actual de su Casa",desc:"Su casa vale más ahora"},
+    {value:"neighbourhood_news",label:"Novedades del Barrio",desc:"Algo que afecta su propiedad"},
+    {value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}
+  ]:[
+    {value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},
+    {value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},
+    {value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},
+    {value:"market_update",label:"Market Update",desc:"Relevant market news"},
+    {value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},
+    {value:"market_value_update",label:"Market Value Update",desc:"Their home is worth more now"},
+    {value:"neighbourhood_news",label:"Neighbourhood News",desc:"Something affecting their property"},
+    {value:"objection_handle",label:"Handle Objection",desc:"They said no"}
+  ];
+  const CONTACT_REASONS=isSeller()?ALL_REASONS_SELLER:s.clientType==="past_client"?ALL_REASONS_PAST:s.clientType==="cold_lead"?ALL_REASONS_COLD:ALL_REASONS_BUYER;
   const TONES=(s.language==="Spanish")?[{value:"warm",label:"Cálido y Personal",desc:"Amigable, relación primero"},{value:"professional",label:"Profesional",desc:"Pulido y creíble"},{value:"urgent",label:"Urgente y Directo",desc:"Con urgencia"},{value:"casual",label:"Casual y Relajado",desc:"Sin presión"},{value:"luxury",label:"Lujo y Prestigio",desc:"Premium y exclusivo"}]:[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
   const URGENCY=(s.language==="Spanish")?[{value:"high",label:"🔥 Alta Urgencia",desc:"Debe actuar ahora"},{value:"medium",label:"⏳ Urgencia Media",desc:"1-3 meses"},{value:"low",label:"🌱 Baja Urgencia",desc:"Construyendo relación"}]:[{value:"high",label:"🔥 High Urgency",desc:"Must act now"},{value:"medium",label:"⏳ Medium Urgency",desc:"1-3 months"},{value:"low",label:"🌱 Low Urgency",desc:"Building relationship"}];
   const OBJECTIONS=(s.language==="Spanish")?[{value:"too_expensive",label:"Demasiado Caro"},{value:"not_interested",label:"No Estoy Interesado"},{value:"happy_where_i_am",label:"Estoy Bien Donde Estoy"},{value:"already_have_agent",label:"Ya Tengo Agente"},{value:"market_too_slow",label:"El Mercado Está Lento"},{value:"need_more_time",label:"Necesito Más Tiempo"},{value:"bad_timing",label:"No Es Buen Momento"}]:[{value:"too_expensive",label:"Too Expensive"},{value:"not_interested",label:"Not Interested"},{value:"happy_where_i_am",label:"Happy Where I Am"},{value:"already_have_agent",label:"Already Have an Agent"},{value:"market_too_slow",label:"Market Too Slow"},{value:"need_more_time",label:"Need More Time"},{value:"bad_timing",label:"Bad Timing"}];
