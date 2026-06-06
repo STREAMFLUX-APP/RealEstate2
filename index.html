@@ -1374,6 +1374,25 @@ function renderApp2(){
     const t2=T2[s.language]||T2.English;
     const isSpa2=s.language==="Spanish";
     wrap.innerHTML="";
+
+    // WORKFLOW FLAGS
+    const isSpaP=s.language==="Spanish";
+    const isBuyer2=["buyer_active","buyer_passive","investor"].includes(s.clientType);
+    const isNoPropertyReason=["first_contact","reconnect","market_update","financing_update","re_engagement"].includes(s.contactReason);
+    const isSellerFullFeatures=["buyer_match","fsbo_outreach","neighbour_sale"].includes(s.contactReason);
+    const isBuyerFullFeatures=["new_listing","price_drop","off_market","open_house","viewing_followup","offer_strategy"].includes(s.contactReason);
+    const showFullFeatures=(isBuyer()&&isBuyerFullFeatures)||(isSeller()&&isSellerFullFeatures);
+    const showBuyerCriteria=isBuyer()&&["new_listing","off_market"].includes(s.contactReason);
+    const isSoldNearby=s.contactReason==="just_sold"||s.contactReason==="neighbour_sale";
+    const isMarketUpdate=s.contactReason==="market_update";
+    const isFinancingUpdate=s.contactReason==="financing_update";
+    const isPriceDiscussion=s.contactReason==="price_discussion";
+    const isExpiredListing=s.contactReason==="expired_listing";
+    const isPreListing=s.contactReason==="prelisting_prep";
+    const isTimelineCheckin=s.contactReason==="timeline_checkin";
+    const isBuyerMatch=s.contactReason==="buyer_match";
+    const isCMA=s.contactReason==="free_valuation";
+
 const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 Comprador Activo",desc:"Buscando ahora, listo para comprar"},{value:"buyer_passive",label:"👀 Comprador Pasivo",desc:"Interesado pero sin urgencia"},{value:"seller_motivated",label:"⚡ Vendedor Motivado",desc:"Quiere vender rápido"},{value:"seller_exploring",label:"🤔 Vendedor Explorando",desc:"Considera vender"},{value:"investor",label:"💰 Inversor",desc:"Oportunidad de ROI"},{value:"cold_lead",label:"❄️ Lead Frío",desc:"Sin contacto previo"},{value:"past_client",label:"🤝 Cliente Anterior",desc:"Ya cerramos juntos"}]:[{value:"buyer_active",label:"🔥 Active Buyer",desc:"Looking now, ready to move"},{value:"buyer_passive",label:"👀 Passive Buyer",desc:"Interested but not urgent"},{value:"seller_motivated",label:"⚡ Motivated Seller",desc:"Wants to sell fast"},{value:"seller_exploring",label:"🤔 Exploring Seller",desc:"Considering selling"},{value:"investor",label:"💰 Investor",desc:"ROI opportunity"},{value:"cold_lead",label:"❄️ Cold Lead",desc:"No prior contact"},{value:"past_client",label:"🤝 Past Client",desc:"Already closed together"}];
   const CONTACT_REASONS=(s.language==="Spanish")?[{value:"new_listing",label:"Nueva Propiedad Disponible",desc:"Propiedad que encaja con sus criterios"},{value:"price_drop",label:"Reducción de Precio",desc:"Bajó el precio de una propiedad"},{value:"first_contact",label:"Primer Contacto",desc:"Nunca hemos hablado"},{value:"reconnect",label:"Retomar Contacto",desc:"Hace tiempo que no hablamos"},{value:"open_house",label:"Invitación a Visita",desc:"Invitar a ver una propiedad"},{value:"market_update",label:"Actualización del Mercado",desc:"Noticias relevantes"},{value:"off_market",label:"Propiedad Exclusiva",desc:"Fuera del mercado"},{value:"just_sold",label:"Recién Vendido Cerca",desc:"Genera credibilidad"},{value:"referral_request",label:"Pedir Referidos",desc:"Tras cerrar un trato"},{value:"anniversary",label:"Aniversario de Compra",desc:"1 año+ desde que compraron"},{value:"objection_handle",label:"Manejar Objeción",desc:"Dijeron que no"}]:[{value:"new_listing",label:"New Listing Match",desc:"Property matches criteria"},{value:"price_drop",label:"Price Reduction",desc:"Property they liked dropped"},{value:"first_contact",label:"First Outreach",desc:"Never contacted before"},{value:"reconnect",label:"Reconnecting",desc:"Haven't spoken in a while"},{value:"open_house",label:"Open House Invite",desc:"Invite to view"},{value:"market_update",label:"Market Update",desc:"Relevant market news"},{value:"off_market",label:"Off-Market Deal",desc:"Exclusive property"},{value:"just_sold",label:"Just Sold Nearby",desc:"Builds credibility"},{value:"referral_request",label:"Referral Request",desc:"Ask after a deal"},{value:"anniversary",label:"Home Anniversary",desc:"1 year+ since they bought"},{value:"objection_handle",label:"Handle Objection",desc:"They said no"}];
   const TONES=(s.language==="Spanish")?[{value:"warm",label:"Cálido y Personal",desc:"Amigable, relación primero"},{value:"professional",label:"Profesional",desc:"Pulido y creíble"},{value:"urgent",label:"Urgente y Directo",desc:"Con urgencia"},{value:"casual",label:"Casual y Relajado",desc:"Sin presión"},{value:"luxury",label:"Lujo y Prestigio",desc:"Premium y exclusivo"}]:[{value:"warm",label:"Warm & Personal",desc:"Friendly, relationship-first"},{value:"professional",label:"Professional",desc:"Polished, credible"},{value:"urgent",label:"Urgent & Direct",desc:"Time-sensitive"},{value:"casual",label:"Casual & Relaxed",desc:"Low pressure"},{value:"luxury",label:"Luxury & Prestige",desc:"High-end, exclusive"}];
@@ -1648,24 +1667,6 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
       annCard.appendChild(field(t2form.annLabel,"number",s.anniversaryYears,v=>s.anniversaryYears=v,"1"));
       content.appendChild(annCard);
     }
-
-    // WORKFLOW FLAGS
-    const isSpaP=s.language==="Spanish";
-    const isBuyer2=["buyer_active","buyer_passive","investor"].includes(s.clientType);
-    const isNoPropertyReason=["first_contact","reconnect","market_update","financing_update","re_engagement"].includes(s.contactReason);
-    const isSellerFullFeatures=["buyer_match","fsbo_outreach","neighbour_sale"].includes(s.contactReason);
-    const isBuyerFullFeatures=["new_listing","price_drop","off_market","open_house","viewing_followup","offer_strategy"].includes(s.contactReason);
-    const showFullFeatures=(isBuyer()&&isBuyerFullFeatures)||(isSeller()&&isSellerFullFeatures);
-    const showBuyerCriteria=isBuyer()&&["new_listing","off_market"].includes(s.contactReason);
-    const isSoldNearby=s.contactReason==="just_sold"||s.contactReason==="neighbour_sale";
-    const isMarketUpdate=s.contactReason==="market_update";
-    const isFinancingUpdate=s.contactReason==="financing_update";
-    const isPriceDiscussion=s.contactReason==="price_discussion";
-    const isExpiredListing=s.contactReason==="expired_listing";
-    const isPreListing=s.contactReason==="prelisting_prep";
-    const isTimelineCheckin=s.contactReason==="timeline_checkin";
-    const isBuyerMatch=s.contactReason==="buyer_match";
-    const isCMA=s.contactReason==="free_valuation";
 
     const propCard=el("div",{style:cardStyle});
     // Dynamic prop title
