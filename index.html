@@ -1232,7 +1232,7 @@ function renderApp2(){
       aiMatchAnalysis:"🏆 Análisis de Coincidencia IA",
     }
   };
-  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages",marketLocation:"",marketDirection:[],marketInsight:"",financingNews:"",lookingFor:"",leadSource:null,daysOnMarket:"",priceReasons:[],expOrigPrice:"",expDays:"",expiredReasons:[],preListingItems:[],originalTimeline:"",buyerBudget:"",buyerType:"",snAddress:"",snPrice:"",snBeds:"",snBaths:"",snType:""};
+  let s={language:state.lang||"English",clientName:"",clientType:"",contactReason:"",urgency:"",tone:"",objection:"",propAddress:"",propPrice:"",propType:"",propHighlights:"",propBeds:"",propBaths:"",propSqft:"",propCondition2:"",propInterior:[],propOutdoor:[],propBuilding:[],cmaSubject:{address:"",price:"",beds:"",baths:"",sqft:"",condition:"",features:""},cmaComps:[{address:"",salePrice:"",saleDate:"",beds:"",baths:"",sqft:"",condition:"",notes:""},{address:"",salePrice:"",saleDate:"",beds:"",baths:"",sqft:"",condition:"",notes:""},{address:"",salePrice:"",saleDate:"",beds:"",baths:"",sqft:"",condition:"",notes:""}],matcherProps:[{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""},{address:"",price:"",type:"",highlights:""}],buyerNeeds:"",buyerCriteria:[],sellerSituation:[],priorContact:"",personalNote:"",anniversaryYears:"",agentName:"",agentPhone:"",agencyName:"",customSituation:"",regenContext:"",regenLoading:false,loading:false,loadingMsg:"",result:null,error:"",activeTab:"messages",marketLocation:"",marketDirection:[],marketInsight:"",financingNews:"",lookingFor:"",leadSource:null,daysOnMarket:"",priceReasons:[],expOrigPrice:"",expDays:"",expiredReasons:[],preListingItems:[],originalTimeline:"",buyerBudget:"",buyerType:"",snAddress:"",snPrice:"",snBeds:"",snBaths:"",snType:""};
 
 
   const wrap=el("div",{style:{minHeight:"100vh",background:G.bg}});
@@ -1463,7 +1463,7 @@ const CLIENT_TYPES=(s.language==="Spanish")?[{value:"buyer_active",label:"🔥 C
     const langCard=el("div",{style:cardStyle});
     langCard.appendChild(el("h2",{style:{fontSize:"17px",fontWeight:"700",marginBottom:"12px",color:G.white}},`🌐 ${(T2[s.language]||T2.English).langLabel}`));
     const langSel=el("select",{style:{...inputStyle,cursor:"pointer"}});
-    LANGUAGES.forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
+    [{value:"English",label:"🇺🇸 English"},{value:"Spanish",label:"🇪🇸 Español"}].forEach(l=>{const o=el("option",{value:l.value},l.label);if(l.value===s.language)o.selected=true;langSel.appendChild(o);});
     langSel.addEventListener("change",e=>{s.language=e.target.value;renderApp2Content();});
     langCard.appendChild(langSel);
     content.appendChild(langCard);
